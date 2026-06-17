@@ -9,6 +9,7 @@ from .archiver import Archiver
 from .csv_kit import CsvKit
 from .duplicates import Duplicates
 from .merging import Merging
+from .overrides import Overrides
 from .paths import Paths
 from .translation import Translation
 from . base_csv import BaseCSV
@@ -35,17 +36,17 @@ class Cleaner:
             print("\n'| Alert | No data files in raw data folder to merge'\n")
             return None
         self.base.output_base_csv_to_raw()
-        merged_df = self.merging.merge_and_drop_empty_filter_columns(
+        merged_df = self.merging.get_merged_module_df(
             csv_list = csv_list, 
             text_columns = text_columns,
             merge_on_file = 'base')
+        
         merged_main_path = self.archiver.create_csvs_main_and_archive(
             merged_df, 
             config.name_01_main, 
             self.paths.stages)
-        self.translation.get_translations_for_review(
-            merged_main_path, 
-            text_columns) # outputs csv for review
+        
+        self.translation.create_translations_for_review(merged_main_path, text_columns)
         
         return
     
@@ -55,22 +56,15 @@ class Cleaner:
             self,
             override_filename = 'translations_manual_override'):
         '''
-        Overwrite non-english with english translations and output duplicates for review
+        If translations_manual_override is in the overrides folder:
+        Overwrites non-english with english translations and output duplicates for review
         Copies override CSV as read-only in archive folder for version history
         '''
-        # if override_filename exists, archives read-only version, else returns none 
-        override_csv_path = self.archiver.create_archive_overrides(override_filename, self.paths.overrides)
-        df = self.csvkit.try_convert_path_to_df(config.name_01_main, self.paths.stages)
+        self.archiver.create_archive_overrides(override_filename, self.paths.overrides)
 
-        # outputs translated csvs if override_filename exists in overrides folder
-        df = self.translation.try_input_trans(
-            df, 
-            main_path = self.paths.stages,
-            override_csv_path = override_csv_path, 
-            override_filename = override_filename, 
-            output_filename = config.name_02_main)
-
+        df = self._try_input_translations_df(override_filename)
         self.archiver.create_csvs_main_and_archive(df, config.name_02_main, self.paths.stages) 
+        
         duplicates = Duplicates(df, self.paths, self.archiver)
         duplicates.get_duplicates_for_review()
 
@@ -87,13 +81,29 @@ class Cleaner:
         1 file for record keeping (logs) and 1 file for manual override editting (overrides)
         Duplicates are identified by birthdate. 
         """
-        df = self.csvkit.try_convert_path_to_df(csv_name, self.paths.stages)
-        # if override_filename exists, archives read-only version, else returns none 
-        override_csv_path = self.archiver.create_archive_overrides(override_filename, self.paths.overrides)
+        self.archiver.create_archive_overrides(override_filename, self.paths.overrides)
         
+        df = self.csvkit.try_convert_path_to_df(csv_name, self.paths.stages)
         duplicates = Duplicates(df, self.paths, self.archiver)
-        # if override_filename exists in overrides folder inputs translations from override_filename
-        df = duplicates.clean_duplicates(override_csv_path, override_filename)
+        df = duplicates.clean_duplicates(override_filename)
         self.archiver.create_csvs_main_and_archive(df, config.name_03_main, self.paths.stages)
         
         return
+
+
+
+    def _try_input_translations_df(self, override_filename):
+        ''' if override_filename exists in overrides folder inputs translations from override_filename '''
+        override_csv_path = self.csvkit.if_exists_path(override_filename, self.paths.overrides)
+        df = self.csvkit.try_convert_path_to_df(config.name_01_main, self.paths.stages)
+        if override_csv_path is not None:
+            overrides = Overrides(override_csv_path, df)
+            df = overrides.override()
+            #self.archiver.create_csvs_main_and_archive(df, config.name_02_main, self.paths.stages)
+        else:
+            warn = '\n  -   No translation input performed   - \n' \
+                f"'{override_filename}' file not found in overrides folder.\n"
+            print(warn) # skips translations
+        
+        return df
+

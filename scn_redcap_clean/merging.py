@@ -11,7 +11,7 @@ class Merging:
         self.csvkit = CsvKit()
 
 
-    def merge_and_drop_empty_filter_columns(self, csv_list, text_columns = None, merge_on_file = None):
+    def get_merged_module_df(self, csv_list, text_columns = None, merge_on_file = None):
         '''
         Merges a list of CSVs on 'participant_id' and removes 
         rows where 'birthdate' is blank or missing

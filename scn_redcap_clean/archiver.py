@@ -33,10 +33,7 @@ class Archiver:
 
         self.create_archive_csv_if_needed(filename, df) # version to archive folder
 
-        csv_path = self.csvkit.if_exists_path(filename, main_path)
-
-
-        return csv_path
+        return
 
 
 

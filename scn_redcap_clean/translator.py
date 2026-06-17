@@ -4,7 +4,6 @@ import re
 import argostranslate.translate
 
 # local imports
-from .script import Script
 from . import config # global configs
 
 

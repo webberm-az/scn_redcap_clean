@@ -50,5 +50,3 @@ class Overrides:
         override_df = override_df.dropna(subset = [self.id_col])
 
         return override_df
-
-

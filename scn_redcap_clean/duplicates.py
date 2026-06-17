@@ -43,16 +43,17 @@ class Duplicates:
 
 
 
-    def clean_duplicates(self, override_csv_path, override_filename):
+    def clean_duplicates(self, override_filename):
         ''' Removes duplicates in dup_col keeping submission with highest id_col value '''
-        self.try_manual_override(override_csv_path, override_filename)
+        self.try_manual_override(override_filename)
         self.df = self._drop_duplicates_and_sort()
         
         return self.df
 
 
 
-    def try_manual_override(self, override_csv_path, override_filename):
+    def try_manual_override(self, override_filename):
+        override_csv_path = self.csvkit.if_exists_path(override_filename, self.paths.overrides)
         if override_csv_path is not None:
             self.df = self.csvkit.append_override_rows(override_csv_path, self.df)
         else:

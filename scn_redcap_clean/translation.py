@@ -1,7 +1,6 @@
 import pandas as pd # external imports
 
 # local imports
-from .overrides import Overrides
 from .translator import Translator
 from .detector import Detector
 from .translation_packages import TranslationPackages
@@ -27,7 +26,7 @@ class Translation:
 
 
 
-    def get_translations_for_review(
+    def create_translations_for_review(
             self, 
             file_path, 
             cols_to_translate,
@@ -56,27 +55,6 @@ class Translation:
         utils.write_txt_file(content, main_filename, self.paths.overrides)
 
         return final_translated_df
-
-
-
-    def try_input_trans( # move to overrides?
-            self, 
-            df, 
-            override_csv_path, 
-            override_filename, 
-            output_filename, 
-            main_path):
-        ''' if override_filename exists in overrides folder inputs translations from override_filename '''
-        if override_csv_path is not None:
-            overrides = Overrides(override_csv_path, df)
-            df = overrides.override()
-            self.archiver.create_csvs_main_and_archive(df, output_filename, main_path)
-        else:
-            warn = '\n  -   No translation input performed   - \n' \
-                f"'{override_filename}' file not found in overrides folder.\n"
-            print(warn) # skips translations
-        
-        return df
 
 
 
