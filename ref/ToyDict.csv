@@ -1,0 +1,14 @@
+﻿Variable / Field Name,Form Name,Section Header,Field Type
+toy_check1,toy,,checkbox
+toy_check2,toy,,checkbox
+toy_check3,toy,,checkbox
+toy_check4,toy,,checkbox
+toy_yesno,toy,,yesno
+toy_text1,toy,,text
+toy_text2,toy,,text
+toy_text3,toy,,text
+toy_text4,toy,,text
+toy_text5,toy,,text
+genomic_text1,genomic,,text
+genomic_text2,genomic,,text
+birthdate,general,,text

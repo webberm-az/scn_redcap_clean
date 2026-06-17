@@ -1,0 +1,14 @@
+{
+  "Quarto code chunk": {
+    "prefix": "qchunk",
+    "body": [
+      "```{${1|python,r,julia|}}",
+      "#| label: ${2:chunk_label}",
+      "#| echo: ${3:true}",
+      "#| eval: ${4:true}",
+      "${0}",
+      "```"
+    ],
+    "description": "Insert a Quarto code chunk with common chunk options"
+  }
+}

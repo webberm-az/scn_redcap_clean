@@ -1,0 +1,234 @@
+---
+title: 'Prep Data'
+format: html
+jupyter: python3
+python:
+  path: .venv/bin/python
+execute:
+  dir: project
+---
+
+### Create a project Vitual Environment
+
+(highly recommended, but not required)
+
+` ` ` run in terminal 
+
+python3 -m venv venv
+
+Code chunks must be run in order. If you make changes to inputs in an earlier code chunk rerun all (and review manual overrides as needed) chunks below in order.
+
+` ` ` ` ` `  run in terminal if venv not activated in new session
+
+source venv/bin/activate
+
+## Install Required Packages
+
+(install scn_redcap_clean in editable mode)
+
+` ` ` {run in terminal}
+
+pip install -e .
+
+` ` ` ` ` `  {run in terminal if the code chunk in your qmd aren't running}
+
+pip install jupyter
+
+# Imports and Config
+For additional config settings you can all look in config.py
+```{python}
+#| label: Imports and Config
+from scn_redcap_clean import Cleaner, config # local import
+
+
+# Data Dictionary
+config.data_dict = 'ToyDict.csv'
+
+# Module Specific
+config.modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
+
+config.raw_module_file = 'Toy1' # must have all of the module(s) you are filtering by (extra modules are fine)
+
+```
+**Set Files to Merge and columns to translate**
+
+(before removing duplicates) If different csv files have different participant_id's input a base file with exact participant_id's wanted for analysis and set merge_on_file to this file name.
+
+
+```{python}
+#| label: Imports and Config
+# pyrefly: ignore[missing-import]
+from scn_redcap_clean import Cleaner # local import
+
+
+
+
+
+# Cleaner() will auto create a 'raw' folder for you to add your raw data files and a 'ref' folder for you to add your Data Dictionary
+# see Extras below for using a different raw folder name
+
+cleaner = Cleaner() 
+
+
+
+```
+
+Extra Functions/Configs:
+```{Extras:  this chunk does not run}
+#| label: Extras Functions/Configs
+#| eval: false
+
+# Custom raw data folder name
+# if your raw data folder is stored separately from .py files this should be the entire folder path
+config.raw_data_dir = 'raw_data'    # run before running cleaner = Cleaner() 
+cleaner = Cleaner() 
+
+
+# if you change to your raw data folder name later in the pipeline it can be updated
+cleaner.raw_data_dir = 'my_raw'  # defaults to 'raw' if not included
+
+```
+
+## 01 Create merge_df and output translations
+
+Outputs 01_merged_raw to cleaner folder, and translations_manual_override for review and edits in review folder. Also creates a review, overrides, cleaner and archive folders for next steps. Rerunning the same stage with different inputs will overwrite files in the 'cleaner' folder. Version history csv files are stored in the 'archive' folder for every run with different back to back input. (e.g. 2 runs in a row without *any* changes will not create new archive files)
+*I should be able to use the data dictionary map to eventually automatically get the text_columns for translation. (in progress)
+
+```{python}
+#| label: 01 Merge Raw and Review Translations
+
+# raw data csvs for merge
+
+# any exact duplicate columns in more than one csv will only be included once
+# a suffix '_y', '_x'... to will be added to identical column names containing at least one different input for a given participant id
+csv_list = ['Toy1', 'Toy2.csv']
+
+
+
+# all langauge-dependent text columns (exclude genomic text answers etc.) for translation
+text_columns = ['toy_text1', 'toy_text2', 'toy_text3', 'toy_text4', 'toy_text5']
+
+# if specific terms need overrides in translation review output add them here and rerun this stage
+# example input (non-english must be the key and the translation (or medical term) the value)
+# config.translation_dict = {
+            #'布洛芬':'Ibuprofen',
+          #  } 
+
+cleaner.step_01_merge_raw_and_review_translations(csv_list, text_columns)
+
+```
+
+
+Extra Functions/Configs:
+```{Extras:  this chunk does not run}
+#| eval: false
+
+# if used merge_on_file should contain the exact participant_id's in the participant_id column wanted for analysis
+# it defaults to the 1st csv in csv_files if not included
+e.g.
+merge_on_file = 'base_ids.csv' 
+s.get_01_merge_raw_and_review_translations(csv_list, text_columns, merge_on_file = 'base_ids.csv')
+
+
+# if translations are failing involving non-latin scripts adjust s.translation_script_threshold 
+# (detects non-latin characters and assigns language after 3 characters match a specific char. script)
+# run anywhere after s = Cleaner() and before get_01_merge_raw_and_review_translations()
+e.g.
+cleaner.translation_script_threshold = 4    # if you don't have many text_columns this should be 1 or 2 
+
+
+# by default filter_columns = 'birthdate' but you can use more than 1 column; avoid any open text responses for filters due to typos
+e.g.
+filter_columns = ['birthdate', 'country']
+s.get_01_merge_raw_and_review_translations(csv_list, text_columns, filter_columns = filter_columns)
+
+```
+
+
+
+After outputing translations, manually review and edit translations_manual_override.csv in the review folder as needed. A version history of the translations file is saved in archive for record keeping. **Once manual edits are complete move this file to the overrides folder.**
+
+Keep the final version of this file without altering filename or column names in the manual_overrides folder *before running* get_02_translated_and_review_duplicates()
+
+## 02 Overwrite non-english with english translations and output duplicates for review
+
+02_translated.csv is saved to cleaner folder Duplicates are identified by birthdate and duplicates_manual_override.csv is saved to review.
+
+```{python}
+#| label: 02 Translated and Review Duplicates
+
+cleaner.step_02_translated_and_review_duplicates()
+
+```
+
+Again, manually review and edit duplicates_manual_override.csv as needed.
+
+*For manual overrides Participant_id should be written as {last Participant_id/ birthdate}.999* Example: participant_id's for birthdate 1/2/02 are 3, 5, 8 If a manual override is needed the override should be 8.999
+
+(.888 works too, just choose an integer that stands out for you.) If no manual override (last submission is best) these rows do not need to be included in the manual override, but it should still work if they are. Add the final version without altering column names to the overrides folder.
+
+If **all** duplicates do not need a *manual* override, you do not need to move the duplicate overrides file to the overrides folder, just run the code chunk to remove earlier submission duplicates.
+
+## 03 Add duplicate manual overrides and remove duplicates
+
+Duplicates identified based on birthdate. (Confirm they are actual duplicates and not just shared birthdates.)
+
+If any duplicates are clearly different people, the manual override must adjust the actual birthdate (e.g. 2011-02-09 to 11-02-09 or 9992011-02-09 for 1 of the shared bday participants). It will be properly reformated later. Just don't alter this part 11-02-09 !!!! make a better option for this !!!!
+
+```{python}
+#| label: 03 Remove duplicates
+
+cleaner.step_03_removed_duplicates()
+
+```
+
+     
+
+
+        to be continued... 
+
+
+
+```
+
+## Pre-Format Genetic text and p. and c. Col Review
+
+??? Check entries accross multiple survey responses as needed Outputs p. and c. columns from multiple surveys for each participant with conflicting inputs
+creates new columns for both condensed and interpretable notation versions
+
+```{python}
+#p. and c. columns
+GENOMIC_COLS = []
+
+```
+
+Create Manual overrides file...
+
+# Final Format Genetic text, Speculative ION channel Function, and Phenotype
+
+'function?\_eric' and 'phenotype?\_eric' columns are based on Eric's AI generated spreadsheet based on a variety of Sources papers ('function?\_eric_ref')
+
+```{python}
+
+```
+
+# Speculative ION channel Function based on Participant Responses
+
+Marlee- I'm not sure if this is possible to compute for IS. You will probably need some adjustments if you use this function. \### 'function?\_symp' is computed based on: -seizure onset -seizure history -non-absense seizures -DQ (developmental quotient)\<50 \### 'function?\_med' is computed based on: -by current medication type -(and/or med history)
+
+```{python}
+
+```
+
+
+# Clean Medications
+
+
+# Categorize Medications
+
+
+# Compute age
+
+
+# Standardize by age
+

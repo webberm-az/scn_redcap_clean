@@ -1,0 +1,4 @@
+pandas
+argostranslate
+langdetect
+certifi
