@@ -35,7 +35,9 @@ pip install -e .
 pip install jupyter
 
 # Imports and Config
-For additional config settings you can all look in config.py
+For additional config settings you can also look in config.py
+
+(If you change anything in this chunk, or any config. you must rerun all the chunks below in order)
 ```{python}
 #| label: Imports and Config
 from scn_redcap_clean import Cleaner, config # local import
@@ -47,29 +49,20 @@ config.data_dict = 'ToyDict.csv'
 # Module Specific
 config.modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
 
-config.raw_module_file = 'Toy1' # must have all of the module(s) you are filtering by (extra modules are fine)
+config.raw_module_file = 'Toy1' # must have all columns of the module(s) you are filtering by  (extra modules/columns are fine)
 
 ```
+
 **Set Files to Merge and columns to translate**
+Cleaner() will auto create a 'raw' folder for you to add your raw data files and a 'ref' folder for you to add your Data Dictionary (it will also auto create additional project folders in your data directory)
 
-(before removing duplicates) If different csv files have different participant_id's input a base file with exact participant_id's wanted for analysis and set merge_on_file to this file name.
-
-
+(see Extras below for using a different raw folder name)
 ```{python}
-#| label: Imports and Config
-# pyrefly: ignore[missing-import]
-from scn_redcap_clean import Cleaner # local import
+#| label: Cleaner instance
 
-
-
-
-
-# Cleaner() will auto create a 'raw' folder for you to add your raw data files and a 'ref' folder for you to add your Data Dictionary
 # see Extras below for using a different raw folder name
 
 cleaner = Cleaner() 
-
-
 
 ```
 
@@ -79,80 +72,92 @@ Extra Functions/Configs:
 #| eval: false
 
 # Custom raw data folder name
-# if your raw data folder is stored separately from .py files this should be the entire folder path
+# if you want your raw data folder stored separately from this .qmd files this should be the entire folder path
+
 config.raw_data_dir = 'raw_data'    # run before running cleaner = Cleaner() 
 cleaner = Cleaner() 
 
-
-# if you change to your raw data folder name later in the pipeline it can be updated
-cleaner.raw_data_dir = 'my_raw'  # defaults to 'raw' if not included
-
 ```
+
+
+
+
+
+**Make sure your raw data is in the raw folder and data dictionary is in the ref folder before continuing**
+Also ensure your data dictionary and modules are accurate (config. in the first code chunk)
+
+
 
 ## 01 Create merge_df and output translations
 
-Outputs 01_merged_raw to cleaner folder, and translations_manual_override for review and edits in review folder. Also creates a review, overrides, cleaner and archive folders for next steps. Rerunning the same stage with different inputs will overwrite files in the 'cleaner' folder. Version history csv files are stored in the 'archive' folder for every run with different back to back input. (e.g. 2 runs in a row without *any* changes will not create new archive files)
+Outputs 01_merged_raw to the steps folder, translations_manual_override for review and edits in the review folder, and a 01_merged_raw.txt for logging any manual override explanations to the overrides folder. 
+
+Archive also stores a ready only copy of 01_merged_raw.csv and translations_manual_override.csv which will be used for auto summaries. Rerunning the same stage with different inputs will overwrite files in the 'steps' folder. Version history csv files are stored in the 'archive' folder for every run with different back to back input if the contents of 01_merged_raw is changed. (e.g. 2 runs in a row without *any* changes will not create new archive files)
+
 *I should be able to use the data dictionary map to eventually automatically get the text_columns for translation. (in progress)
 
 ```{python}
 #| label: 01 Merge Raw and Review Translations
 
+
 # raw data csvs for merge
 
-# any exact duplicate columns in more than one csv will only be included once
-# a suffix '_y', '_x'... to will be added to identical column names containing at least one different input for a given participant id
 csv_list = ['Toy1', 'Toy2.csv']
 
 
 
 # all langauge-dependent text columns (exclude genomic text answers etc.) for translation
-text_columns = ['toy_text1', 'toy_text2', 'toy_text3', 'toy_text4', 'toy_text5']
+text_columns = ['toy_text1', 'toy_text2', 'toy_text3', 'toy_text4', 'toy_text5'] # hoping to automate this
+
 
 # if specific terms need overrides in translation review output add them here and rerun this stage
 # example input (non-english must be the key and the translation (or medical term) the value)
-# config.translation_dict = {
-            #'布洛芬':'Ibuprofen',
-          #  } 
+config.translation_dict = { # planning to track this in notes eventually for each version
+            '布洛芬':'Ibuprofen',
+           } 
 
 cleaner.step_01_merge_raw_and_review_translations(csv_list, text_columns)
 
 ```
+
+Other Info:
+-Any exact duplicate columns in more than one csv will only be included once.
+-A suffix '_{filename}' will be added to identical column names containing at least one different input for a given participant id.
 
 
 Extra Functions/Configs:
 ```{Extras:  this chunk does not run}
 #| eval: false
 
-# if used merge_on_file should contain the exact participant_id's in the participant_id column wanted for analysis
-# it defaults to the 1st csv in csv_files if not included
-e.g.
-merge_on_file = 'base_ids.csv' 
-s.get_01_merge_raw_and_review_translations(csv_list, text_columns, merge_on_file = 'base_ids.csv')
 
-
-# if translations are failing involving non-latin scripts adjust s.translation_script_threshold 
+# if translations are failing involving non-latin scripts adjust config.translation_script_threshold 
 # (detects non-latin characters and assigns language after 3 characters match a specific char. script)
-# run anywhere after s = Cleaner() and before get_01_merge_raw_and_review_translations()
+# run anywhere after cleaner = Cleaner() and before get_01_merge_raw_and_review_translations()
 e.g.
-cleaner.translation_script_threshold = 4    # if you don't have many text_columns this should be 1 or 2 
+config.translation_script_threshold = 4    # if you don't have many text_columns this should be 1 or 2 
 
 
-# by default filter_columns = 'birthdate' but you can use more than 1 column; avoid any open text responses for filters due to typos
+# by default filter_columns = 'birthdate' for creating the duplicate review csv but you should be able to use more than 1 column; avoid any open text responses for filters due to typos
 e.g.
 filter_columns = ['birthdate', 'country']
-s.get_01_merge_raw_and_review_translations(csv_list, text_columns, filter_columns = filter_columns)
+cleaner.get_01_merge_raw_and_review_translations(csv_list, text_columns, filter_columns = filter_columns)
 
 ```
 
 
 
-After outputing translations, manually review and edit translations_manual_override.csv in the review folder as needed. A version history of the translations file is saved in archive for record keeping. **Once manual edits are complete move this file to the overrides folder.**
+
+After outputing translations, manually review and edit translations_manual_override.csv in the review folder as needed. A version history of the translations file is saved in archive for record keeping. The final column in translations_manual_override should be used to record reasons you made any adjustments to a row.  **Once manual edits are complete move this file to the overrides folder.** 
 
 Keep the final version of this file without altering filename or column names in the manual_overrides folder *before running* get_02_translated_and_review_duplicates()
 
+The .txt file in the overrides folder is for recording general and brief override explanations and row deletion (e.g. 'Deleted false positives, language was already english.') Keep this file in the overrides folder (the summary will eventually archive it).
+
+
+
 ## 02 Overwrite non-english with english translations and output duplicates for review
 
-02_translated.csv is saved to cleaner folder Duplicates are identified by birthdate and duplicates_manual_override.csv is saved to review.
+02_translated.csv is saved to the steps folder.  Duplicates are identified by birthdate and duplicates_manual_override.csv is saved to review.
 
 ```{python}
 #| label: 02 Translated and Review Duplicates
@@ -161,19 +166,26 @@ cleaner.step_02_translated_and_review_duplicates()
 
 ```
 
-Again, manually review and edit duplicates_manual_override.csv as needed.
+
+
+
+Again, manually review and edit duplicates_manual_override.csv as needed, leaving explanations in the overrides column of the manual_overrides file and general comments in the txt. 
+
 
 *For manual overrides Participant_id should be written as {last Participant_id/ birthdate}.999* Example: participant_id's for birthdate 1/2/02 are 3, 5, 8 If a manual override is needed the override should be 8.999
 
 (.888 works too, just choose an integer that stands out for you.) If no manual override (last submission is best) these rows do not need to be included in the manual override, but it should still work if they are. Add the final version without altering column names to the overrides folder.
 
-If **all** duplicates do not need a *manual* override, you do not need to move the duplicate overrides file to the overrides folder, just run the code chunk to remove earlier submission duplicates.
-
-## 03 Add duplicate manual overrides and remove duplicates
+If **all** duplicates do not need a *manual* override, you do not need to move the duplicate overrides file to the overrides folder, just run the code chunk to remove earlier submission duplicates. 
 
 Duplicates identified based on birthdate. (Confirm they are actual duplicates and not just shared birthdates.)
 
-If any duplicates are clearly different people, the manual override must adjust the actual birthdate (e.g. 2011-02-09 to 11-02-09 or 9992011-02-09 for 1 of the shared bday participants). It will be properly reformated later. Just don't alter this part 11-02-09 !!!! make a better option for this !!!!
+If any duplicates are clearly different people, the manual override must adjust the actual birthdate (e.g. 2011-02-09 to 11-02-09 or 9992011-02-09 for 1 of the shared bday participants). It will be properly reformated later. Just don't alter this part 11-02-09   !!! planning to use the is_shared column at the end instead of this process, but it's not implemented yet. 
+
+
+
+## 03 Add duplicate manual overrides and remove duplicates
+
 
 ```{python}
 #| label: 03 Remove duplicates
@@ -231,4 +243,3 @@ Marlee- I'm not sure if this is possible to compute for IS. You will probably ne
 
 
 # Standardize by age
-

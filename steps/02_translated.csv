@@ -1,0 +1,9 @@
+participant_id,repeat_instrument,repeat_instance,toy_check1,toy_check2,toy_check3,toy_check4,toy_yesno,toy_text1,toy_text2,toy_text3,toy_text4,toy_text5,genomic_text1,genomic_p._text2,birthdate,submission_date
+1805,,,1.0,1.0,0.0,0.0,2.0,"yes, this happens often",?,she is very active,no/na,not lately,c.123G>C,N984K ? ,2017-08-10	,2024-08-10	
+1810,,,0.0,0.0,0.0,0.0,1.0,O tempo todo.,,Ela é muito ativa.,,,3333G>A. scn8a,p.E1483K,2020-09-10	,2024-09-11	
+1815,,,0.0,0.0,0.0,0.0,2.0,Mary does this all the time,we generally don't,she plays soccer and volleyball,,sometimes,123G>C p.(N984K),(N984K) SCN8A,2017-08-10	,2024-08-18	
+1817,,,1.0,1.0,0.0,0.0,,是的，经常这样。,有时候会。,精力很充沛。,,很少发生。,SCN8A,p.(G1451S),2017-11-11	,2024-08-18	
+1821,,,0.0,0.0,0.0,0.0,,"Sí, esto pasa seguido.",Últimamente no.,,,A veces.,c.2345+1T>G,E1483K,2020-08-15	,2024-08-19	
+1824,,,1.0,1.0,0.0,0.0,1.0,总是如此 / 一直都是。,,,不适用,我们一般不这样做。,SCN8A,p.(G1451S),2017-11-11	,2024-08-20	
+1825,,,0.0,0.0,0.0,0.0,,Todo el tiempo.,Por lo general no lo hacemos.,,,De vez en cuando.,c.2345+1T>G,E1483K,2020-08-15	,2024-08-21	
+1826,,,0.0,0.0,0.0,0.0,1.0,A menudo ocurre.,Rara vez.,,,,c2345+1T>G,pE1483K,2020-08-15	,2024-08-23	

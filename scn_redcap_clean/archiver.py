@@ -61,7 +61,7 @@ class Archiver:
         '''
         if archive_filename is None:
             archive_filename = main_filename
-        self.get_main_file_path(df, main_filename, main_path)
+        self.get_main_file_path(df, main_filename, main_path) # also create 
         if filename_get_version is not None:
             filename_get_version = self.get_max_version(filename_get_version)
         self.create_archive_csv_if_needed(archive_filename, df, filename_get_version)

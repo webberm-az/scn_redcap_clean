@@ -45,8 +45,7 @@ class Cleaner:
             self.paths.stages)
         self.translation.get_translations_for_review(
             merged_main_path, 
-            text_columns,
-            config.name_01_main) # outputs csv for review
+            text_columns) # outputs csv for review
         
         return
     
