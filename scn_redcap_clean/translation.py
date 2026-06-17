@@ -3,11 +3,11 @@ import pandas as pd # external imports
 # local imports
 from .overrides import Overrides
 from .translator import Translator
+from .detector import Detector
 from .translation_packages import TranslationPackages
 from . import config # global configs
 from .csv_kit import CsvKit
 from . import utils
-
 
 
 class Translation:
@@ -21,6 +21,7 @@ class Translation:
         self.packages = TranslationPackages(to_code = 'en')
         self.translator = Translator(self.packages)
         self.csvkit = CsvKit()
+        self.detect = Detector(self.packages)
         self.archive_filename = archive_filename
         self.df = None
 
@@ -58,24 +59,7 @@ class Translation:
 
 
 
-    def _is_no_translations_needed(self):
-        if '_needs_trans' not in self.df.columns or not self.df['_needs_trans'].any():
-            print('No foreign languages detected.')
-            return True
-        
-        return False
-
-
-
-    def _get_translations_for_review_df(self, cols_to_translate):
-        translated_df = self._get_translated_rows_only_df(cols_to_translate)
-        utils.add_column_if_dne('override_explanation', translated_df)
-
-        return translated_df
-
-
-
-    def try_input_trans(
+    def try_input_trans( # move to overrides?
             self, 
             df, 
             override_csv_path, 
@@ -107,6 +91,23 @@ class Translation:
                     
 
 
+    def _is_no_translations_needed(self):
+        if '_needs_trans' not in self.df.columns or not self.df['_needs_trans'].any():
+            print('No foreign languages detected.')
+            return True
+        
+        return False
+
+
+
+    def _get_translations_for_review_df(self, cols_to_translate):
+        translated_df = self._get_translated_rows_only_df(cols_to_translate)
+        utils.add_column_if_dne('override_explanation', translated_df)
+
+        return translated_df
+
+
+
     def _get_translated_rows_only_df(self, cols_to_translate):
         '''
         Returns reduced df of translated rows and columns for easier review
@@ -135,39 +136,38 @@ class Translation:
 
 
 
-
     def _get_needs_translation_df(self, cols_to_translate):
         '''
         Creates df of rows needing translation and includes detected langange in '_lang' col
         '''
         last_review_df = self.archiver.get_last_archive_df(self.archive_filename)
         if last_review_df is None:
-            detected_needs_trans_idx = self.get_detected_needs_trans_idx(cols_to_translate)
+            detected_needs_trans_idx = self._get_detected_needs_trans_idx(cols_to_translate)
             return detected_needs_trans_idx
         
         max_version = self.archiver.get_max_version(self.archive_filename)
         if max_version is None:
-            detected_needs_trans_idx = self.get_detected_needs_trans_idx(cols_to_translate)
+            detected_needs_trans_idx = self._get_detected_needs_trans_idx(cols_to_translate)
             return detected_needs_trans_idx
         archive_version = self.archiver.get_max_version(config.name_01_main)
         if float(max_version) >= float(archive_version):
-            archived_needs_trans_idx = self.get_archived_needs_trans_idx(last_review_df, max_version)
+            archived_needs_trans_idx = self._get_archived_needs_trans_idx(last_review_df, max_version)
             return archived_needs_trans_idx
 
-        detected_needs_trans_idx = self.get_detected_needs_trans_idx(cols_to_translate)
+        detected_needs_trans_idx = self._get_detected_needs_trans_idx(cols_to_translate)
         return detected_needs_trans_idx
 
 
 
-    def get_detected_needs_trans_idx(self, cols_to_translate):
+    def _get_detected_needs_trans_idx(self, cols_to_translate):
         print('Detecting language (based on whole row language context)...')
-        self.df['_lang'] = self.df.apply(lambda row: self.translator.detect_language(row, cols_to_translate), axis=1)
+        self.df['_lang'] = self.df.apply(lambda row: self.detect.detect_language(row, cols_to_translate), axis=1)
         self.df['_needs_trans'] = self.df['_lang'] != 'en' # flag rows needing translation
 
         return self.df['_needs_trans']
 
 
-    def get_archived_needs_trans_idx(self, last_version_translations_review_df, max_version):
+    def _get_archived_needs_trans_idx(self, last_version_translations_review_df, max_version):
         print(f'Using language detections from {self.archive_filename} version {max_version}')
         self._input_languages_codes(last_version_translations_review_df)
 
