@@ -15,6 +15,7 @@ from .translation import Translation
 from . base_csv import BaseCSV
 from .summary import Summary
 from . import config # global configs
+from . import console
 
 
 class Cleaner:
@@ -33,7 +34,7 @@ class Cleaner:
     def step_01_merge_raw_and_review_translations(self, csv_list, text_columns):
         ''' Returns csv_files as merge_df and outputs translation CSV for review '''
         if not csv_list:
-            print("\n'| Alert | No data files in raw data folder to merge'\n")
+            console.error('No data files in raw data folder to merge')
             return None
         self.base.output_base_csv_to_raw()
         merged_df = self.merging.get_merged_module_df(
@@ -76,11 +77,11 @@ class Cleaner:
             self,
             csv_name = config.name_02_main, 
             override_filename = 'duplicates_manual_override'):
-        """
+        '''
         Outputs csv files for duplicates review 
         1 file for record keeping (logs) and 1 file for manual override editting (overrides)
         Duplicates are identified by birthdate. 
-        """
+        '''
         self.archiver.create_archive_overrides(override_filename, self.paths.overrides)
         
         df = self.csvkit.try_convert_path_to_df(csv_name, self.paths.stages)
@@ -99,11 +100,8 @@ class Cleaner:
         if override_csv_path is not None:
             overrides = Overrides(override_csv_path, df)
             df = overrides.override()
-            #self.archiver.create_csvs_main_and_archive(df, config.name_02_main, self.paths.stages)
         else:
-            warn = '\n  -   No translation input performed   - \n' \
-                f"'{override_filename}' file not found in overrides folder.\n"
-            print(warn) # skips translations
+            console.missing_override(override_filename, 'translation input', 'without translations')
         
         return df
 

@@ -5,6 +5,7 @@ import pandas as pd # external import
 # local import
 from .csv_kit import CsvKit
 from . import utils
+from . import console
 
 
 
@@ -63,7 +64,7 @@ class Archiver:
             filename_get_version = self.get_max_version(filename_get_version)
         self.create_archive_csv_if_needed(archive_filename, df, filename_get_version)
         self.last_archived_file = self.csvkit.read_only_path
-        print(f"(Archive version saved as read-only to: {self.last_archived_file} )\n")
+        console.archive_file_saved_to(self.last_archived_file)
 
         return self.path
 
@@ -84,7 +85,7 @@ class Archiver:
         if not path.exists():
             self.csvkit.create_read_only(df, path)
         else:
-            print(f"\nNo changes detected for '{filename}'. Reusing existing archive copy.")
+            print(f"\nNo changes detected for '{filename}'.  Reusing existing archive copy.")
 
 
 
@@ -190,13 +191,10 @@ class Archiver:
     
     def _if_identical_and_get_version(self, current_df, fname, max_version):
         if max_version == 0 or max_version is None:
-            print("_if_identical_and_get_version ARCHIVER max version")
-            print(max_version)
             return None
         
         is_data_identical = self._try_is_identical(current_df, fname, max_version)
         if is_data_identical:
-            print("_if_identical_and_get_version ARCHIVER max version IS INDENTICAL")
             return max_version
         
         return None

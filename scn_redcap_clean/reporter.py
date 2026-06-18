@@ -20,7 +20,7 @@ class Reporter:
     ) -> str:
         '''Constructs a clean Markdown representation of changes between states.'''
         lines = [
-            f'# Step Summary: {step_name.replace('_', ' ').title()}',
+            f"# Step Summary: {step_name.replace('_', ' ').title()}",
             '\n## Base Metrics',
             f'* **Initial Row Count:** {len(base_df)}',
             f'* **Adjusted Row Count:** {len(modified_df)}',
@@ -45,7 +45,7 @@ class Reporter:
             lines.append('\n## Duplicate Participant Mappings (Same Birthdate)')
             lines.append('The following secondary submissions were merged/dropped into the primary record:')
             for primary_id, omitted_ids in duplicate_mappings.items():
-                lines.append(f'* **Primary ID {primary_id}** consumed repeated submission IDs: `{', '.join(omitted_ids)}`')
+                lines.append(f"* **Primary ID {primary_id}** consumed repeated submission IDs: `{', '.join(omitted_ids)}`")
 
         # Append general summary documentation at the bottom
         if general_explanation.strip():

@@ -4,6 +4,7 @@ import pandas as pd
 from . import config # global configs
 from .csv_kit import CsvKit
 from . import utils
+from . import console
 
 
 
@@ -21,11 +22,11 @@ class Duplicates:
             self, 
             main_filename = 'duplicates_manual_override', 
             archive_filename = 'duplicates_for_review'):
-        """ 
+        ''' 
         Outputs csv files for duplicates review 
         (1 file for record keeping and 1 file for manual override editting)
         Duplicates are identified by dup_col w/ 'birthdate' as default. 
-        """
+        '''
         final_duplicates_df = self._get_duplicates_for_review_df()
 
         # outputs csvs to review folder and a version to archive
@@ -95,10 +96,9 @@ class Duplicates:
 
 
     def _alert_no_override_file(self, override_filename):
-        warn = f"\n - - - No manual override duplicates performed. \
-            '{override_filename}' file not found in overrides folder.\
-        Proceeding with last submission for each duplicated '{self.dup_col}'- - -\n"
-        print(warn) # skips manual overrides
+        override_description = 'manual override duplicates'
+        proceeding_message = f"with last submission for each duplicated '{self.dup_col}'"
+        console.missing_override(override_filename, override_description, proceeding_message)  
 
 
 
@@ -116,7 +116,7 @@ class Duplicates:
 
     def _keep_last_duplicate_only(self):
         self._sort_rows_by_id()
-        self.df = self.df.drop_duplicates(subset = self.dup_col, keep = "last").copy()
+        self.df = self.df.drop_duplicates(subset = self.dup_col, keep = 'last').copy()
     
 
 

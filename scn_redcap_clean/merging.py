@@ -24,8 +24,8 @@ class Merging:
         if existing_filter_columns: 
             merged_df = utils.if_missing_drop_row(merged_df, existing_filter_columns)
         else: 
-            print(f"'{config.filter_columns}' column(s) must be in at least 1 csv file")
-
+            console.error_missing(config.filter_columns, 'column(s) must be in at least 1 csv file.')
+            
         return merged_df
 
 
@@ -159,7 +159,7 @@ class Merging:
     def _suffix_col_name_with_csv_name(self, col, csv_name):
         csv_str = str(csv_name)
         clean_suffix = csv_str.replace('.csv', '').replace(' ', '_').replace('.', '_')
-        new_col_name = f"{col}_{clean_suffix}"
+        new_col_name = f'{col}_{clean_suffix}'
 
         return new_col_name
 
@@ -168,7 +168,7 @@ class Merging:
     def _add_to_rename_dict_and_alert(self, col, new_col_name):
         self.rename_dict[col] = new_col_name
         print(f"Matching Column names with different contents found for '{col}'.")
-        print(f"Keeping 1st instance as '{col}' and matching instance as '{new_col_name}'.")
+        print(f"Keeping 1st instance as '{col}' and matching instance as '{new_col_name}'.\n")
 
 
 

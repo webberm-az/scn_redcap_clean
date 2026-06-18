@@ -4,6 +4,7 @@ import pandas as pd # external import
 
 # local imports
 from . import utils
+from . import console
 
 class CsvKit:
 
@@ -35,7 +36,6 @@ class CsvKit:
     def if_exists_path(self, csv_name, dir_path):
         potential_path = Path(dir_path) / self.add_suffix(csv_name)
         if not potential_path.exists(): 
-            #print(f"\n | Missing |   {potential_path}\n")
             return None
         
         self.main_path = potential_path
@@ -48,8 +48,7 @@ class CsvKit:
         ''' Create editable csv to main_path '''
         self.main_path = Path(dir_path) / self.add_suffix(output_filename)
         df.to_csv(self.main_path, index=False)
-        print(f'\n{output_filename} file saved to: {self.main_path}')
-
+        console.file_saved_to(output_filename, self.main_path)
 
 
     def _try_read_csv(self):
@@ -136,7 +135,4 @@ class CsvKit:
     def instruct_missing_csv(self, filename, dir, role_name, set_config):
         clean_filename = self.add_suffix(filename)
         raw_path = Path(dir) / f'{clean_filename}'
-        print(
-        f"\n | {role_name} Missing |   {raw_path}\n"
-        f"set filename using  {set_config} = 'your_file_name'  and store in  '{dir}' folder"
-        )
+        console.alert_missing_config_file(dir, role_name, set_config, raw_path)

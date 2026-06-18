@@ -129,7 +129,7 @@ class BaseCSV:
 
     def _save_and_report(self, df: pd.DataFrame):
         self.csvkit.create_main(df, 'base', config.raw_data_dir)
-        print(f'Raw base file response count: {len(df)}')
+        print(f'Raw base file response count: {len(df)}\n')
 
 
 

@@ -5,7 +5,7 @@ from . import config # global configs
 
 
 class Script:
-    """ Detects non-latin scripts using character ranges """
+    ''' Detects non-latin scripts using character ranges '''
 
     KOREAN = re.compile(r'[\uac00-\ud7af]')
     JAPANESE = re.compile(r'[\u3040-\u30ff]')

@@ -75,7 +75,7 @@ class Paths:
 
     def _create_raw_dir_and_alert(self):
         self.raw.mkdir(parents = True, exist_ok = True)
-        print(f'\n| Alert | Raw data directory not found at: {self.raw} \n'\
-            'A raw folder has been created. Add your data before proceeding. \n')
+        console.alert_missing_file('Raw data directory', self.raw)
+        print(f'A raw folder has been created. Add your data before proceeding. \n')
 
     

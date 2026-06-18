@@ -2,6 +2,8 @@ from pathlib import Path
 
 import pandas as pd # external import
 
+from . import console
+
 
 
 def is_n_matches(pattern, string, n):
@@ -49,8 +51,7 @@ def write_txt_file(content: str, filename: str, output_dir: Path):
 def create_txt(content, filename, file_path):
     # Path.write_text automatically opens, writes, and closes the file safely.
     file_path.write_text(content, encoding='utf-8')
-    print(f'| Info | {filename} txt file saved to: {file_path}')
-
+    console.file_saved(filename, file_path)
 
 
 def get_txt_filepath(filename, output_dir):
@@ -76,33 +77,14 @@ def append_to_txt(content: str, filename: str, output_dir: Path):
     '''        
     file_path = get_txt_filepath(filename, output_dir)
     _append_txt(content, file_path)
-    print(f'Text entry added text to: {file_path.name}')
+    action = 'Text entry added'
+    console.message_path(action, file_path.name)
 
 
 
 def _append_txt(content, file_path):
     with open(file_path, mode='a', encoding='utf-8') as file:
         file.write(f'{content}\n')
-
-
-
-def view_txt_file(filename: str, output_dir: Path):
-    '''
-    Reads a text file and prints its entire contents to the console.
-    '''
-    file_path = get_txt_filepath(filename, output_dir)
-    alert_filepath_DNE(file_path)
-    # Read and print contents
-    print(f'\n   |  {filename}  |')
-    print(file_path.read_text(encoding='utf-8'))
-    print('` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `\n')
-
-
-
-def alert_filepath_DNE(file_path):
-    if not file_path.exists():
-        print(f"| Error | '{file_path}' does not exist.")
-        return
 
 
 

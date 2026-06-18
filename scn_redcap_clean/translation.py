@@ -58,15 +58,17 @@ class Translation:
 
 
 
-    def input_eng_translation(self, cols_to_translate, needs_trans_idx):
-        ''' Inputs english translations for all df cols_to_translate containing text  '''
-        print('Translating each text column (if non-english detected)...\n')
-        for col in cols_to_translate:
-            needs_trans = needs_trans_idx & self.df[col].notna() & (self.df[col].astype(str).str.strip() != '')
+    def _get_translation_df(self, file_path, cols_to_translate):
+        '''
+        Returns df with added _orig columns, _needs_trans column, and translations 
+        '''
+        # create df w/ duplicated cols_to_translate w/ '_orig' suffix added to col names
+        self.df = self.csvkit.make_duplicate_orig_cols(file_path, cols_to_translate)
+        needs_trans_idx = self._get_needs_translation_df(cols_to_translate) 
+        self._input_eng_translation(cols_to_translate, needs_trans_idx)
 
-            for idx in self.df[needs_trans].index:
-                self._try_translate_df(idx, col)
-                    
+        return self.df
+
 
 
     def _is_no_translations_needed(self):
@@ -83,34 +85,6 @@ class Translation:
         utils.add_column_if_dne('override_explanation', translated_df)
 
         return translated_df
-
-
-
-    def _get_translated_rows_only_df(self, cols_to_translate):
-        '''
-        Returns reduced df of translated rows and columns for easier review
-        '''
-        # only rows where '_needs_trans' is True
-        t_df = self.df[self.df['_needs_trans']].copy() 
-        
-        keep = [self.id_col, '_lang']
-        for col in cols_to_translate:
-            keep.extend(c for c in (col, f'{col}_orig') if c in t_df.columns)
-            
-        return t_df[keep]
-
-
-
-    def _get_translation_df(self, file_path, cols_to_translate):
-        '''
-        Returns df with added _orig columns, _needs_trans column, and translations 
-        '''
-        # create df w/ duplicated cols_to_translate w/ '_orig' suffix added to col names
-        self.df = self.csvkit.make_duplicate_orig_cols(file_path, cols_to_translate)
-        needs_trans_idx = self._get_needs_translation_df(cols_to_translate) 
-        self.input_eng_translation(cols_to_translate, needs_trans_idx)
-
-        return self.df
 
 
 
@@ -137,6 +111,45 @@ class Translation:
 
 
 
+    def _input_eng_translation(self, cols_to_translate, needs_trans_idx):
+        ''' Inputs english translations for all df cols_to_translate containing text  '''
+        print('Translating each text column (if non-english detected)...\n')
+        for col in cols_to_translate:
+            needs_trans = needs_trans_idx & self.df[col].notna() & (self.df[col].astype(str).str.strip() != '')
+
+            for idx in self.df[needs_trans].index:
+                self._try_translate_df(idx, col)
+                    
+                    
+
+    def _try_translate_df(self, idx, col):
+        val = str(self.df.at[idx, col]).strip()
+        row_lang = self.df.at[idx, '_lang']
+
+        try:
+            translated = self.translator.to_english(val, row_lang)
+            self.df.at[idx, col] = f'[trans. from {row_lang}] {translated}'
+
+        except Exception as e:
+            print(f'\nTranslation failed | Language: {row_lang} | Error: {e}')
+
+
+
+    def _get_translated_rows_only_df(self, cols_to_translate):
+        '''
+        Returns reduced df of translated rows and columns for easier review
+        '''
+        # only rows where '_needs_trans' is True
+        t_df = self.df[self.df['_needs_trans']].copy() 
+        
+        keep = [self.id_col, '_lang']
+        for col in cols_to_translate:
+            keep.extend(c for c in (col, f'{col}_orig') if c in t_df.columns)
+            
+        return t_df[keep]
+
+
+
     def _get_detected_needs_trans_idx(self, cols_to_translate):
         print('Detecting language (based on whole row language context)...')
         self.df['_lang'] = self.df.apply(lambda row: self.detect.detect_language(row, cols_to_translate), axis=1)
@@ -145,8 +158,9 @@ class Translation:
         return self.df['_needs_trans']
 
 
+
     def _get_archived_needs_trans_idx(self, last_version_translations_review_df, max_version):
-        print(f'Using language detections from {self.archive_filename} version {max_version}')
+        print(f"Using language detections from '{self.archive_filename}' version {max_version}")
         self._input_languages_codes(last_version_translations_review_df)
 
         return self.df['_needs_trans']
@@ -165,18 +179,3 @@ class Translation:
         ''' Omitted id's from archived_df default to english for _lang column '''
         self.df['_lang'] = self.df[self.id_col].map(map_id_to_lang).fillna('en')
         self.df['_needs_trans'] = self.df['_lang'] != 'en'
-
-
-
-    def _try_translate_df(self, idx, col):
-        val = str(self.df.at[idx, col]).strip()
-        row_lang = self.df.at[idx, '_lang']
-
-        try:
-            translated = self.translator.to_english(val, row_lang)
-            self.df.at[idx, col] = f'[trans. from {row_lang}] {translated}'
-
-        except Exception as e:
-            print(f'\nTranslation failed | Language: {row_lang} | Error: {e}')
-
-
