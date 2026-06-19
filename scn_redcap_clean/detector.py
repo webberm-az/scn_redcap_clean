@@ -5,12 +5,12 @@ import re
 import langdetect
 import pandas as pd
 
+langdetect.DetectorFactory.seed = 0 # not working?
+
 # local imports
 from .script import Script
 from . import config # global configs
 
-
-langdetect.DetectorFactory.seed = 0 # not working?
 os.environ['ARGOS_DEVICE_TYPE'] = 'cpu'
 
 
@@ -25,13 +25,16 @@ class Detector:
 
 
     def __init__(self, packages):
-        # e.g. special_terms = {'布洛芬':'Ibuprofen',}  inputs for special terms
 
+        langdetect.DetectorFactory.seed = 0 # not working?
+        
+        # e.g. special_terms = {'布洛芬':'Ibuprofen',}  inputs for special terms
         self.special_terms = self._format_special_terms(config.translation_dict)
         
         # finds 3 (default) characters in a non-latin script before classifying 
         self.script = Script()
         self.packages = packages
+
 
 
 
@@ -120,6 +123,7 @@ class Detector:
             # map Chinese codes zh-cn or zh-tw to zh for argostranslate.translate.translate()
             lang = self._get_lang_prediction_defaults(predictions)
             return lang
+        
         except Exception: 
             return 'en'
         

@@ -6,6 +6,7 @@ from .detector import Detector
 from .translation_packages import TranslationPackages
 from . import config # global configs
 from .csv_kit import CsvKit
+from . version import Version
 from . import utils
 
 
@@ -23,6 +24,7 @@ class Translation:
         self.detect = Detector(self.packages)
         self.archive_filename = archive_filename
         self.df = None
+        self.version = Version(self.paths.archive)
 
 
 
@@ -97,11 +99,11 @@ class Translation:
             detected_needs_trans_idx = self._get_detected_needs_trans_idx(cols_to_translate)
             return detected_needs_trans_idx
         
-        max_version = self.archiver.get_max_version(self.archive_filename)
+        max_version = self.version.get_max_version(self.archive_filename)
         if max_version is None:
             detected_needs_trans_idx = self._get_detected_needs_trans_idx(cols_to_translate)
             return detected_needs_trans_idx
-        archive_version = self.archiver.get_max_version(config.name_01_main)
+        archive_version = self.version.get_max_version(config.name_01_main)
         if float(max_version) >= float(archive_version):
             archived_needs_trans_idx = self._get_archived_needs_trans_idx(last_review_df, max_version)
             return archived_needs_trans_idx

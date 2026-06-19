@@ -3,10 +3,8 @@ from pathlib import Path
 import pandas as pd
 
 from .csv_kit import CsvKit
+from .field_dict import FieldDict
 from . import config # global configs
-
-
-
 
 
 class BaseCSV:
@@ -15,13 +13,14 @@ class BaseCSV:
         self.paths = paths
         self.csvkit = CsvKit()
         self.dict_df = self.csvkit.try_convert_path_to_df(config.data_dict, Path('ref'))
-        self.data_df = self.csvkit.try_convert_path_to_df(config.raw_module_file, config.raw_data_dir)
+        self.data_df = self.csvkit.try_convert_path_to_df(config.raw_module_csv, config.raw_data_dir)
         self.modules = config.modules
-
+        self.field_dict = FieldDict(self.data_df, self.dict_df)
 
 
     def output_base_csv_to_raw(self):
         base_df = self.filter_id_by_modules()
+
         if base_df is not None:
             self._save_and_report(base_df)
             
@@ -31,7 +30,9 @@ class BaseCSV:
         if self._is_data_missing():
             return None
 
-        module_columns = self._get_module_columns_by_type()
+        module_columns = self.field_dict.get_module_columns_by_type(
+            type = 'checkbox', modules = self.modules)
+        
         checkbox_cols = module_columns['checkbox']
         other_cols = module_columns['other']
 
@@ -58,38 +59,7 @@ class BaseCSV:
 
         if self.data_df is None:
             self.csvkit.instruct_missing_csv(
-                config.raw_module_file, 'raw', 'Raw Module Data', 'config.raw_module_file')
-
-
-
-    def _get_module_columns_by_type(self):
-        '''Splits relevant data dictionary columns into safe, verified groups.'''
-        module_dict_df = self._get_module_dict_df()
-        module_checkbox_list = self._get_valid_columns(module_dict_df, match_checkbox = True)
-        module_other_list = self._get_valid_columns(module_dict_df, match_checkbox = False)
-
-        field_dict = {'checkbox': module_checkbox_list, 'other': module_other_list}
-        
-        return field_dict
-
-
-
-    def _get_module_dict_df(self):
-        module_col_list = self.dict_df[config.module_column].isin(self.modules)
-        module_dict_df = self.dict_df[module_col_list]
-        
-        return module_dict_df
-
-
-
-    def _get_valid_columns(self, module_dict_df, match_checkbox):
-        is_checkbox = module_dict_df[config.field_type_column] == 'checkbox'
-        col_type = is_checkbox if match_checkbox else ~is_checkbox
-        
-        col_match_list = module_dict_df[col_type][config.col_names_column].tolist()
-        col_match = [col for col in col_match_list if col in self.data_df.columns]
-        
-        return col_match
+                config.raw_module_csv, 'raw', 'Raw Module Data', 'config.raw_module_csv')
 
 
 

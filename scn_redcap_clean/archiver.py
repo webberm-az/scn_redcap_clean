@@ -4,9 +4,9 @@ import pandas as pd # external import
 
 # local import
 from .csv_kit import CsvKit
+from . version import Version
 from . import utils
 from . import console
-
 
 
 class Archiver:
@@ -18,9 +18,11 @@ class Archiver:
             self.archive_path = Path('archive')
         else:
             self.archive_path = Path(archive_path)
+        
+        self.version = Version(self.archive_path)
 
-
-
+    
+    # cleaner
     def create_archive_overrides(self, filename, main_path = Path('overrides')):
         '''
         For manual override archiving
@@ -28,25 +30,16 @@ class Archiver:
         '''
         main_path = Path(main_path)
         df = self._get_overrides_df(filename, main_path)
-        
         if df is None: 
             return None
 
         self.create_archive_csv_if_needed(filename, df) # version to archive folder
-
+        
         return
 
 
 
-    def _get_overrides_df(self, filename, main_path):
-        csv_path = self.csvkit.if_exists_path(filename, main_path)
-        try:
-            df = pd.read_csv(csv_path) if csv_path else None
-            return df
-        except Exception:
-            return None
-
-
+    # cleaner
     def create_csvs_main_and_archive(
             self, 
             df, 
@@ -59,14 +52,28 @@ class Archiver:
         '''
         if archive_filename is None:
             archive_filename = main_filename
-        self.get_main_file_path(df, main_filename, main_path) # also create 
+
+        self.csvkit.create_main(df, main_filename, Path(main_path))
+        self.path = self.csvkit.main_path
+
         if filename_get_version is not None:
-            filename_get_version = self.get_max_version(filename_get_version)
+            filename_get_version = self.version.get_max_version(filename_get_version)
+        
         self.create_archive_csv_if_needed(archive_filename, df, filename_get_version)
-        self.last_archived_file = self.csvkit.read_only_path
-        console.archive_file_saved_to(self.last_archived_file)
 
         return self.path
+
+
+
+    # translation
+    def get_last_archive_df(self, fname):
+        ''' Create filename with version suffix based on filenames in directory '''
+        if self.version.get_max_version(fname) == 0:
+            return None
+
+        last_version_translations_review_df = self.version.try_last_version_path(fname)
+
+        return last_version_translations_review_df
 
 
 
@@ -76,11 +83,23 @@ class Archiver:
         '''
         archive_file_path = self.get_archive_path(filename, df, version)
         self.create_archive_csv_if_changed(filename, df, archive_file_path)
+        self.last_archived_file = self.csvkit.read_only_path
+        console.archive_file_saved_to(self.last_archived_file)
 
         
-        
 
-    
+    def get_archive_path(self, fname, df, version = None):
+        ''' Create filename with version suffix based on filenames in directory '''
+        fname = Path(fname).stem # strip any file extensions if needed
+        if version is None:
+            version = self.version.get_output_version(fname, df)
+
+        filepath = self.archive_path / f'{fname}_v{version:03d}.csv'
+
+        return filepath
+
+
+        
     def create_archive_csv_if_changed(self, filename, df, path):
         if not path.exists():
             self.csvkit.create_read_only(df, path)
@@ -89,127 +108,10 @@ class Archiver:
 
 
 
-    def get_archive_path(self, fname, df, version = None):
-        ''' Create filename with version suffix based on filenames in directory '''
-        fname = Path(fname).stem # strip any file extensions if needed
-        if version is None:
-            version = self.get_output_version(fname, df)
-
-        filepath = self.archive_path / f'{fname}_v{version:03d}.csv'
-
-        return filepath
-
-    
-    def if_identical_get_last_archive_df(self, fname, current_df):
-        ''' Create filename with version suffix based on filenames in directory '''
-        last_version_translations_review_df = self.get_last_archive_df(fname)
-        if last_version_translations_review_df is None:
-            return None
-        
-        if utils.is_df_identical(current_df, last_version_translations_review_df):
-            return last_version_translations_review_df
-
-        return None
-
-
-
-    def get_last_archive_df(self, fname):
-        ''' Create filename with version suffix based on filenames in directory '''
-        if self.get_max_version(fname) == 0:
-            return None
-
-        last_version_translations_review_df = self._try_last_version_trans_review_path(fname)
-
-        return last_version_translations_review_df
-
-
-    def _try_last_version_trans_review_path(self, fname):
+    def _get_overrides_df(self, filename, main_path):
+        csv_path = self.csvkit.if_exists_path(filename, main_path)
         try:
-            last_version_trans_review_path = self.get_last_archive_path(fname)
-            last_version_translations_review_df = pd.read_csv(last_version_trans_review_path)
-            return last_version_translations_review_df
+            df = pd.read_csv(csv_path) if csv_path else None
+            return df
         except Exception:
             return None
-
-
-
-    def get_last_archive_path(self, fname):
-        ''' Create filename with version suffix based on filenames in directory '''
-        fname = Path(fname).stem # strip any file extensions if needed
-        version = self.get_max_version(fname)
-        filepath = self.archive_path / f'{fname}_v{version:03d}.csv'
-
-        return filepath
-
-
-
-    def get_version_df(self, version, fname):
-        filepath = self.archive_path / f'{fname}_v{version:03d}.csv'
-        if filepath.exists():
-            return pd.read_csv(filepath)
-
-
-
-    def get_main_file_path(self, df, output_filename, main_path):
-        main_path = Path(main_path)
-        self.csvkit.create_main(df, output_filename, main_path)
-        self.path = self.csvkit.main_path
-
-
-
-    def get_output_version(self, fname, df):
-        ''' Gets version suffix based on filenames in directory '''
-        max_version = self.get_max_version(fname)
-
-        max_version_if_duplicate = self._if_identical_and_get_version(df, fname, max_version)
-        if max_version_if_duplicate is not None:
-            return max_version_if_duplicate
-
-        return max_version + 1
-
-
-
-    def get_max_version(self, fname):
-        existing = self.archive_path.glob(f'{fname}_v*.csv')
-        past_versions_found = [0]
-        for file in existing: 
-            self._get_all_versions(file, past_versions_found)
-
-        max_version = max(past_versions_found)
-
-        return max_version
-
-
-
-    def _get_all_versions(self, file, versions):
-        ''' Gets each file version suffix existing in the directory '''
-        suffix = file.stem.rsplit('_v', 1)[-1]
-        if suffix.isdigit():
-            versions.append(int(suffix))
-
-
-    
-    def _if_identical_and_get_version(self, current_df, fname, max_version):
-        if max_version == 0 or max_version is None:
-            return None
-        
-        is_data_identical = self._try_is_identical(current_df, fname, max_version)
-        if is_data_identical:
-            return max_version
-        
-        return None
-
-
-
-    def _try_is_identical(self, current_df, fname, max_version):
-        try:
-            last_df = self.get_version_df(max_version, fname)            
-            is_identical = utils.is_df_identical(current_df, last_df)
-
-            return is_identical
-        
-        except Exception:
-            pass
-
-        return False
-

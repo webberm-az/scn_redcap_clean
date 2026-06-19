@@ -3,6 +3,7 @@ import socket
 
 from . import console
 
+
 class TranslationPackages:
     ''' Manages downloading, installing, and caching local Argos language packages '''
 
@@ -149,6 +150,7 @@ class TranslationPackages:
         console.downloading_package_for(from_code)
         downloaded_file = package.download()
         argostranslate.package.install_from_path(downloaded_file)
+
 
 
     def _track_successful_download(self, from_code):

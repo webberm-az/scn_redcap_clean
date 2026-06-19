@@ -30,4 +30,19 @@ col_names_column = 'Variable / Field Name'
 # Module Specific
 modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
 
-raw_module_file = 'Toy1' # must have all of the module(s) you are filtering by
+raw_module_csv = 'Toy1' # must have all of columns of the module(s) you are filtering by
+
+
+
+# for age on Module submission date
+birthdate = 'birthdate'
+
+module_suffix_age = {
+    'submission_date' : '_toy',
+    'submission_date_2': '_mod2' # if more than 1 module is timestamped
+}
+
+
+c_genomic = 'genomic_text1'
+p_genomic = 'genomic_p._text2'
+no_translate_cols = [c_genomic, p_genomic, birthdate, merge_on_id_column]

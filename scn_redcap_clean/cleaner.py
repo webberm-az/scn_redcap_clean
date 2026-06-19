@@ -4,7 +4,6 @@ import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
 # local imports
-# Local imports using explicit relative paths
 from .archiver import Archiver
 from .csv_kit import CsvKit
 from .duplicates import Duplicates
@@ -12,9 +11,10 @@ from .merging import Merging
 from .overrides import Overrides
 from .paths import Paths
 from .translation import Translation
-from . base_csv import BaseCSV
+from .base_csv import BaseCSV
 from .summary import Summary
 from . import config # global configs
+from . import utils
 from . import console
 
 
@@ -24,30 +24,34 @@ class Cleaner:
         self.paths = Paths(raw_data_source = config.raw_data_dir)
         self.archiver = Archiver(archive_path = self.paths.archive)
         self.translation = Translation(paths = self.paths, archiver = self.archiver,)
-        self.merging = Merging()
+        self.merging = Merging(self.paths)
         self.csvkit = CsvKit()
         self.summary = Summary(paths = self.paths)
         self.base = BaseCSV(self.paths)
 
 
-
-    def step_01_merge_raw_and_review_translations(self, csv_list, text_columns):
+    def step_01_merge_raw_and_review_translations(
+        self, csv_list, text_columns = utils.auto, drop_na_col = True):
         ''' Returns csv_files as merge_df and outputs translation CSV for review '''
         if not csv_list:
             console.error('No data files in raw data folder to merge')
             return None
         self.base.output_base_csv_to_raw()
+        
         merged_df = self.merging.get_merged_module_df(
             csv_list = csv_list, 
             text_columns = text_columns,
-            merge_on_file = 'base')
+            merge_on_file = 'base',
+            drop_na_col = drop_na_col)
         
+        language_cols = self.merging.active_text_columns
+
         merged_main_path = self.archiver.create_csvs_main_and_archive(
             merged_df, 
             config.name_01_main, 
             self.paths.stages)
-        
-        self.translation.create_translations_for_review(merged_main_path, text_columns)
+
+        self.translation.create_translations_for_review(merged_main_path, language_cols)
         
         return
     

@@ -2,14 +2,19 @@ from . import utils
 
 
 
-
 def custom_alert(type, message):
     print(f"\n| {type} | {message}\n")
 
-def alert_missing_config_file(dir, role_name, set_config, raw_path):
+def alert_missing_config_file(
+    dir, role_name, set_config, file_path = '', message = None):
     type = f"{role_name} Missing"
-    custom_alert(type, raw_path)
+    custom_alert(type, file_path)
     print(f"set filename using  {set_config} = 'your_file_name'  and store in  '{dir}' folder\n")
+    if message:
+        alternative(message)
+
+def alternative(message):
+    print("\n ``Alternatively, {message} \n")
 
 
 

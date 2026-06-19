@@ -2,31 +2,86 @@
 from . import utils
 from . import config # global configs
 from .csv_kit import CsvKit
+from .field_dict import FieldDict
+from . import console
 
 
 class Merging:
 
-    def __init__(self):
+    def __init__(self, paths):
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
+        self.paths = paths
 
 
-    def get_merged_module_df(self, csv_list, text_columns = None, merge_on_file = None):
+    def get_merged_module_df(
+            self, 
+            csv_list, 
+            text_columns = utils.auto, 
+            merge_on_file = None, 
+            drop_na_col = True):
         '''
         Merges a list of CSVs on 'participant_id' and removes 
         rows where 'birthdate' is blank or missing
         '''
-        self.active_text_cols = text_columns if text_columns is not None else []
         merged_df = self.merge_csvs(csv_list, merge_on_file)
-
+        self._try_get_active_text_cols(merged_df, text_columns)
         existing_filter_columns = self.get_existing_filter_columns(merged_df)
 
         if existing_filter_columns: 
             merged_df = utils.if_missing_drop_row(merged_df, existing_filter_columns)
         else: 
-            console.error_missing(config.filter_columns, 'column(s) must be in at least 1 csv file.')
+            console.error_missing(
+                config.filter_columns, 'column(s) must be in at least 1 csv file.')
+
+        if drop_na_col:
+            merged_df = self._drop_entirely_empty_columns(merged_df)
             
         return merged_df
+
+
+    def _try_get_active_text_cols(self, merged_df, text_cols):
+        if text_cols is utils.auto:
+            text_cols = self._try_get_auto_text_cols(merged_df)
+            self._get_active_auto_text_cols(text_cols)
+        elif text_cols is None:
+            self.active_text_columns = []
+        else:
+            self.active_text_columns = [text_cols] if isinstance(text_cols, str) else list(text_cols)
+
+
+    def _get_active_auto_text_cols(self, text_cols):
+        not_active = config.no_translate_cols
+        self.active_text_columns = [col for col in text_cols if col not in not_active]
+
+
+    def _try_get_auto_text_cols(self, merged_df):
+        dict_df = self.csvkit.try_convert_path_to_df(config.data_dict, self.paths.ref)
+
+        if dict_df is not None:
+            text_cols = self._get_auto_text_cols(merged_df, dict_df)
+        else:
+            self._alert_instruct()
+            text_cols = []
+            self.active_text_columns = []
+        
+        return text_cols
+                
+
+
+    def _get_auto_text_cols(self, merged_df, dict_df):
+        field_dict = FieldDict(data_df = merged_df, dict_df = dict_df)
+        text_cols = field_dict.get_columns_by_type(
+            type = 'text', match_type = True)
+
+        return text_cols
+
+
+
+    def _alert_instruct(self):
+        message = "input 'text_columns' = None or the list of columns you would like translated."
+        console.alert_missing_config_file(
+                'ref', 'Data Dictionary', 'config.data_dict', message = message)
 
 
 
@@ -173,14 +228,14 @@ class Merging:
 
 
     def _if_active_text_col_add_new(self, col, new_col_name):
-        if hasattr(self, 'active_text_cols') and col in self.active_text_cols:
+        if hasattr(self, 'active_text_cols') and col in self.active_text_columns:
             self._if_not_in_active_append(new_col_name)
 
 
 
     def _if_not_in_active_append(self, new_col_name):
-        if new_col_name not in self.active_text_cols:
-            self.active_text_cols.append(new_col_name)  
+        if new_col_name not in self.active_text_columns:
+            self.active_text_columns.append(new_col_name)  
 
 
 
@@ -238,3 +293,32 @@ class Merging:
         if base_vals.equals(merging_vals):
             self.cols_to_drop.append(col)
         
+
+
+    def _drop_entirely_empty_columns(self, merged_df):
+        is_empty = merged_df.apply(self._is_column_empty)
+        is_id_col = (merged_df.columns == self.id_col)
+        cols_to_keep = merged_df.columns[~is_empty | is_id_col]
+    
+        active_columns_df = merged_df[cols_to_keep].copy()
+        
+        return active_columns_df
+
+
+
+    def _is_column_empty(self, col_df):
+        cleaned_col_df = self._strip_whitespace_if_object(col_df)
+        
+        not_na_column = col_df.notna() & (cleaned_col_df != '')
+        not_entirely_na_column = not_na_column.any()
+        empty_column = not not_entirely_na_column
+
+        return empty_column
+
+
+
+    def _strip_whitespace_if_object(self, col_df):
+        if col_df.dtype == 'object':
+            return col_df.astype(str).str.strip()
+        
+        return col_df

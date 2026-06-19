@@ -1,12 +1,14 @@
 from pathlib import Path
+from typing import Union, List, Pattern, Any, Iterable
 
 import pandas as pd # external import
 
 from . import console
 
+auto = object()
 
 
-def is_n_matches(pattern, string, n):
+def is_n_matches(pattern: Pattern[str], string: str, n: int) -> bool:
     ''' Returns True if at least n of pattern elements found in string '''
     count = 0
 
@@ -19,7 +21,8 @@ def is_n_matches(pattern, string, n):
 
 
 
-def get_cols_if_in_df(df, override_df, id_col):
+def get_cols_if_in_df(
+        df: pd.DataFrame, override_df: pd.DataFrame, id_col: Any) -> List[Any]:
     ''' Returns shared columns between df and override_df excluding id_col '''
     shared_cols = set(df.columns) & set(override_df.columns)
     clean_shared_cols = [col for col in shared_cols if col != id_col]
@@ -28,7 +31,8 @@ def get_cols_if_in_df(df, override_df, id_col):
 
 
 
-def if_missing_drop_row(df, filter_subset):
+def if_missing_drop_row(
+        df: pd.DataFrame, filter_subset: Union[str, Iterable[str]]) -> pd.DataFrame:
     ''' Removes rows where col is blank or missing '''
     subset = [filter_subset] if isinstance(filter_subset, str) else list(filter_subset)
 
@@ -39,7 +43,7 @@ def if_missing_drop_row(df, filter_subset):
     
 
 
-def write_txt_file(content: str, filename: str, output_dir: Path):
+def write_txt_file(content: str, filename: Union[str, Path], output_dir: Path) -> None:
     '''
     Safely writes a string content to a txt within an output directory.
     '''        
@@ -54,6 +58,7 @@ def create_txt(content, filename, file_path):
     console.file_saved(filename, file_path)
 
 
+
 def get_txt_filepath(filename, output_dir):
     filename = add_txt_suffix(filename)
     file_path = output_dir / filename
@@ -63,6 +68,9 @@ def get_txt_filepath(filename, output_dir):
 
 
 def add_txt_suffix(filename):
+    if not isinstance(filename, str):
+        filename = str(filename)
+    
     if not filename.endswith('.txt'):
         filename = f'{filename}.txt'
     
@@ -70,7 +78,31 @@ def add_txt_suffix(filename):
 
 
 
-def append_to_txt(content: str, filename: str, output_dir: Path):
+def add_column_if_dne(colname: Any, df: pd.DataFrame, input: Any = '') -> pd.DataFrame:
+    if colname not in df.columns:
+        df[colname] = input
+    
+    return df
+
+
+
+def match_rows_to_ref_id(
+        df: pd.DataFrame, ref_df: pd.DataFrame, id_column: Any) -> pd.Series:
+    df[id_column] = df[id_column].astype(ref_df[id_column].dtype)
+        
+    return df[id_column]
+
+
+
+def is_df_identical(current_df, last_df):
+    if last_df.astype(str).equals(current_df.astype(str)):
+        return True
+
+    return False
+
+
+
+def append_to_txt(content: str, filename: Union[str, Path], output_dir: Path) -> None:
     '''
     Appends text to a file without overwriting existing content.
     Creates the file if it doesn't exist.
@@ -85,30 +117,5 @@ def append_to_txt(content: str, filename: str, output_dir: Path):
 def _append_txt(content, file_path):
     with open(file_path, mode='a', encoding='utf-8') as file:
         file.write(f'{content}\n')
-
-
-
-def add_column_if_dne(colname, df, input = ''):
-    if colname not in df.columns:
-        df[colname] = input
-    
-    return df
-
-
-
-def match_rows_to_ref_id(df, ref_df, id_column):
-    df[id_column] = df[id_column].astype(ref_df[id_column].dtype)
-        
-    return df[id_column]
-
-
-
-
-def is_df_identical(current_df, last_df):
-    if last_df.astype(str).equals(current_df.astype(str)):
-        return True
-
-    return False
-
 
 
