@@ -8,10 +8,13 @@ version = "0.1.0"
 description = "Data cleaning and preprocessing for Hammer Lab REDCap SCN genomics data"
 #dynamic = ["dependencies"]
 dependencies = [
-    'pandas',
+    'pandas>=2.0.0',
     'argostranslate',
     'langdetect',
-    'certifi']
+    'certifi',
+    'ollama>=0.6.2',
+    'biopython',
+    ]
 
 [tool.setuptools]
 # Force Python to only look at your core package directory
@@ -24,6 +27,8 @@ packages = ["scn_redcap_clean"]
 
 
 
-
-[tool.pyrefly]
-project-includes = ["src", "."]
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+extraPaths = ["."]
+typeCheckingMode = "basic"

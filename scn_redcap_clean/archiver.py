@@ -11,7 +11,7 @@ from . import console
 
 class Archiver:
     
-    def __init__(self, archive_path = None):
+    def __init__(self, archive_path = None, review_path = None, override_path = None):
         self.csvkit = CsvKit()
 
         if archive_path is None:
@@ -19,6 +19,16 @@ class Archiver:
         else:
             self.archive_path = Path(archive_path)
         
+        if review_path is None:
+            self.review_path = Path('review')
+        else:
+            self.review_path = Path(review_path)
+
+        if override_path is None:
+            self.override_path = Path('overrides')
+        else:
+            self.override_path = Path(override_path)
+
         self.version = Version(self.archive_path)
 
     
@@ -74,6 +84,26 @@ class Archiver:
         last_version_translations_review_df = self.version.try_last_version_path(fname)
 
         return last_version_translations_review_df
+
+
+    def create_files_review_and_archive(
+            self, 
+            df, 
+            main_filename, 
+            archive_filename = None, 
+            filename_get_version = None):
+        '''
+        Create CSVs editable version to main_path and read-only to archive folder
+        '''
+        self.create_csvs_main_and_archive(
+            df, 
+            main_filename, 
+            self.review_path, 
+            archive_filename,
+            filename_get_version)
+        
+        content = 'Additional explanations: \n'
+        utils.write_txt_file(content, main_filename, self.override_path)
 
 
 

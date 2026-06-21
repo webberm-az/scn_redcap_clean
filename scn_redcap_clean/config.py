@@ -46,3 +46,7 @@ module_suffix_age = {
 c_genomic = 'genomic_text1'
 p_genomic = 'genomic_p._text2'
 no_translate_cols = [c_genomic, p_genomic, birthdate, merge_on_id_column]
+
+
+
+med_text_cols = ['toy_meds', 'toy_supps']

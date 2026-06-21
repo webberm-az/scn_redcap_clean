@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
+from pandas import DataFrame
 
 from .csv_kit import CsvKit
 from .field_dict import FieldDict
@@ -12,8 +14,10 @@ class BaseCSV:
     def __init__(self, paths):
         self.paths = paths
         self.csvkit = CsvKit()
-        self.dict_df = self.csvkit.try_convert_path_to_df(config.data_dict, Path('ref'))
-        self.data_df = self.csvkit.try_convert_path_to_df(config.raw_module_csv, config.raw_data_dir)
+        self.dict_df = self.csvkit.try_convert_path_to_df(
+            config.data_dict, Path('ref'))
+        self.data_df = self.csvkit.try_convert_path_to_df(
+            config.raw_module_csv, config.raw_data_dir)
         self.modules = config.modules
         self.field_dict = FieldDict(self.data_df, self.dict_df)
 
@@ -21,7 +25,7 @@ class BaseCSV:
     def output_base_csv_to_raw(self):
         base_df = self.filter_id_by_modules()
 
-        if base_df is not None:
+        if isinstance(base_df, DataFrame):
             self._save_and_report(base_df)
             
 
@@ -39,6 +43,19 @@ class BaseCSV:
         base_df = self.get_rows_at_least_one_reponse(checkbox_cols, other_cols)
 
         return base_df
+
+
+
+    def get_rows_at_least_one_reponse(self, checkbox_cols, other_cols):
+        is_row_all_zero_checkbox = self._are_all_checkboxes_zero(checkbox_cols)
+        is_row_all_na_other = self._are_all_text_fields_na(other_cols)
+        
+        completely_empty_rows = is_row_all_zero_checkbox & is_row_all_na_other
+        
+        data_df = cast(DataFrame, self.data_df)
+        rows_at_least_one_reponse = data_df[~completely_empty_rows].copy()
+        
+        return rows_at_least_one_reponse
 
 
 
@@ -63,21 +80,10 @@ class BaseCSV:
 
 
 
-    def get_rows_at_least_one_reponse(self, checkbox_cols, other_cols):
-        is_row_all_zero_checkbox = self._are_all_checkboxes_zero(checkbox_cols)
-        is_row_all_na_other = self._are_all_text_fields_na(other_cols)
-        
-        completely_empty_rows = is_row_all_zero_checkbox & is_row_all_na_other
-        
-        rows_at_least_one_reponse = self.data_df[~completely_empty_rows].copy()
-        
-        return rows_at_least_one_reponse
-
-
-
     def _are_all_checkboxes_zero(self, columns):
+        data_df = cast(DataFrame, self.data_df)
         if not columns:
-            entire_row_zero = pd.Series(True, index = self.data_df.index)
+            entire_row_zero = pd.Series(True, index = data_df.index)
             return entire_row_zero
         
         entire_row_zero = self._get_checkbox_all_zero(columns)
@@ -87,8 +93,9 @@ class BaseCSV:
 
 
     def _are_all_text_fields_na(self, columns):
+        data_df = cast(DataFrame, self.data_df)
         if not columns: # no other columns in module
-            entire_row_na = pd.Series(True, index = self.data_df.index)
+            entire_row_na = pd.Series(True, index = data_df.index)
             return entire_row_na
 
         entire_row_na = self._get_other_all_na(columns)
@@ -104,7 +111,8 @@ class BaseCSV:
 
 
     def _get_checkbox_all_zero(self, columns):
-        always_filled_cols_df = self.data_df[columns]
+        data_df = cast(DataFrame, self.data_df)
+        always_filled_cols_df = data_df[columns]
         is_zero_or_na_col = always_filled_cols_df.fillna(0) == 0
         entire_row_zero = (is_zero_or_na_col).all(axis=1)
 
@@ -113,7 +121,8 @@ class BaseCSV:
 
 
     def _get_other_all_na(self, columns):
-        other_cols_df = self.data_df[columns]
+        data_df = cast(DataFrame, self.data_df)
+        other_cols_df = data_df[columns]
         is_na_col = other_cols_df.isna()
         entire_row_na = is_na_col.all(axis=1)
 

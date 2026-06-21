@@ -5,12 +5,11 @@ import re
 import langdetect
 import pandas as pd
 
-langdetect.DetectorFactory.seed = 0 # not working?
-
 # local imports
 from .script import Script
 from . import config # global configs
 
+langdetect.DetectorFactory.seed = 0 # not working?
 os.environ['ARGOS_DEVICE_TYPE'] = 'cpu'
 
 

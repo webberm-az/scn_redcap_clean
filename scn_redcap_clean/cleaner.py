@@ -7,6 +7,7 @@ os.environ['SSL_CERT_FILE'] = certifi.where()
 from .archiver import Archiver
 from .csv_kit import CsvKit
 from .duplicates import Duplicates
+from .meds import Medications
 from .merging import Merging
 from .overrides import Overrides
 from .paths import Paths
@@ -71,7 +72,7 @@ class Cleaner:
         self.archiver.create_csvs_main_and_archive(df, config.name_02_main, self.paths.stages) 
         
         duplicates = Duplicates(df, self.paths, self.archiver)
-        duplicates.get_duplicates_for_review()
+        duplicates.create_duplicates_for_review()
 
         return
     
@@ -92,7 +93,9 @@ class Cleaner:
         duplicates = Duplicates(df, self.paths, self.archiver)
         df = duplicates.clean_duplicates(override_filename)
         self.archiver.create_csvs_main_and_archive(df, config.name_03_main, self.paths.stages)
-        
+        meds = Medications(df, self.paths, self.archiver)
+        meds.create_medications_for_review()
+
         return
 
 

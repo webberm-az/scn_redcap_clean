@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, List, Pattern, Any, Iterable
+from typing import Union, List, Pattern, Any, Iterable, cast
 
 import pandas as pd # external import
 
@@ -90,7 +90,7 @@ def match_rows_to_ref_id(
         df: pd.DataFrame, ref_df: pd.DataFrame, id_column: Any) -> pd.Series:
     df[id_column] = df[id_column].astype(ref_df[id_column].dtype)
         
-    return df[id_column]
+    return cast(pd.Series, df[id_column])
 
 
 
@@ -110,7 +110,7 @@ def append_to_txt(content: str, filename: Union[str, Path], output_dir: Path) ->
     file_path = get_txt_filepath(filename, output_dir)
     _append_txt(content, file_path)
     action = 'Text entry added'
-    console.message_path(action, file_path.name)
+    console.view_txt_file(action, file_path.name)
 
 
 

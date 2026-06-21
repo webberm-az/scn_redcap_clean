@@ -2,7 +2,9 @@ Metadata-Version: 2.4
 Name: scn_redcap_clean
 Version: 0.1.0
 Summary: Data cleaning and preprocessing for Hammer Lab REDCap SCN genomics data
-Requires-Dist: pandas
+Requires-Dist: pandas>=2.0.0
 Requires-Dist: argostranslate
 Requires-Dist: langdetect
 Requires-Dist: certifi
+Requires-Dist: ollama>=0.6.2
+Requires-Dist: biopython

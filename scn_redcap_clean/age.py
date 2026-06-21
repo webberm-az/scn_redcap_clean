@@ -5,7 +5,7 @@ from . import config
 
 class Age: 
     def __init__(self):
-        self.average_days_in_month = 365 / 12
+        self.ave_days_in_month = 365 / 12
 
 
     def get_age(self, df, units = ['days', 'months', 'years']):
@@ -15,26 +15,8 @@ class Age:
             if sub_date_col not in df.columns:
                 continue
             
-            if 'years' in unit_list:
-                df = self.get_age_in_years(df, sub_date_col, suffix)
-            
-            elif 'months' in unit_list:
-                df = self.get_age_in_months(df, sub_date_col, suffix)
-            
-            elif 'days' in unit_list:
-                df = self.get_age_in_days(df, sub_date_col, suffix)
-
-            extra_columns_to_drop = []
-            if 'days' not in unit_list:
-                extra_columns_to_drop.append(f'age_in_days{suffix}')
-            
-            if 'months' not in unit_list:
-                extra_columns_to_drop.append(f'age_in_months{suffix}')
-            
-            if 'years' not in unit_list:
-                extra_columns_to_drop.append(f'age_in_years{suffix}')
-
-            df = df.drop(columns = extra_columns_to_drop, errors = 'ignore')
+            df = self._get_age_in_unit_list(df, unit_list, sub_date_col, suffix)
+            df = self._cleaned_df(df, unit_list, suffix)
                 
         return df
 
@@ -53,7 +35,7 @@ class Age:
         if days_col not in df.columns:
             df = self.get_age_in_days(df, sub_date_col, suffix)
             
-        df[f'age_in_months{suffix}'] = (df[days_col] / self.average_days_in_month).round(1)
+        df[f'age_in_months{suffix}'] = (df[days_col] / self.ave_days_in_month).round(1)
         
         return df
 
@@ -70,8 +52,45 @@ class Age:
 
 
 
+    def _cleaned_df(self, df, unit_list, suffix):
+        extra_columns_to_drop = self._get_columns_to_drop(unit_list, suffix)
+        df = df.drop(columns = extra_columns_to_drop, errors = 'ignore')
+
+        return df
+
+
+
     def _prepare_dates(self, df, sub_date_col):
         df[config.birthdate] = pd.to_datetime(df[config.birthdate]).copy()
         df[sub_date_col] = pd.to_datetime(df[sub_date_col]).copy()
         
         return df
+
+
+
+    def _get_age_in_unit_list(self, df, unit_list, sub_date_col, suffix):
+        if 'years' in unit_list:
+                df = self.get_age_in_years(df, sub_date_col, suffix)
+            
+        elif 'months' in unit_list:
+            df = self.get_age_in_months(df, sub_date_col, suffix)
+        
+        elif 'days' in unit_list:
+            df = self.get_age_in_days(df, sub_date_col, suffix)
+
+        return df
+
+
+
+    def _get_columns_to_drop(self, unit_list, suffix):
+        extra_columns_to_drop = []
+        if 'days' not in unit_list:
+            extra_columns_to_drop.append(f'age_in_days{suffix}')
+        
+        if 'months' not in unit_list:
+            extra_columns_to_drop.append(f'age_in_months{suffix}')
+        
+        if 'years' not in unit_list:
+            extra_columns_to_drop.append(f'age_in_years{suffix}')
+
+        return extra_columns_to_drop

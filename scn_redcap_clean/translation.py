@@ -1,4 +1,5 @@
 import pandas as pd # external imports
+from typing import cast
 
 # local imports
 from .translator import Translator
@@ -23,7 +24,7 @@ class Translation:
         self.csvkit = CsvKit()
         self.detect = Detector(self.packages)
         self.archive_filename = archive_filename
-        self.df = None
+        self.df = pd.DataFrame()
         self.version = Version(self.paths.archive)
 
 
@@ -38,8 +39,8 @@ class Translation:
         (1 file for record keeping and 1 file for manual override editting)
         '''
         # df with added english '_orig' cols, _needs_trans col, and translated cols_to_translate
-        self.df = self._get_translation_df(file_path, cols_to_translate)
-        if self._is_no_translations_needed():
+        translation_df = self._get_translation_df(file_path, cols_to_translate)
+        if self._is_no_translations_needed(translation_df):
             return pd.DataFrame() # if no translations detected returns empty df
 
         self.packages.print_language_download_summary() 
@@ -73,8 +74,8 @@ class Translation:
 
 
 
-    def _is_no_translations_needed(self):
-        if '_needs_trans' not in self.df.columns or not self.df['_needs_trans'].any():
+    def _is_no_translations_needed(self, df):
+        if '_needs_trans' not in df.columns or not df['_needs_trans'].any():
             print('No foreign languages detected.')
             return True
         
@@ -83,7 +84,8 @@ class Translation:
 
 
     def _get_translations_for_review_df(self, cols_to_translate):
-        translated_df = self._get_translated_rows_only_df(cols_to_translate)
+        translated_df = cast(
+            pd.DataFrame, self._get_translated_rows_only_df(cols_to_translate))
         utils.add_column_if_dne('override_explanation', translated_df)
 
         return translated_df

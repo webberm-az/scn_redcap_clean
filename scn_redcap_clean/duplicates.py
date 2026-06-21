@@ -18,7 +18,7 @@ class Duplicates:
         self.shared_col = 'flag_shared_birthdate'
 
 
-    def get_duplicates_for_review(
+    def create_duplicates_for_review(
             self, 
             main_filename = 'duplicates_manual_override', 
             archive_filename = 'duplicates_for_review'):
@@ -28,24 +28,20 @@ class Duplicates:
         Duplicates are identified by dup_col w/ 'birthdate' as default. 
         '''
         final_duplicates_df = self._get_duplicates_for_review_df()
+        filename_get_version = config.name_02_main
 
-        # outputs csvs to review folder and a version to archive
-        self.archiver.create_csvs_main_and_archive(
-            final_duplicates_df, 
-            main_filename, 
-            self.paths.review, 
-            archive_filename,
-            filename_get_version = config.name_02_main)
-        
-        content = 'Additional explanations: \n'
-        utils.write_txt_file(content, main_filename, self.paths.overrides)
+        # outputs csvs to review folder, a version to archive, and txt to overrides
+        self.archiver.create_files_review_and_archive(
+            final_duplicates_df, main_filename, archive_filename, filename_get_version)
 
         return final_duplicates_df
 
 
 
     def clean_duplicates(self, override_filename):
-        ''' Removes duplicates in dup_col keeping submission with highest id_col value '''
+        ''' 
+        Removes duplicates in dup_col keeping submission with highest id_col value 
+        '''
         self.try_manual_override(override_filename)
 
         shared_birthdate_ids = self._get_shared_bday_ids()

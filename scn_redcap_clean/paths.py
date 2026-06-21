@@ -1,6 +1,9 @@
 from pathlib import Path
 from typing import Union
 
+from . import console
+
+
 
 class Paths:
     
@@ -76,6 +79,6 @@ class Paths:
     def _create_raw_dir_and_alert(self):
         self.raw.mkdir(parents = True, exist_ok = True)
         console.alert_missing_file('Raw data directory', self.raw)
-        print(f'A raw folder has been created. Add your data before proceeding. \n')
+        print('A raw folder has been created. Add your data before proceeding. \n')
 
     

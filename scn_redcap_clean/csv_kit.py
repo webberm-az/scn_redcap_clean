@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Optional, Union, List, Any
 
 import pandas as pd # external import
+from typing import cast
 
 # local imports
 from . import utils
@@ -107,7 +108,7 @@ class CsvKit:
             set_config: Any) -> None:
         clean_filename = self.add_suffix(filename)
         raw_path = Path(dir) / f'{clean_filename}'
-        console.file_path(dir, role_name, set_config, raw_path)
+        console.alert_missing_config_file(dir, role_name, set_config, str(raw_path))
 
 
 
@@ -153,7 +154,11 @@ class CsvKit:
 
     def _try_read_csv(self):
         try:
-            df = pd.read_csv(self.main_path)
+            if self.main_path is None:
+                return None
+
+            path = cast(Path, self.main_path)
+            df = pd.read_csv(path)
             return df
         
         except Exception:

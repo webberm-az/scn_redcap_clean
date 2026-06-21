@@ -47,6 +47,23 @@ class Version:
         return max_version
 
 
+
+    def get_version_df(self, version, fname):
+        filepath = self.dir_path / f'{fname}_v{version:03d}.csv'
+        if filepath.exists():
+            return pd.read_csv(filepath)
+
+
+
+    def try_last_version_path(self, fname):
+        try:
+            last_version_path = self.get_last_version_path(fname)
+            last_version_df = pd.read_csv(last_version_path)
+            return last_version_df
+        except Exception:
+            return None
+
+
     
     def _if_identical_and_get_version(self, current_df, fname, max_version):
         if max_version == 0 or max_version is None:
@@ -79,23 +96,3 @@ class Version:
             pass
 
         return False
-
-
-
-    def get_version_df(self, version, fname):
-        filepath = self.dir_path / f'{fname}_v{version:03d}.csv'
-        if filepath.exists():
-            return pd.read_csv(filepath)
-
-
-
-    def try_last_version_path(self, fname):
-        try:
-            last_version_path = self.get_last_version_path(fname)
-            last_version_df = pd.read_csv(last_version_path)
-            return last_version_df
-        except Exception:
-            return None
-
-
-

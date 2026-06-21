@@ -1,4 +1,6 @@
-pandas
+pandas>=2.0.0
 argostranslate
 langdetect
 certifi
+ollama>=0.6.2
+biopython

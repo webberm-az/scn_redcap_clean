@@ -17,7 +17,6 @@ def alternative(message):
     print("\n ``Alternatively, {message} \n")
 
 
-
 #       Error
 
 def error(message):

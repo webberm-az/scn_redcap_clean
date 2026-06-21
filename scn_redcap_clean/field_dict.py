@@ -1,6 +1,7 @@
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, cast
 
 import pandas as pd # external import
+from pandas import DataFrame
 
 from . import config # global configs
 
@@ -17,12 +18,14 @@ class FieldDict:
         type: str, 
         match_type: bool = True, 
         dict_df: Optional[pd.DataFrame] = None)-> List[str]:
-        dict_df = self.dict_df if dict_df is None else dict_df
-        is_type = dict_df[config.field_type_column] == type
+        current_dict_df = (
+            cast(DataFrame, self.dict_df) if dict_df is None else dict_df)
+        is_type = current_dict_df[config.field_type_column] == type
         col_type = is_type if match_type else ~is_type
         
-        col_match_list = dict_df[col_type][config.col_names_column].tolist()
-        col_match = [col for col in col_match_list if col in self.data_df.columns]
+        col_match_list = current_dict_df[col_type][config.col_names_column].tolist()
+        data_df = cast(DataFrame, self.data_df)
+        col_match = [col for col in col_match_list if col in data_df.columns]
         
         return col_match
 
