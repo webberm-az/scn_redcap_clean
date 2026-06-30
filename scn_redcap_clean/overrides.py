@@ -1,52 +1,62 @@
-import pandas as pd
-
+from .archiver import Archiver
+from .csv_kit import CsvKit
 from . import utils
-from . import config # global configs
 
 
 class Overrides:
     
-    def __init__(self, override_csv_path, df):
-        self.df = df.copy()
-        self.id_col = config.merge_on_id_column
-        self.override_csv_path = override_csv_path
-        self.override_df = self._prep_override_df()
-        self.shared_cols = utils.get_cols_if_in_df(self.df, self.override_df, self.id_col)
+    def __init__(self, step_number, Class, delegate):
+        self.paths = delegate.paths
+        self.archiver = Archiver(self.paths)
+        self.step_number = step_number
+        self.Class_instance = Class
+        
+        self.process_name = self.Class_instance.__name__.lower()
+        self.override_csv_name = f'{self.process_name}_manual_override'
+
+        self.csvkit = CsvKit()
+        self.df = self.get_last_step_df()
+        self.override_csv_path = self.csvkit.if_exists_path(
+            self.override_csv_name, self.paths.overrides)
+        
+        self.archiver.create_archive_overrides(self.override_csv_name)
+
+
+    def get_last_step_df(self):
+        last_step = utils.get_step_config(self.step_number - 1)
+        df = self.csvkit.try_convert_path_to_df(last_step, self.paths.steps)
+
+        return df
 
 
 
-    def override(self):
-        '''
-        Returns merged_raw with translations replacing of foreign text
-        '''
-        self.append_override_rows()
-
-        return self.df
-
-
-
-    def append_override_rows(self):
-        ''' Adds all rows in override_csv to df '''
-        self.df = self.df.set_index(self.id_col)
-        temp_override = self.override_df.set_index(self.id_col)
-        self.df.update(temp_override[self.shared_cols])
-        self.df = self.df.reset_index()
+    # in Cleaner for Translations, Duplicates, Medication & Genomics
+    def try_run_step(self):
+        df = self.try_input_override_df()
+        self.create_step_main_and_archive(df)
+        
+        return df
 
 
 
-    def _prep_override_df(self):
-        ''' Prepares the override dataframe by reading the CSV and filtering rows '''
-        override_df = self._dropna_id_col()
-        # ensure df and override_df 'id_col's are the same type for comparison
-        override_df[self.id_col] = override_df[self.id_col].astype(self.df[self.id_col].dtype)
-
-        return override_df
-    
+    def try_input_override_df(self):
+        df = self.df
+        method = self._get_class_instance_method('try_input_override_df')
+        df = method()
+        
+        return df
 
 
-    def _dropna_id_col(self):
-        override_df = pd.read_csv(self.override_csv_path)
-        # drop rows w/ NA id_col in override file for efficiency
-        override_df = override_df.dropna(subset = [self.id_col])
 
-        return override_df
+    def create_step_main_and_archive(self, df):
+        cur_step = utils.get_step_config(self.step_number)
+        self.archiver.create_csvs_main_and_archive(df, cur_step, self.paths.steps)
+
+
+
+    def _get_class_instance_method(self, method):
+        Class_instance = self.Class_instance
+        instance = Class_instance(self.df, self)
+        method = getattr(instance, method)
+
+        return method

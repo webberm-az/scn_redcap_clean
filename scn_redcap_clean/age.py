@@ -9,8 +9,7 @@ class Age:
 
 
     def get_age(self, df, units = ['days', 'months', 'years']):
-
-        unit_list = [units]
+        unit_list = [units] if isinstance(units, str) else units
         for sub_date_col, suffix in config.module_suffix_age.items():
             if sub_date_col not in df.columns:
                 continue

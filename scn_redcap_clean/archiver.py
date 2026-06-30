@@ -1,7 +1,5 @@
 from pathlib import Path
 
-import pandas as pd # external import
-
 # local import
 from .csv_kit import CsvKit
 from . version import Version
@@ -11,33 +9,22 @@ from . import console
 
 class Archiver:
     
-    def __init__(self, archive_path = None, review_path = None, override_path = None):
+    def __init__(self, paths):
+
+        self.paths = paths
         self.csvkit = CsvKit()
-
-        if archive_path is None:
-            self.archive_path = Path('archive')
-        else:
-            self.archive_path = Path(archive_path)
-        
-        if review_path is None:
-            self.review_path = Path('review')
-        else:
-            self.review_path = Path(review_path)
-
-        if override_path is None:
-            self.override_path = Path('overrides')
-        else:
-            self.override_path = Path(override_path)
-
-        self.version = Version(self.archive_path)
+        self.version = Version(self.paths.archive)
 
     
     # cleaner
-    def create_archive_overrides(self, filename, main_path = Path('overrides')):
+    def create_archive_overrides(self, filename, main_path = None):
         '''
         For manual override archiving
         Copies CSVs from main_path (with override as default) as read-only in archive folder
         '''
+        if main_path is None:
+            main_path = self.paths.overrides
+        
         main_path = Path(main_path)
         df = self._get_overrides_df(filename, main_path)
         if df is None: 
@@ -51,25 +38,21 @@ class Archiver:
 
     # cleaner
     def create_csvs_main_and_archive(
-            self, 
-            df, 
-            main_filename, 
-            main_path, 
-            archive_filename = None, 
-            filename_get_version = None):
+            self, df, main_csvname, main_path, 
+            archive_csvname = None, csvname_get_version = None):
         '''
         Create CSVs editable version to main_path and read-only to archive folder
         '''
-        if archive_filename is None:
-            archive_filename = main_filename
+        if archive_csvname is None:
+            archive_csvname = main_csvname
 
-        self.csvkit.create_main(df, main_filename, Path(main_path))
+        self.csvkit.create_main(df, main_csvname, Path(main_path))
         self.path = self.csvkit.main_path
 
-        if filename_get_version is not None:
-            filename_get_version = self.version.get_max_version(filename_get_version)
+        if csvname_get_version is not None:
+            csvname_get_version = self.version.get_max_version(csvname_get_version)
         
-        self.create_archive_csv_if_needed(archive_filename, df, filename_get_version)
+        self.create_archive_csv_if_needed(archive_csvname, df, csvname_get_version)
 
         return self.path
 
@@ -86,24 +69,18 @@ class Archiver:
         return last_version_translations_review_df
 
 
-    def create_files_review_and_archive(
-            self, 
-            df, 
-            main_filename, 
-            archive_filename = None, 
-            filename_get_version = None):
+    def create_csvs_review_and_archive(self, df, step, csvname_get_version = None):
         '''
         Create CSVs editable version to main_path and read-only to archive folder
         '''
+        main_csv_name = f'{step}_manual_override'
+        archive_csv_name = f'{step}_for_review'
+
         self.create_csvs_main_and_archive(
-            df, 
-            main_filename, 
-            self.review_path, 
-            archive_filename,
-            filename_get_version)
+            df, main_csv_name, self.paths.review, archive_csv_name, csvname_get_version)
         
         content = 'Additional explanations: \n'
-        utils.write_txt_file(content, main_filename, self.override_path)
+        utils.write_txt_file(content, main_csv_name, self.paths.overrides)
 
 
 
@@ -124,24 +101,24 @@ class Archiver:
         if version is None:
             version = self.version.get_output_version(fname, df)
 
-        filepath = self.archive_path / f'{fname}_v{version:03d}.csv'
+        filepath = self.paths.archive / f'{fname}_v{version:03d}.csv'
 
         return filepath
 
 
         
-    def create_archive_csv_if_changed(self, filename, df, path):
+    def create_archive_csv_if_changed(self, csvname, df, path):
         if not path.exists():
             self.csvkit.create_read_only(df, path)
         else:
-            print(f"\nNo changes detected for '{filename}'.  Reusing existing archive copy.")
+            print(f"\nNo changes detected for '{csvname}'. Reusing existing archive copy.")
 
 
 
     def _get_overrides_df(self, filename, main_path):
         csv_path = self.csvkit.if_exists_path(filename, main_path)
         try:
-            df = pd.read_csv(csv_path) if csv_path else None
+            df = self.csvkit.robust_read_csv(csv_path) if csv_path else None
             return df
         except Exception:
             return None

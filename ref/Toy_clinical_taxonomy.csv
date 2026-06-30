@@ -1,0 +1,47 @@
+Type,functional_class,Abbr.,Generic Name,Alias,Brand Name,Class,2nd Mechanism of Action,Mechanism Details,Drug Company Description,,Source
+Medication,Sodium Channel Blockers,CBZ,Carbamazepine,,"Tegretol, Carbatrol",AED/Carboxamide,-,Use- and voltage-dependent blockade of neuronal volatage-gated sodium channels.,Effective for focal seizures and primary tonic clonic and secondarily generalized tonic clonic seizures. May worsen absence and myoclonic seizures.,,https://scn8a.net/medication-guide/
+Medication,Sodium Channel Blockers,LAC,Lacosamide,,Vimpat,AED,-,Blocks voltage-gated sodium channels via a selective effect on slow inactivation of channels; may also relate to interaction with collapsing-response mediator protein-2.,Add-on therapy for focal seizures with or without secondary generalization. Monotherapy in children 17 years older.8,,https://scn8a.net/medication-guide/
+Medication,Sodium Channel Blockers,LTG,Lamotrigine,,Lamictal,AED,-,Use- and voltage-dependent blockade of neuronal voltage-gated sodium channels,Monotherapy and add-on therapy for focal and generalized seizures. Also used for seizures associated with Lennox-Gastaut syndrome. Valproate adjunct for children 2-12 years of age.,,https://scn8a.net/medication-guide/
+Medication,Sodium Channel Blockers,OXC,Oxcarbazepine,,Trileptal,AED/Carboxamide,-,"Use- and voltage-dependent blockade of voltage-gated sodium channels, may increase potassium conductance, reduces presynaptic glutamate release, possibly by blocking high threshold calcium channels.",Add-on therapy for Lennox-Gastaut syndrome.,,https://scn8a.net/medication-guide/
+Medication,Sodium Channel Blockers,PHT,Phenytoin,,Dilantin,AED,-,Use- and voltage-dependent blockade of neuronal voltage-gated sodium channels.,Effective for focal and tonic clonic seizures. Ineffective against absences. Blood testing is essential to guide the doses.,,https://scn8a.net/medication-guide/
+Medication,Sodium Channel Blockers,RFM,Rufinamide,,"Inovelon, Banzel",Carboxamide,-,Blockage of neuronal sodium channel.,Add-on therapy for Lennox-Gastaut syndrome.,,https://scn8a.net/medication-guide/
+Medication,Sodium Channel Blockers,VPA,Valproate,,"Depakote, Epilim",AED,-,Use- and voltage-dependent blockage of neuronal voltage-gated sodium channels; possible blockage of T-type calcium channels; increases synthesis and release of GABA.,Effective for all types of seizures.,,https://scn8a.net/medication-guide/
+Medication,GABAergic,CLB,Clobazam,,"Frisium, ONFI",BZD,-,"Enhanced GABAergic neurotransmission, binds at benzodiazepine site",Add-on therapy.,,https://scn8a.net/medication-guide/
+Medication,GABAergic,CLZ,Clonazepam,,-,BZD,-,"Binds to benzodiazepine receptor, enhances GABA effects","Effective for focal, tonic clonic, myoclonic and absence seizures.",,https://scn8a.net/medication-guide/
+Medication,GABAergic,FBM,Felbamate,,Feltabol,AED,-,Inhibits NMDA glutamate receptor mediated activity by modulating glycine binding sites on the receptor; blocks voltage activated sodium channels; possibly increases GABAA receptor activity.,Mono- or add-on theraphy for Lennox-Gastaut syndrome.,,https://scn8a.net/medication-guide/
+Medication,GABAergic,NTZ,Nitrazepam,,-,BZD,-,"Binds to benzodiazepine receptor, enhances GABA effects.",Effective for infantile spasms only.,,https://scn8a.net/medication-guide/
+Medication,GABAergic,PBT,Phenobarbital,,-,BARB/AED,-,Increases the duration of opening of GABA mediated chloride channels by binding to an allosteric site for GABA receptor.,Effective for focal and tonic clonic seizures.,,https://scn8a.net/medication-guide/
+Medication,GABAergic,PRM,Primidone,,Mysoline,AED,-,"Metabolized to phenobarbitol, acts on GABA receptors.",Primidone is not often used in children. Effective for all seizure types except typical absences,,https://scn8a.net/medication-guide/
+Medication,GABAergic,STP,Stiripentol,,Diacomit,Aromatic Allytic Alcohol,-,"Increases GABA transmission through a barbiturate like effect, increases opening of GABAA receptors in the hippocampus, possibly also increases GABAA in brain through interfering with its uptake and metabolism.",Add-on therapy for tonic clonic seizures for children with severe myoclonic epilepsy in infancy (SMEI or Dravet syndrome) where other treatment has not worked.,,https://scn8a.net/medication-guide/
+Medication,GABAergic,TGB,Tiagabine,,Gabitril,AED,-,Prevents GABA re-uptake by binding and inhibiting GAT1 thus prolonging GABA in the synapse.,Children >12 add on for partial seizures.,,https://scn8a.net/medication-guide/
+Medication,GABAergic,VBG,Vigabatrin,,Sabril,AED,-,Increases GABA brain concentrations through irreversible inhibition of GABA transaminase.,Effective for focal seizures with or without secondarily generalized seizures where other treatment has not worked. Used for West syndrome with Tuberous Sclerosis. May worsen absence and myoclonic seizures. Not widely prescribed due to possible side effects.,,https://scn8a.net/medication-guide/
+Medication,Calcium Channel Blockers,ETX,Ethosuximide,,Zarontin,AED,-,Binds to and blocks T-type calcium channels.,Effective for typical and atypical absences.,,https://scn8a.net/medication-guide/
+Medication,Calcium Channel Blockers,GBP,Gabapentin,,Neurontin,AED/Analgesic,-,Inhibits calcium currents and neurotransmitter release by binding to the alpha2-delta subunit of high voltage-activated calcium channels,Monotherapy and add-on therapy for focal seizures with or without secondary generalization (where other treatment has not worked). May make myoclonic and absence seizures worse,,https://scn8a.net/medication-guide/
+Medication,Calcium Channel Blockers,ZNS,Zonisamide,,Zonegran,AED/Sulfa,-,Blocks voltage dependent neuronal sodium and T-type calcium channels.,Children >16. Add-on therapy for focal seizures with or without secondary generalization.,,https://scn8a.net/medication-guide/
+Medication,Binds to Synaptic Vesicle Protein 2A,BRV,Brivaracetam,,(not FDA approved),Racetam,-,Binds to synaptic vesicle protein 2A.,-,,https://scn8a.net/medication-guide/
+Medication,Binds to Synaptic Vesicle Protein 2A,LEV,Levetiracetam,,Keppra,AED,CCB,Binds to synaptic vesicle protein 2A.,Emonotherapy and add-on therapy for focal seizures with or without secondary generalization. Add-on therapy for myoclonic seizures in Juvenile Myoclonic Epilepsy.,,https://scn8a.net/medication-guide/
+Medication,Other/Multiple,AZA,Acetazolamide,,-,CAI,-,Carbonic anhydrase inhibitor.,"Effective for focal, tonic clonic and absence seizures.",,https://scn8a.net/medication-guide/
+Medication,Other/Multiple,CLO,Clonidine,,-,Antihypertensive,alpha2 agonist,-,-,,https://scn8a.net/medication-guide/
+Medication,Other/Multiple,MDZ,Midazolam,,-,BZD,-,-,-,,https://scn8a.net/medication-guide/
+Medication,Other/Multiple,PER,Perampanel,,Fycompa,AED,GLY,Non-competitive AMPA receptor antagonist.,Mono-therapy for children >12 years for partial onset seizures.,,https://scn8a.net/medication-guide/
+Medication,Other/Multiple,TPM,Topiramate,,Topamax,AED,"GABA, GLY, SCB","Blockade of neuronal sodium and calcium channels, augmenting GABA activity at some GABAA receptor subtypes, inhibition at the AMPA/kainate subtype of the glutamte receptor.","Used for focal seizures with or without secondary generalization and tonic clonic seizures, where other treatment has not worked. Topiramate has a licence for monotherapy but is not widely used as a first line drug.",,https://scn8a.net/medication-guide/
+Medication,Other/Multiple,Cenobamate,Cenobamate,,Xcopri,AED,"GABA,SCB",Enhances GABAAreceptor-mediated inhibition and inhibits persistent sodium currents. Also modulates voltage-gated sodium channels by promoting the inactivated state.,Approved for partial-onset seizures in adults. Has shown broad-spectrum efficacy and may reduce interictal epileptiform discharges more than other AEDs. Marketed by SK Life Science.,,https://scn8a.net/medication-guide/
+Medication,Steroids,ACTH,ACTH,,-,Steroid,Steroid,-,-,,https://scn8a.net/medication-guide/
+Medication,Steroids,PRD,Prednisolone,,-,Steroid,Steroid,,,,https://scn8a.net/medication-guide/
+,,,,,,,,,,,
+Supplement,,,Multivitamin,multi,,,,,,,
+Supplement,,,Vitamin A,,,,,,,,
+Supplement,,,Vitamin B,"Vitamin B12, cyanocobalamin, methylcobalamin",,,,,,,
+Supplement,,,Vitamin C,,,,,,,,
+Supplement,,,Vitamin D,Vitamin D3,,,,,,,
+Supplement,,,Vitamin E,,,,,,,,
+Supplement,,,Vitamin K,,,,,,,,
+Supplement,,,Omega 3,Omega-3,,,,,,,
+Supplement,,,Calcium,,,,,,,,
+Supplement,,,Iodine,,,,,,,,
+Supplement,,,Iron,,,,,,,,
+Supplement,,,Zinc,,,,,,,,
+Supplement,,,Melatonin,,,,,,,,
+Supplement,,,CBD Oil,,,,,,,,
+Supplement,,,Coenzyme Q10,,,,,,,,
+Supplement,,,,,,,,,,,

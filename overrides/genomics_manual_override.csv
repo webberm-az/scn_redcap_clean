@@ -1,0 +1,12 @@
+participant_id,from_column,raw_text,variant_type,recommended_term,ollama_confidence,override_explanation
+1824.888,genomic_text1,SCN8A,,,0,
+1828,genomic_text1,?,,,0,
+1828,genomic_p._text2,?,,,0,
+1810,genomic_text1,3333G>A. scn8a,cDNA,c.3333G>A,73.78,not a protein
+1824.888,genomic_p._text2,p.(G1451S),protein,p.G1451S,75.7,
+1815.888,genomic_p._text2,(N984K) SCN8A,protein,p.N984K,79.89,
+1810,genomic_p._text2,p.E1483K,protein,p.E1483K,80.98,
+1826.888,genomic_p._text2,pE1483K,protein,p.E1483K,81.12,
+1826.888,genomic_text1,c2345+1T>G,cDNA,c.2345+1T>G,85.04,
+1815.888,genomic_text1,123G>C p.(N984K),protein,p.N984K,85.39,
+1815.888,genomic_text1,123G>C p.(N984K),cdna,c.123G>C,85.39,

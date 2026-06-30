@@ -1,9 +1,0 @@
-participant_id,from_column,raw_text,original_term,standardized_name,category,ollama_confidence,override_explanation
-1810,toy_meds,"Metoclopramida 10mg, Fenobarbital 100mg",,,,0.0,
-1826,toy_meds,"Diazepam, CBD oil",,,,0.0,
-1810,toy_supps,"Vitamina B12, Ômega 3",,,,0.0,
-1826,toy_supps,Omega-3,,,,0.0,
-1828,toy_supps,Acetazolamide 250mg,,,,0.0,
-1815,toy_meds,nan,,,,100.0,
-1828,toy_meds,nan,,,,100.0,
-1815,toy_supps,nan,,,,100.0,

@@ -1,0 +1,18 @@
+participant_id,from_column,raw_text,original_term,recommended_term,ollama_confidence,override_explanation,add_to_ref
+1826.888,toy_supps,Óleo de peixe (omega 3),Óleo de peixe (omega 3),Omega 3,66.06,updated to match generic map term,MISSING IN REF
+1828,toy_meds,Acetazolamide 250mg,Acetazolamide,Acetazolamide,74.03,,
+1824.888,toy_meds,卡马西平片 200mg,卡马西平片,Carbamazepine,75.52,,
+1826.888,toy_meds,"Diazepam, CBD oil",Diazepam,Diazepam,77.91,,MISSING IN REF
+1826.888,toy_meds,"Diazepam, CBD oil",CBD oil,CBD Oil,77.91,,
+1815.888,toy_supps,vitamina D e melatonina,melatonina,Melatonin,83.57,,
+1815.888,toy_supps,vitamina D e melatonina,Vitamina D,Vitamin D,83.57,,
+1828,toy_supps,"Vitamin C, Coenzyme Q10",Coenzyme Q10,Coenzyme Q10,84.46,,
+1828,toy_supps,"Vitamin C, Coenzyme Q10",Vitamina C,Vitamin C,84.46,,
+1810,toy_supps,"Vitamina B12, Ômega 3",Vitamina B12,Vitamin B12,84.57,,
+1810,toy_supps,"Vitamina B12, Ômega 3",Ômega 3,Omega 3,84.57,,
+1824.888,toy_supps,"维生素D3, 褪黑素",维生素D3,Vitamin D3,84.75,,
+1824.888,toy_supps,"维生素D3, 褪黑素",褪黑素,Melatonin,84.75,,
+1810,toy_meds,"Metoclopramida 10mg, Fenobarbital 100mg",Fenobarbital,Phenobarbital,86.55,,
+1810,toy_meds,"Metoclopramida 10mg, Fenobarbital 100mg",Metoclopramida,Metoclopramide,86.55,,MISSING IN REF
+1815.888,toy_meds,ondansetrona e levetiracetam para crises,levetiracetam,Levetiracetam,87.85,,
+1815.888,toy_meds,ondansetrona e levetiracetam para crises,ondansetrona,Ondansetron,87.85,,MISSING IN REF

@@ -1,9 +1,9 @@
 # local imports
-from . import utils
-from . import config # global configs
+from . import config, console, utils # global configs
+from .archiver import Archiver 
+from .base_csv import BaseCSV
 from .csv_kit import CsvKit
 from .field_dict import FieldDict
-from . import console
 
 
 class Merging:
@@ -12,20 +12,33 @@ class Merging:
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
         self.paths = paths
+        self.archiver = Archiver(self.paths)
+        self.text_cols = config.language_text_columns
+
+
+
+    def try_run_step_01(self, csv_list):
+        df = self.get_merged_module_df(csv_list)
+        self.archiver.create_csvs_main_and_archive(
+            df, config.name_01_main, self.paths.steps)
+        
+        return df    
 
 
     def get_merged_module_df(
-            self, 
-            csv_list, 
-            text_columns = utils.auto, 
-            merge_on_file = None, 
-            drop_na_col = True):
+            self, csv_list, merge_on_file = 'base'):
         '''
         Merges a list of CSVs on 'participant_id' and removes 
         rows where 'birthdate' is blank or missing
         '''
+        if not csv_list:
+            console.error('No data files in raw data folder to merge')
+            return None
+        
+        BaseCSV(self.paths).output_base_csv_to_raw()
+
         merged_df = self.merge_csvs(csv_list, merge_on_file)
-        self._try_get_active_text_cols(merged_df, text_columns)
+        self._try_get_active_text_cols(merged_df)
         existing_filter_columns = self.get_existing_filter_columns(merged_df)
 
         if existing_filter_columns: 
@@ -34,7 +47,7 @@ class Merging:
             console.error_missing(
                 config.filter_columns, 'column(s) must be in at least 1 csv file.')
 
-        if drop_na_col:
+        if config.drop_na_col:
             merged_df = self._drop_entirely_empty_columns(merged_df)
             
         return merged_df
@@ -164,19 +177,30 @@ class Merging:
 
 
 
-    def _try_get_active_text_cols(self, merged_df, text_cols):
-        if text_cols is utils.auto:
-            text_cols = self._try_get_auto_text_cols(merged_df)
-            self._get_active_auto_text_cols(text_cols)
-        elif text_cols is None:
-            self.active_text_columns = []
+    def _try_get_active_text_cols(self, merged_df):
+        if self.text_cols is None:
+            self.language_columns = []
+
+        elif type(self.text_cols) is dict and self.text_cols.get("id") == "utils.auto":
+            detected_cols = self._try_get_auto_text_cols(merged_df)
+            self._get_active_auto_text_cols(detected_cols)
+
         else:
-            self.active_text_columns = [text_cols] if isinstance(text_cols, str) else list(text_cols)
+            self._format_text_cols()
 
 
-    def _get_active_auto_text_cols(self, text_cols):
+
+    def _format_text_cols(self):
+        if type(self.text_cols) is str:
+            self.language_columns = [self.text_cols]
+        else:
+            self.language_columns = list(self.text_cols)
+
+
+
+    def _get_active_auto_text_cols(self, detected_cols):
         not_active = config.no_translate_cols
-        self.active_text_columns = [col for col in text_cols if col not in not_active]
+        self.language_columns = [col for col in detected_cols if col not in not_active]
 
 
 
@@ -184,22 +208,22 @@ class Merging:
         dict_df = self.csvkit.try_convert_path_to_df(config.data_dict, self.paths.ref)
 
         if dict_df is not None:
-            text_cols = self._get_auto_text_cols(merged_df, dict_df)
+            self.text_cols = self._get_auto_text_cols(merged_df, dict_df)
         else:
             self._alert_instruct()
-            text_cols = []
-            self.active_text_columns = []
+            self.text_cols = []
+            self.language_columns = []
         
-        return text_cols
+        return self.text_cols
                 
 
 
     def _get_auto_text_cols(self, merged_df, dict_df):
         field_dict = FieldDict(data_df = merged_df, dict_df = dict_df)
-        text_cols = field_dict.get_columns_by_type(
+        self.text_cols = field_dict.get_columns_by_type(
             type = 'text', match_type = True)
 
-        return text_cols
+        return self.text_cols
 
 
 
@@ -237,14 +261,14 @@ class Merging:
 
 
     def _if_active_text_col_add_new(self, col, new_col_name):
-        if hasattr(self, 'active_text_cols') and col in self.active_text_columns:
+        if col in self.language_columns:
             self._if_not_in_active_append(new_col_name)
 
 
 
     def _if_not_in_active_append(self, new_col_name):
-        if new_col_name not in self.active_text_columns:
-            self.active_text_columns.append(new_col_name)  
+        if new_col_name not in self.language_columns:
+            self.language_columns.append(new_col_name)  
 
 
 

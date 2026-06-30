@@ -2,59 +2,65 @@ import pandas as pd
 
 # local imports
 from . import config # global configs
+from .archiver import Archiver
 from .csv_kit import CsvKit
 from . import utils
 from . import console
 
 
 class Duplicates:
-    def __init__(self, df, paths, archiver):
+    def __init__(self, df, delegate):
         self.df = df
+        self.paths = delegate.paths
+        self.archiver = Archiver(self.paths)
+        self.csvkit = CsvKit()
         self.dup_col = config.filter_columns
         self.id_col = config.merge_on_id_column
-        self.paths = paths
-        self.archiver = archiver
-        self.csvkit = CsvKit()
-        self.shared_col = 'flag_shared_birthdate'
+        self.flag_shared_col = 'flag_shared_birthdate'
 
 
-    def create_duplicates_for_review(
-            self, 
-            main_filename = 'duplicates_manual_override', 
-            archive_filename = 'duplicates_for_review'):
+
+    def create_duplicates_for_review(self):
         ''' 
         Outputs csv files for duplicates review 
         (1 file for record keeping and 1 file for manual override editting)
         Duplicates are identified by dup_col w/ 'birthdate' as default. 
         '''
-        final_duplicates_df = self._get_duplicates_for_review_df()
-        filename_get_version = config.name_02_main
+        df = self._get_duplicates_for_review_df()
+        get_version = config.name_02_main
 
         # outputs csvs to review folder, a version to archive, and txt to overrides
-        self.archiver.create_files_review_and_archive(
-            final_duplicates_df, main_filename, archive_filename, filename_get_version)
+        self.archiver.create_csvs_review_and_archive(df, 'duplicates', get_version)
 
-        return final_duplicates_df
-
+        return df
 
 
-    def clean_duplicates(self, override_filename):
+
+    def try_input_override_df(self):
         ''' 
         Removes duplicates in dup_col keeping submission with highest id_col value 
         '''
-        self.try_manual_override(override_filename)
-
-        shared_birthdate_ids = self._get_shared_bday_ids()
-
-        self.df = self._drop_duplicates_and_sort(shared_birthdate_ids)
+        
+        self.try_manual_override('duplicates_manual_override')
+        df = self.clean_duplicates()
+        self.df = self._drop_override_note_cols(df)
         
         return self.df
 
 
 
+    def clean_duplicates(self):
+        shared_birthdate_ids = self._get_flagged_ids()
+        df = self._drop_duplicates(shared_birthdate_ids)
+        self.df = df.sort_values(self.id_col).reset_index(drop = True)
+
+        return self.df 
+
+
+
     def try_manual_override(self, override_filename):
         override_csv_path = self.csvkit.if_exists_path(
-            override_filename, self.paths.overrides)
+            override_filename, self.paths.overrides)        
         if override_csv_path is not None:
             self.df = self.csvkit.append_override_rows(override_csv_path, self.df)
         else:
@@ -64,7 +70,8 @@ class Duplicates:
     def _get_duplicates_for_review_df(self):
         sorted_duplicates_df = self._get_sorted_duplicates()
         utils.add_column_if_dne('override_explanation', sorted_duplicates_df)
-        final_df = utils.add_column_if_dne(self.shared_col, sorted_duplicates_df, '')
+        final_df = utils.add_column_if_dne(
+            self.flag_shared_col, sorted_duplicates_df, '')
         
         return final_df
 
@@ -80,6 +87,9 @@ class Duplicates:
     
 
     def _get_duplicates_df(self):
+        if self.df is None:
+            return
+        
         duplicates = self.df.duplicated(self.dup_col, keep = False)
         duplicates_df = self.df[duplicates]
 
@@ -103,25 +113,23 @@ class Duplicates:
 
 
 
-    def _drop_duplicates_and_sort(self, shared_birthdate_ids):
+    def _drop_duplicates(self, shared_birthdate_ids):
         ''' 
         Drops duplicates in dup_col keeping submission with highest id_col value 
         and restores original id_col order (ascending)
         '''
-        shared_bday_id = self.df[self.id_col].isin(shared_birthdate_ids)
-        shared_bday_ids_df = self.df[shared_bday_id].copy()
-        not_shared_bday_df = self.df[~shared_bday_id].copy()
 
-        clean_not_shared_bday_df = self._keep_last_duplicate_only(not_shared_bday_df)
+        df_sorted = self.df.sort_values(by = self.id_col, ascending = True)
+        is_duplicate = df_sorted.duplicated(subset=self.dup_col, keep='last')
+        is_protected = df_sorted[self.id_col].isin(shared_birthdate_ids)
+        drop_mask = is_duplicate & ~is_protected
 
-        self.df = pd.concat(
-            [clean_not_shared_bday_df, shared_bday_ids_df], ignore_index=True)
-
-        self.df = self.df.sort_values(self.id_col).reset_index(drop=True)
+        self.df = df_sorted[~drop_mask].sort_values(
+            by = self.id_col).reset_index(drop = True) # type: ignore
         
         return self.df
     
-
+    
 
     def _keep_last_duplicate_only(self, not_shared_bday_df):
         not_shared_bday_df = self._sort_rows_by_id(not_shared_bday_df)
@@ -139,15 +147,26 @@ class Duplicates:
 
         return sorted_not_shared_bday_df
 
-    def _get_shared_bday_ids(self):
+
+
+    def _get_flagged_ids(self):
         ''' Returns a set of IDs where the shared birthdate flag has been set '''
-        if self.shared_col not in self.df.columns:
+        if self.flag_shared_col not in self.df.columns:
             return set()
             
-        cleaned_text = self.df[self.shared_col].fillna('').astype(str).str.strip()
+        cleaned_text = self.df[self.flag_shared_col].fillna('').astype(str).str.strip()
         
         is_not_blank = cleaned_text != ''
 
-        shared_birthdate_ids = set(self.df.loc[is_not_blank, self.id_col])
+        is_flagged_id = set(self.df.loc[is_not_blank, self.id_col])
         
-        return shared_birthdate_ids
+        return is_flagged_id
+
+
+
+    def _drop_override_note_cols(self, df):
+        drop_cols = ['override_explanation', self.flag_shared_col]
+        self.df = df.drop(columns = drop_cols, errors = 'ignore')
+
+        return self.df
+

@@ -19,7 +19,9 @@ class BaseCSV:
         self.data_df = self.csvkit.try_convert_path_to_df(
             config.raw_module_csv, config.raw_data_dir)
         self.modules = config.modules
-        self.field_dict = FieldDict(self.data_df, self.dict_df)
+
+        if self.dict_df is not None and self.data_df is not None:
+            self.field_dict = FieldDict(self.data_df, self.dict_df)
 
 
     def output_base_csv_to_raw(self):

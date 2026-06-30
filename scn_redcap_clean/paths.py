@@ -11,7 +11,7 @@ class Paths:
         self.root = Path.cwd().resolve()
         self.set_raw_data_path(raw_data_source, strict = False)
         self.archive = self._make_dir('archive')
-        self.stages = self._make_dir('steps')
+        self.steps = self._make_dir('steps')
         self.overrides = self._make_dir('overrides')
         self.review = self._make_dir('review')
         self.ref = self._make_dir('ref')

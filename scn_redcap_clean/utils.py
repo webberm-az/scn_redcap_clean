@@ -3,9 +3,10 @@ from typing import Union, List, Pattern, Any, Iterable, cast
 
 import pandas as pd # external import
 
-from . import console
+from . import config, console
 
-auto = object()
+
+auto = {"id": "utils.auto"} # creates a parameter_input = utils.auto 
 
 
 def is_n_matches(pattern: Pattern[str], string: str, n: int) -> bool:
@@ -20,6 +21,8 @@ def is_n_matches(pattern: Pattern[str], string: str, n: int) -> bool:
     return False
 
 
+
+#       df:
 
 def get_cols_if_in_df(
         df: pd.DataFrame, override_df: pd.DataFrame, id_col: Any) -> List[Any]:
@@ -42,6 +45,44 @@ def if_missing_drop_row(
     return df
     
 
+
+
+def add_column_if_dne(colname: Any, df: pd.DataFrame, input: Any = '') -> pd.DataFrame:
+    if colname not in df.columns:
+        df[colname] = input
+    
+    return df
+
+
+
+def match_rows_to_ref_id( # check ref_df ????
+        df: pd.DataFrame, ref_df: pd.DataFrame, id_column: Any) -> pd.Series:
+    df[id_column] = df[id_column].astype('float64')
+        
+    return cast(pd.Series, df[id_column])
+
+
+
+def is_df_identical(current_df, last_df):
+    if last_df.astype(str).equals(current_df.astype(str)):
+        return True
+
+    return False
+
+
+
+def make_duplicate_orig_cols(df: pd.DataFrame, rep_cols: List[str]) -> pd.DataFrame:
+    '''
+    Creates df with duplicated rep_cols with '_orig' suffix added to col names
+    '''
+    for col in rep_cols: 
+        df[f'{col}_orig'] = df[col]
+
+    return df
+
+
+
+#       txt:
 
 def write_txt_file(content: str, filename: Union[str, Path], output_dir: Path) -> None:
     '''
@@ -78,30 +119,6 @@ def add_txt_suffix(filename):
 
 
 
-def add_column_if_dne(colname: Any, df: pd.DataFrame, input: Any = '') -> pd.DataFrame:
-    if colname not in df.columns:
-        df[colname] = input
-    
-    return df
-
-
-
-def match_rows_to_ref_id(
-        df: pd.DataFrame, ref_df: pd.DataFrame, id_column: Any) -> pd.Series:
-    df[id_column] = df[id_column].astype(ref_df[id_column].dtype)
-        
-    return cast(pd.Series, df[id_column])
-
-
-
-def is_df_identical(current_df, last_df):
-    if last_df.astype(str).equals(current_df.astype(str)):
-        return True
-
-    return False
-
-
-
 def append_to_txt(content: str, filename: Union[str, Path], output_dir: Path) -> None:
     '''
     Appends text to a file without overwriting existing content.
@@ -119,3 +136,11 @@ def _append_txt(content, file_path):
         file.write(f'{content}\n')
 
 
+
+def get_step_config(step_number):
+    step_attr = f"name_{str(step_number).zfill(2)}_main"
+    step = getattr(config, step_attr)
+
+    return step
+
+    

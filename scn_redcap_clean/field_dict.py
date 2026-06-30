@@ -8,7 +8,7 @@ from . import config # global configs
 
 class FieldDict:
 
-    def __init__(self, data_df, dict_df):
+    def __init__(self, data_df: pd.DataFrame, dict_df: pd.DataFrame):
         self.data_df = data_df
         self.dict_df = dict_df
  
@@ -17,9 +17,8 @@ class FieldDict:
         self, 
         type: str, 
         match_type: bool = True, 
-        dict_df: Optional[pd.DataFrame] = None)-> List[str]:
-        current_dict_df = (
-            cast(DataFrame, self.dict_df) if dict_df is None else dict_df)
+        dict_df: Optional[pd.DataFrame] = None) -> List[str]:
+        current_dict_df = dict_df if dict_df is not None else self.dict_df
         is_type = current_dict_df[config.field_type_column] == type
         col_type = is_type if match_type else ~is_type
         
@@ -50,4 +49,7 @@ class FieldDict:
         module_col_list = self.dict_df[config.module_column].isin(modules)
         module_dict_df = self.dict_df[module_col_list].copy()
         
+        if not isinstance(module_dict_df, pd.DataFrame):
+            raise TypeError(f"Expected pd.DataFrame, got {type(module_dict_df)}")
+            
         return module_dict_df

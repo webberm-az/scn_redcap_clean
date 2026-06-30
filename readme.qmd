@@ -1,0 +1,340 @@
+---
+title: 'readme'
+format: html
+jupyter: python3
+python:
+  path: .venv/bin/python
+execute:
+  dir: project
+---
+
+### Create a project Vitual Environment
+
+(highly recommended, but not required)
+
+` ` ` run in terminal
+
+python3 -m venv venv
+
+Code chunks must be run in order. If you make changes to inputs in an earlier code chunk rerun all (and review manual overrides as needed) chunks below in order.
+
+` ` ` ` ` `  run in terminal if venv not activated in new session
+
+source venv/bin/activate
+
+## Install Required Packages
+
+(install scn_redcap_clean in editable mode)
+
+` ` ` {run in terminal}
+
+pip install -e .
+
+` ` ` ` ` `  {run in terminal if the code chunk in your qmd aren't running}
+
+pip install jupyter
+
+# Imports and Config
+For additional config settings you can also look in config.py
+
+(If you change anything in this chunk, or any config.py variables you must rerun all the
+chunks below in order)
+
+```{python}
+#| label: Imports and Config
+#%reload_ext autoreload # comment out if you're not editting py files
+
+from scn_redcap_clean import Cleaner, config # local import
+
+
+# Data Dictionary
+config.data_dict = 'ToyDict.csv'
+
+# Module Specific
+config.modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
+
+# csv must have all columns of the module(s) you are filtering by (extra modules/cols are fine)
+config.raw_module_csv = 'Toy1'
+
+config.c_genomic = 'genomic_text1'
+config.p_genomic = 'genomic_p._text2'
+# all columns marked text in the data dictionary you don't want translated
+config.no_translate_cols = [
+      config.c_genomic,
+      config.p_genomic,
+      config.birthdate,
+      config.merge_on_id_column,
+      ]
+
+# alternatively you can manual set the text_columns you wanted translated below
+
+```
+
+**Set Files to Merge and Columns to Translate**
+Cleaner() will auto create a 'raw' folder for you to add your raw data files and a
+'ref' folder for you to add your Data Dictionary
+(it will also auto create additional project folders in your data directory)
+
+(see Extras below for using a different raw folder name)
+```{python}
+#| label: Cleaner instance
+
+# see Extras below for using a different raw folder name
+
+cleaner = Cleaner()
+
+```
+
+##### Extra Functions/Configs:
+
+Custom raw data folder name
+if you want your raw data folder stored separately from this .qmd file this should be the entire folder path
+
+config.raw_data_dir = 'raw_data'    # run before running cleaner = Cleaner()
+cleaner = Cleaner()
+
+` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
+
+
+
+
+## 01 Create merge_df with age added and output translations
+
+
+**Make sure raw data is in the raw folder & data dictionary in the ref folder before continuing**
+Also ensure your data dictionary and modules are accurate (config. in the first code chunk)
+
+
+Outputs 01_merged_raw to the steps folder, translations_manual_override for review and
+edits in the review folder, and a 01_merged_raw.txt for logging any manual override
+explanations to the overrides folder.
+
+Archive also stores a read only copy of 01_merged_raw.csv and
+translations_manual_override.csv which will be used for auto summaries.
+Rerunning the same stage with different inputs will overwrite files in the 'steps' folder.
+Version history csv files are stored in the 'archive' folder for every run with different
+back to back input if the contents of 01_merged_raw is changed.
+(e.g. 2 runs in a row without *any* changes will not create new archive files)
+
+The data dictionary is used as a map to automatically get all 'Field Type' = 'text' for
+translation.
+config.no_translate_cols = [] above should include all columns you don't want translated.
+
+See Extra for manually setting specific columns you do want translated instead.
+```{python}
+#| label: 01 Merge Raw and Review Translations
+
+csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
+
+# if specific terms need overrides after translation add them here & rerun this step
+config.translation_dict = { # planning to track this in notes eventually for each version
+            '布洛芬':'Ibuprofen',
+           }
+
+cleaner.step_01_merge_raw_and_review_translations(csv_list)
+```
+
+Other Info:
+- Any exact duplicate columns in more than one csv will only be included once.
+- A suffix '_{filename}' will be added to identical column names containing at least one
+different input for a given participant id.
+- config.translation_dict input:
+non-english must be the key and the translation (or medical term) the value
+
+
+##### Extra Functions/Configs:
+
+*Manually setting text columns for translation*
+List all langauge-dependent text columns (exclude genomic text, etc.) for translation
+e.g.
+text_columns = ['toy_text1', 'toy_text2', 'toy_text3', 'toy_text4', 'toy_text5']
+cleaner.step_01_merge_raw_and_review_translations(csv_list, text_columns)
+
+If translations are failing involving non-latin scripts adjust config.translation_script_threshold
+(detects non-latin characters and assigns language after 3 characters match a specific char. script)
+run anywhere after cleaner = Cleaner() and before get_01_merge_raw_and_review_translations()
+
+e.g.
+config.translation_script_threshold = 4    # if you don't have many text_columns this should be 1 or 2
+
+
+By default filter_columns = 'birthdate' for creating the duplicate review csv but you
+should be able to use more than 1 column;
+avoid any open text responses for filters due to typos
+
+e.g.
+filter_columns = ['birthdate', 'country']
+cleaner.get_01_merge_raw_and_review_translations(csv_list, text_columns, filter_columns = filter_columns)
+
+` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` `
+
+
+
+## 02 Overwrite non-english with english translations and output duplicates for review
+
+
+After outputing translations, manually review and edit translations_manual_override.csv
+in the review folder as needed. A version history of the translations file is saved in
+archive for record keeping. The final column in translations_manual_override should be
+used to record reasons you made any adjustments to a row.
+**Once manual edits are complete move this file to the overrides folder.**
+
+Keep the final version of this file without altering filename or column names in the
+manual_overrides folder *before running* get_02_translated_and_review_duplicates()
+
+The .txt file in the overrides folder is for recording general and brief override
+explanations and row deletion (e.g. 'Deleted false positives, language was already english.')
+Keep this file in the overrides folder (the summary will eventually archive it).
+
+
+
+02_translated.csv is saved to the steps folder. Duplicates are identified by birthdate
+and duplicates_manual_override.csv is saved to review.
+
+```{python}
+#| label: 02 Translated and Review Duplicates
+
+cleaner.step_02_translated_and_review_duplicates()
+
+```
+
+
+
+
+## 03 Add duplicate manual overrides, remove duplicates, and output medications for review
+
+
+Again, manually review and edit duplicates_manual_override.csv as needed, leaving
+explanations in the overrides column of the manual_overrides file and general comments
+in the txt.
+
+
+*For manual overrides Participant_id should be written as {last Participant_id per bday}.999*
+Example:
+participant_id's for birthdate 1/2/02 are 3, 5, 8
+If a manual override is needed the override should be 8.999
+
+(.888 works too, just choose an integer that stands out for you.) If no manual override
+(last submission is best) these rows do not need to be included in the manual override,
+but it should still work if they are. Add the final version without altering column
+names to the overrides folder.
+
+If **all** duplicates do not need a *manual* override, you do not need to move the
+duplicate overrides file to the overrides folder, just run the code chunk below to
+remove earlier submission duplicates.
+
+Duplicates are identified based on birthdate. (Confirm they are actual duplicates and
+not just **shared** birthdates.)
+
+**keep flag_shared_birthdate empty, unless two different participants truly share a birthdate**
+
+See 'Shared Birthdates' below for instructions if needed.
+
+**Once manual edits are complete move this file to the overrides folder.**
+
+03_removed_duplicates.csv is saved to the steps folder. 
+Medications and Supplements are extracted using local AI and reported with lowest AI 
+confidence scores at the top fo the medications_manual_override.csv (saved to review).
+
+Each AI recommended term is listed in the 'recommended_text' next to the full 'raw_text'
+entry. 
+
+##### Before running ensure:
+-Download and install from: https://ollama.com/download'
+-'med_sup_dict.csv' is in the ref folder
+
+
+```{python}
+#| label: 03 Remove duplicates and Review Meds
+
+cleaner.step_03_removed_duplicates_and_review_meds()
+
+```
+
+##### Shared Birthdates
+If any duplicates are clearly different people, the manual override must mark the flag_shared_birthdate column for the early submission. If the birthdates are not shared this must remain empty.
+
+Flagging a row makes that specific row stay in the final dataset no mater what.
+
+*e.g.*   all rows will be kept
+id 1       bday 1/2/10       flag X
+
+id 3       bday 1/2/10       flag X
+
+id 4       bday 1/2/10       flag X
+
+
+*e.g.*   the id 1 and id 4 will kept
+id 1       bday 1/2/10       flag X
+
+id 3       bday 1/2/10       flag
+
+id 4       bday 1/2/10       flag
+
+
+*e.g.*  id 3 and id 4 will kept
+id 1       bday 1/2/10       flag
+
+id 3       bday 1/2/10       flag
+
+id 4       bday 1/2/10       flag X
+
+
+
+
+# Clean and Review Medication and Supplement text reponses
+Again, manually review and edit medications_manual_override.csv as needed, leaving
+explanations in the overrides column of the manual_overrides file and general comments
+in the txt.
+
+Change the 'recommended_term' as needed (along with the 'from_column' if it was submitted
+in the wrong column e.g. a supplement in seizure medication) 
+
+The 'add_to_ref' column tracks 'MISSING IN REF' medicatons and supplements. 
+If the 'recommended_term' is an alias add it to the alias column of the med_sup_dict.csv.
+If it's a new medication or supplement, insert a new row with the 'functional_class' 
+(if applicable), 'Generic Name', and any aliases/abbr. 
+(All other columns are optional for your reference, and not included in the code.)
+
+
+**Once manual edits are complete move 'medications_manual_override' to overrides folder.**
+
+
+# 04 Inputs and categorizes medication overrides, and output medications for review
+
+
+
+
+
+
+
+        to be continued...
+
+```
+
+
+# and Seizure Overrides. # Standardize by age
+## Pre-Format Genetic text and p. and c. Col Review
+
+??? Check entries accross multiple survey responses as needed Outputs p. and c. columns
+from multiple surveys for each participant with conflicting inputs
+creates new columns for both condensed and interpretable notation versions
+
+
+Create Manual overrides file...
+
+# Final Format Genetic text, Speculative ION channel Function, and Phenotype
+
+'function?\_eric' and 'phenotype?\_eric' columns are based on Eric's AI generated spreadsheet based on a variety of Sources papers ('function?\_eric_ref')
+
+
+
+# Speculative ION channel Function based on Participant Responses
+
+I'm not sure if this is possible to compute for IS. You will probably need some adjustments
+if you use this function.
+'by_symp' is computed based on:
+-seizure onset -seizure history -non-absense seizures -DQ (developmental quotient)\<50
+'by_med' is computed based on:
+-by current medication type -(and/or med history)
+-seizure type (separate out myoclonic lof as separate category)

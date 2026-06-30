@@ -2,20 +2,22 @@ import pandas as pd # external imports
 from typing import cast
 
 # local imports
+from .archiver import Archiver
 from .translator import Translator
 from .detector import Detector
 from .translation_packages import TranslationPackages
 from . import config # global configs
 from .csv_kit import CsvKit
+from .override_manager import OverrideManager
 from . version import Version
 from . import utils
 
 
 class Translation:
 
-    def __init__(self, paths, archiver, archive_filename = 'translations_for_review'):
-        self.paths = paths
-        self.archiver = archiver
+    def __init__(self, df, delegate):
+        self.paths = delegate.paths
+        self.archiver = Archiver(self.paths)
         self.id_col = config.merge_on_id_column
         self.detect_script_threshold = config.translation_script_threshold
         self.special_terms = config.translation_dict
@@ -23,23 +25,22 @@ class Translation:
         self.translator = Translator(self.packages)
         self.csvkit = CsvKit()
         self.detect = Detector(self.packages)
-        self.archive_filename = archive_filename
-        self.df = pd.DataFrame()
+        self.archive_filename = 'translations_for_review'
+        self.df = df
         self.version = Version(self.paths.archive)
 
 
 
-    def create_translations_for_review(
-            self, 
-            file_path, 
-            cols_to_translate,
-            main_filename = 'translations_manual_override'):
+    def create_translations_for_review(self, cols_to_translate):
         '''
         Outputs csv files for translation review 
         (1 file for record keeping and 1 file for manual override editting)
         '''
-        # df with added english '_orig' cols, _needs_trans col, and translated cols_to_translate
-        translation_df = self._get_translation_df(file_path, cols_to_translate)
+        df = self.df
+        main_filename = 'translation_manual_override'
+
+        # df with added english '_orig' cols, '_needs_trans' col, and translated 'cols_to_translate'
+        translation_df = self._get_translation_df(df, cols_to_translate)
         if self._is_no_translations_needed(translation_df):
             return pd.DataFrame() # if no translations detected returns empty df
 
@@ -52,7 +53,7 @@ class Translation:
             main_filename, 
             self.paths.review, 
             self.archive_filename,
-            filename_get_version = config.name_01_main)
+            csvname_get_version = config.name_01_main)
 
         content = 'Additional explanations: \n'
         utils.write_txt_file(content, main_filename, self.paths.overrides)
@@ -60,13 +61,22 @@ class Translation:
         return final_translated_df
 
 
+    def try_input_override_df(self): # called in Override
+        ''' 
+        If override_filename exists in overrides folder inputs into main csv
+        '''
+        df = self.df
+        df = OverrideManager(2, self).try_append_override_df()
+        
+        return df
 
-    def _get_translation_df(self, file_path, cols_to_translate):
+
+    def _get_translation_df(self, df, cols_to_translate):
         '''
         Returns df with added _orig columns, _needs_trans column, and translations 
         '''
         # create df w/ duplicated cols_to_translate w/ '_orig' suffix added to col names
-        self.df = self.csvkit.make_duplicate_orig_cols(file_path, cols_to_translate)
+        self.df = utils.make_duplicate_orig_cols(df, cols_to_translate)
         needs_trans_idx = self._get_needs_translation_df(cols_to_translate) 
         self._input_eng_translation(cols_to_translate, needs_trans_idx)
 

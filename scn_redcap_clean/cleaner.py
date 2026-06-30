@@ -1,114 +1,111 @@
 import os
 import certifi
-
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
 # local imports
-from .archiver import Archiver
-from .csv_kit import CsvKit
+from . import config  # global configs
 from .duplicates import Duplicates
+from .genomics import Genomics
 from .meds import Medications
 from .merging import Merging
 from .overrides import Overrides
 from .paths import Paths
+from .standardize import Standardize
 from .translation import Translation
-from .base_csv import BaseCSV
-from .summary import Summary
-from . import config # global configs
-from . import utils
-from . import console
 
 
 class Cleaner:
-
+    '''
+    Data cleaning steps to run in order. Each outputs a main step csv to the steps folder and steps 1-4 output a review csv for the next step to the review folder.
+    Each step also copies csv outputs as read-only in archive folder for version history.
+    '''
     def __init__(self):
         self.paths = Paths(raw_data_source = config.raw_data_dir)
-        self.archiver = Archiver(archive_path = self.paths.archive)
-        self.translation = Translation(paths = self.paths, archiver = self.archiver,)
-        self.merging = Merging(self.paths)
-        self.csvkit = CsvKit()
-        self.summary = Summary(paths = self.paths)
-        self.base = BaseCSV(self.paths)
 
 
-    def step_01_merge_raw_and_review_translations(
-        self, csv_list, text_columns = utils.auto, drop_na_col = True):
-        ''' Returns csv_files as merge_df and outputs translation CSV for review '''
-        if not csv_list:
-            console.error('No data files in raw data folder to merge')
-            return None
-        self.base.output_base_csv_to_raw()
+    def step_01_merge_raw_and_review_translations(self, csv_list):
+        ''' 
+        Creates a 'base' file and merges csvs in csv_list (if csvs are in raw folder).
+        'base.csv' is created based on 'config.module' and 'config.raw_module_csv' settings and used to filter only participant_id's with at least 1 response in the specified 'config.module' list. 'Data Dictionary' configs must be set.
+        '''
         
-        merged_df = self.merging.get_merged_module_df(
-            csv_list = csv_list, 
-            text_columns = text_columns,
-            merge_on_file = 'base',
-            drop_na_col = drop_na_col)
-        
-        language_cols = self.merging.active_text_columns
-
-        merged_main_path = self.archiver.create_csvs_main_and_archive(
-            merged_df, 
-            config.name_01_main, 
-            self.paths.stages)
-
-        self.translation.create_translations_for_review(merged_main_path, language_cols)
+        merging = Merging(self.paths)
+        df = merging.try_run_step_01(csv_list)
+                
+                        #### track merging.language_columns in new cleaned data dict?
+        Translation(df, self).create_translations_for_review(merging.language_columns)
         
         return
     
 
 
-    def step_02_translated_and_review_duplicates(
-            self,
-            override_filename = 'translations_manual_override'):
+    def step_02_translated_and_review_duplicates(self):
+        ''' 
+        Only inputs translations if 'translations_manual_override.csv' is in the overrides folder
         '''
-        If translations_manual_override is in the overrides folder:
-        Overwrites non-english with english translations and output duplicates for review
-        Copies override CSV as read-only in archive folder for version history
-        '''
-        self.archiver.create_archive_overrides(override_filename, self.paths.overrides)
+        df = Overrides(2, Translation, self).try_run_step()
 
-        df = self._try_input_translations_df(override_filename)
-        self.archiver.create_csvs_main_and_archive(df, config.name_02_main, self.paths.stages) 
-        
-        duplicates = Duplicates(df, self.paths, self.archiver)
-        duplicates.create_duplicates_for_review()
+        Duplicates(df, self).create_duplicates_for_review()
 
         return
     
     
 
-    def step_03_removed_duplicates(
-            self,
-            csv_name = config.name_02_main, 
-            override_filename = 'duplicates_manual_override'):
+    def step_03_removed_duplicates_and_review_meds(self):
         '''
-        Outputs csv files for duplicates review 
-        1 file for record keeping (logs) and 1 file for manual override editting (overrides)
-        Duplicates are identified by birthdate. 
-        '''
-        self.archiver.create_archive_overrides(override_filename, self.paths.overrides)
+        Requires Ollama (local AI): 
+        Download and install from: https://ollama.com/download
+
+        If duplicates_manual_override is not in overrides folder, removes all but the last submission. (Duplicate based on birthdate) 
+        Only inputs manual overrides if 'duplicates_manual_override.csv' is in the overrides folder (keep flag_shared column empty unless a birthdate is shared by 2 different individuals, only flag the shared birthdate individual with the smaller 'participant_id' number)
         
-        df = self.csvkit.try_convert_path_to_df(csv_name, self.paths.stages)
-        duplicates = Duplicates(df, self.paths, self.archiver)
-        df = duplicates.clean_duplicates(override_filename)
-        self.archiver.create_csvs_main_and_archive(df, config.name_03_main, self.paths.stages)
-        meds = Medications(df, self.paths, self.archiver)
-        meds.create_medications_for_review()
+        Set medications (and supplements) configs before running 'config.med_text_cols'.
+
+        Expect this step to take a few minutes...
+        '''
+        df = Overrides(3, Duplicates, self).try_run_step()
+
+        Medications(df, self).create_medications_for_review()
 
         return
 
 
 
-    def _try_input_translations_df(self, override_filename):
-        ''' if override_filename exists in overrides folder inputs translations from override_filename '''
-        override_csv_path = self.csvkit.if_exists_path(override_filename, self.paths.overrides)
-        df = self.csvkit.try_convert_path_to_df(config.name_01_main, self.paths.stages)
-        if override_csv_path is not None:
-            overrides = Overrides(override_csv_path, df)
-            df = overrides.override()
-        else:
-            console.missing_override(override_filename, 'translation input', 'without translations')
-        
-        return df
+    def step_04_medications_and_review_genomics(self):
+        '''
+        Requires Ollama (local AI)
 
+        The included 'config.meds_dict' csv should be updated based on the 'add_to_ref' column in 'medications_manual_override.csv' before running this step.
+
+        medications_manual_override.csv' must be in the overrides folder 
+
+        Medications/supplements are input as dummy variables by individual med/sup and by their 'functional_class'.
+        '''
+        df = Overrides(4, Medications, self).try_run_step()
+        
+        Genomics(df, self).create_genomics_for_review()
+
+        return
+
+
+
+    def step_05_genomics_and_standardize(self, age_units = ['days', 'months', 'years']):
+        '''
+        genomics_manual_override.csv' must be in the overrides folder 
+
+        Splits protein variants (see configs), and maps regions based on UniProt regions
+        
+        Computes age based on each modules submission_date and the 'birthdate'
+
+        (in progress... )
+        Standardizes all 'config.age_dependent' columns
+        Outputs descriptive statistics of cleaned csv
+        '''
+        overrides = Overrides(5, Genomics, self)
+
+        df = overrides.try_input_override_df()
+        df = Standardize(df, self).try_get_age(age_units)
+
+        overrides.create_step_main_and_archive(df)
+
+        return
