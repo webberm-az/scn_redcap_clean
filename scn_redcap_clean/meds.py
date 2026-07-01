@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from .archiver import Archiver
+from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
@@ -15,19 +15,19 @@ from . import console
 class Medications:
     ''' Standardizes and dummies medications and supplements using local AI Ollama. '''
     
-    def __init__(self, df, delegate):
+    def __init__(self, df, paths):
 
         self.df = df.copy()
-        self.paths = delegate.paths
-        self.archiver = Archiver(self.paths)
+        self.paths = paths
+        self.archiver = CsvWriter(self.paths)
         self.id_col = config.merge_on_id_column
         self.local_ai = LocalAI(schema = MedicationList, field_name = 'substances')
         self.csvkit = CsvKit()
-        self.meds_dict_df = self.csvkit.try_convert_path_to_df(
+        self.meds_dict_df = self.csvkit.try_path_to_df(
             config.meds_dict, self.paths.ref)
 
 
-    def create_medications_for_review(self):
+    def review_df(self):
         ''' 
         Outputs csv files for medications review 
         (1 file for record keeping and 1 file for manual override editting)
@@ -36,13 +36,9 @@ class Medications:
         if self.meds_dict_df is None:
             console.alert_missing_config_file(
                 'ref', 'Medication and Supplements Map', 'config.meds_dict')
-            return
+            return None
             
         df = self._get_meds_for_review()
-
-        # outputs csvs to review folder, a version to archive, and txt to overrides
-        get_version = config.name_03_main
-        self.archiver.create_csvs_review_and_archive(df, 'medications', get_version)
 
         return df
 

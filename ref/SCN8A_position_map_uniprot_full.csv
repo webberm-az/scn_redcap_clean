@@ -1,0 +1,279 @@
+gene,start_pos,end_pos,type,description
+SCN8A,1,1980,Chain,Sodium channel protein type 8 subunit alpha
+SCN8A,1,132,Topological domain,Cytoplasmic
+SCN8A,1,20,Region,Disordered
+SCN8A,5,5,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,19,34,Helix,
+SCN8A,28,62,Region,Disordered
+SCN8A,28,61,Compositional bias,Basic and acidic residues
+SCN8A,57,59,Turn,
+SCN8A,58,58,Natural variant,in DEE13; uncertain significance; no effect on voltage-gated sodium channel activity; dbSNP:rs1940955246
+SCN8A,60,63,Beta strand,
+SCN8A,64,66,Helix,
+SCN8A,67,69,Helix,
+SCN8A,89,91,Beta strand,
+SCN8A,94,97,Beta strand,
+SCN8A,103,106,Beta strand,
+SCN8A,112,114,Turn,
+SCN8A,114,442,Repeat,I
+SCN8A,117,119,Helix,
+SCN8A,122,129,Helix,
+SCN8A,132,150,Helix,
+SCN8A,133,151,Transmembrane,Helical; Name=S1 of repeat I
+SCN8A,133,133,Sequence conflict,in Ref. 1; AAD15789
+SCN8A,151,153,Beta strand,
+SCN8A,152,158,Topological domain,Extracellular
+SCN8A,156,158,Helix,
+SCN8A,159,179,Transmembrane,Helical; Name=S2 of repeat I
+SCN8A,159,179,Helix,
+SCN8A,180,193,Topological domain,Cytoplasmic
+SCN8A,182,187,Beta strand,
+SCN8A,189,191,Helix,
+SCN8A,193,207,Helix,
+SCN8A,194,211,Transmembrane,Helical; Name=S3 of repeat I
+SCN8A,207,207,Alternative sequence,in isoform 2
+SCN8A,208,210,Beta strand,
+SCN8A,210,210,Natural variant,in DEE13
+SCN8A,212,217,Topological domain,Extracellular
+SCN8A,212,212,Alternative sequence,in isoform 2
+SCN8A,215,215,Glycosylation,N-linked (GlcNAc...) asparagine
+SCN8A,215,215,Natural variant,in DEE13; uncertain significance; requires 2 nucleotide substitutions
+SCN8A,216,216,Natural variant,in DEE13; dbSNP:rs879255696
+SCN8A,216,223,Helix,
+SCN8A,218,234,Transmembrane,Helical; Name=S4 of repeat I
+SCN8A,223,223,Natural variant,in DEE13; loss of function mutation; reduces voltage-gated sodium channel activity; dbSNP:rs672601319
+SCN8A,224,228,Helix,
+SCN8A,229,233,Helix,
+SCN8A,232,232,Natural variant,in DEE13
+SCN8A,235,253,Topological domain,Cytoplasmic
+SCN8A,237,249,Helix,
+SCN8A,253,272,Helix,
+SCN8A,254,273,Transmembrane,Helical; Name=S5 of repeat I
+SCN8A,257,257,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,260,260,Natural variant,in DEE13; uncertain significance; dbSNP:rs879255697
+SCN8A,273,273,Sequence conflict,in Ref. 3; ACM63162
+SCN8A,274,355,Topological domain,Extracellular
+SCN8A,274,278,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,274,277,Turn,
+SCN8A,278,283,Beta strand,
+SCN8A,281,333,Disulfide bond,
+SCN8A,288,290,Helix,
+SCN8A,289,289,Glycosylation,N-linked (GlcNAc...) asparagine
+SCN8A,294,297,Beta strand,
+SCN8A,295,295,Glycosylation,N-linked (GlcNAc...) asparagine
+SCN8A,302,307,Turn,
+SCN8A,307,307,Natural variant,in DEE13; uncertain significance; dbSNP:rs1057519557
+SCN8A,308,308,Glycosylation,N-linked (GlcNAc...) asparagine
+SCN8A,309,311,Helix,
+SCN8A,318,320,Beta strand,
+SCN8A,326,326,Glycosylation,N-linked (GlcNAc...) (high mannose) asparagine
+SCN8A,326,330,Beta strand,
+SCN8A,337,341,Beta strand,
+SCN8A,346,350,Turn,
+SCN8A,353,355,Beta strand,
+SCN8A,356,380,Intramembrane,Pore-forming
+SCN8A,356,367,Helix,
+SCN8A,369,371,Turn,
+SCN8A,372,383,Helix,
+SCN8A,373,373,Binding site,
+SCN8A,381,387,Topological domain,Extracellular
+SCN8A,385,387,Helix,
+SCN8A,388,408,Transmembrane,Helical; Name=S6 of repeat I
+SCN8A,388,396,Helix,
+SCN8A,397,399,Turn,
+SCN8A,401,443,Helix,
+SCN8A,407,407,Natural variant,in DEE13; uncertain significance; dbSNP:rs879255698
+SCN8A,408,408,Natural variant,in DEE13; uncertain significance
+SCN8A,409,753,Topological domain,Cytoplasmic
+SCN8A,410,410,Natural variant,in DEE13; uncertain significance; dbSNP:rs879255699
+SCN8A,446,530,Region,Disordered
+SCN8A,453,453,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,474,486,Compositional bias,Low complexity
+SCN8A,477,477,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,479,479,Natural variant,in DEE13; uncertain significance
+SCN8A,483,483,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,489,500,Compositional bias,Basic residues
+SCN8A,492,492,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,501,530,Compositional bias,Basic and acidic residues
+SCN8A,504,504,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,518,518,Modified residue,Phosphoserine
+SCN8A,520,520,Modified residue,Phosphoserine
+SCN8A,547,548,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,568,602,Region,Disordered
+SCN8A,586,602,Compositional bias,Basic and acidic residues
+SCN8A,662,662,Natural variant,in DEE13; uncertain significance; dbSNP:rs76222829
+SCN8A,666,666,Alternative sequence,in isoform 3
+SCN8A,722,730,Helix,
+SCN8A,735,1007,Repeat,II
+SCN8A,739,747,Helix,
+SCN8A,748,750,Turn,
+SCN8A,753,770,Helix,
+SCN8A,754,772,Transmembrane,Helical; Name=S1 of repeat II
+SCN8A,767,767,Natural variant,in DEE13; gain-of-function mutation; increases voltage-gated sodium channel activity; dbSNP:rs797045013
+SCN8A,773,783,Topological domain,Extracellular
+SCN8A,779,806,Helix,
+SCN8A,784,803,Transmembrane,Helical; Name=S2 of repeat II
+SCN8A,804,817,Topological domain,Cytoplasmic
+SCN8A,809,813,Helix,
+SCN8A,815,817,Beta strand,
+SCN8A,818,837,Transmembrane,Helical; Name=S3 of repeat II
+SCN8A,820,832,Helix,
+SCN8A,834,836,Turn,
+SCN8A,837,839,Beta strand,
+SCN8A,838,839,Topological domain,Extracellular
+SCN8A,840,857,Transmembrane,Helical; Name=S4 of repeat II
+SCN8A,840,843,Helix,
+SCN8A,846,846,Natural variant,in DEE13; dbSNP:rs879255700
+SCN8A,847,856,Helix,
+SCN8A,850,850,Natural variant,in DEE13; likely pathogenic; dbSNP:rs587780586
+SCN8A,858,873,Topological domain,Cytoplasmic
+SCN8A,859,871,Helix,
+SCN8A,872,875,Turn,
+SCN8A,874,892,Transmembrane,Helical; Name=S5 of repeat II
+SCN8A,876,897,Helix,
+SCN8A,890,890,Natural variant,in DEE13; dbSNP:rs879255702
+SCN8A,891,891,Natural variant,in DEE13; dbSNP:rs1592149793
+SCN8A,893,921,Topological domain,Extracellular
+SCN8A,900,903,Helix,
+SCN8A,904,904,Disulfide bond,Interchain; with SCN2B or SCN4B
+SCN8A,904,904,Disulfide bond,Interchain; with the conotoxin GVIIJ (when the channel is not linked to SCN2B or SCN4B; the bond to SCN2B or SCN4B protects the channel from the inhibition by toxin)
+SCN8A,905,907,Helix,
+SCN8A,906,912,Disulfide bond,
+SCN8A,919,921,Beta strand,
+SCN8A,922,942,Intramembrane,Pore-forming
+SCN8A,922,934,Helix,
+SCN8A,936,936,Binding site,
+SCN8A,938,948,Helix,
+SCN8A,939,939,Binding site,
+SCN8A,943,955,Topological domain,Extracellular
+SCN8A,944,953,Disulfide bond,
+SCN8A,951,979,Helix,
+SCN8A,956,976,Transmembrane,Helical; Name=S6 of repeat II
+SCN8A,960,960,Natural variant,in DEE13; uncertain significance; dbSNP:rs879255703
+SCN8A,977,1199,Topological domain,Cytoplasmic
+SCN8A,978,978,Natural variant,in DEE13; dbSNP:rs1057519540
+SCN8A,981,983,Helix,
+SCN8A,984,984,Natural variant,in DEE13; gain-of-function mutation; increased voltage-gated sodium channel activity; dbSNP:rs876657399
+SCN8A,986,988,Beta strand,
+SCN8A,996,1006,Helix,
+SCN8A,1107,1148,Region,Disordered
+SCN8A,1176,1178,Beta strand,
+SCN8A,1179,1196,Helix,
+SCN8A,1180,1495,Repeat,III
+SCN8A,1200,1217,Transmembrane,Helical; Name=S1 of repeat III
+SCN8A,1200,1214,Helix,
+SCN8A,1218,1230,Topological domain,Extracellular
+SCN8A,1220,1223,Helix,
+SCN8A,1226,1254,Helix,
+SCN8A,1231,1249,Transmembrane,Helical; Name=S2 of repeat III
+SCN8A,1250,1263,Topological domain,Cytoplasmic
+SCN8A,1256,1260,Helix,
+SCN8A,1263,1284,Helix,
+SCN8A,1264,1282,Transmembrane,Helical; Name=S3 of repeat III
+SCN8A,1275,1315,Alternative sequence,in isoform 5
+SCN8A,1275,1283,Alternative sequence,in isoform 4
+SCN8A,1279,1279,Natural variant,in DEE13
+SCN8A,1283,1290,Topological domain,Extracellular
+SCN8A,1284,1980,Alternative sequence,in isoform 4
+SCN8A,1290,1296,Helix,
+SCN8A,1291,1309,Transmembrane,Helical; Name=S4 of repeat III
+SCN8A,1297,1301,Helix,
+SCN8A,1302,1305,Turn,
+SCN8A,1307,1309,Turn,
+SCN8A,1310,1326,Topological domain,Cytoplasmic
+SCN8A,1311,1346,Helix,
+SCN8A,1323,1323,Natural variant,in DEE13; uncertain significance; dbSNP:rs794727361
+SCN8A,1327,1346,Transmembrane,Helical; Name=S5 of repeat III
+SCN8A,1327,1327,Natural variant,in DEE13; dbSNP:rs879255704
+SCN8A,1331,1331,Natural variant,in DEE13; uncertain significance; dbSNP:rs397514738
+SCN8A,1347,1399,Topological domain,Extracellular
+SCN8A,1349,1351,Beta strand,
+SCN8A,1354,1358,Beta strand,
+SCN8A,1356,1376,Disulfide bond,
+SCN8A,1358,1358,Glycosylation,N-linked (GlcNAc...) asparagine
+SCN8A,1359,1362,Turn,
+SCN8A,1364,1366,Helix,
+SCN8A,1367,1369,Turn,
+SCN8A,1372,1372,Glycosylation,N-linked (GlcNAc...) asparagine
+SCN8A,1373,1379,Helix,
+SCN8A,1383,1383,Glycosylation,N-linked (GlcNAc...) asparagine
+SCN8A,1386,1391,Beta strand,
+SCN8A,1399,1410,Helix,
+SCN8A,1400,1421,Intramembrane,Pore-forming
+SCN8A,1415,1424,Helix,
+SCN8A,1416,1417,Mutagenesis,"Reduced inhibition by 4,9-anhydro-tetrodotoxin."
+SCN8A,1416,1416,Sequence conflict,in Ref. 3; ACM63162
+SCN8A,1422,1438,Topological domain,Extracellular
+SCN8A,1427,1430,Beta strand,
+SCN8A,1438,1440,Helix,
+SCN8A,1439,1460,Transmembrane,Helical; Name=S6 of repeat III
+SCN8A,1441,1449,Helix,
+SCN8A,1445,1445,Sequence conflict,in Ref. 1; AAD15789
+SCN8A,1450,1454,Helix,
+SCN8A,1451,1451,Natural variant,in DEE13; loss of voltage-gated sodium channel activity; dbSNP:rs863223345
+SCN8A,1455,1474,Helix,
+SCN8A,1461,1523,Topological domain,Cytoplasmic
+SCN8A,1466,1466,Natural variant,in DEE13; dbSNP:rs587777722
+SCN8A,1466,1466,Natural variant,in DEE13; dbSNP:rs587777723
+SCN8A,1475,1475,Natural variant,in DEE13; dbSNP:rs796053216
+SCN8A,1479,1479,Natural variant,in DEE13; uncertain significance; dbSNP:rs796053217
+SCN8A,1483,1483,Natural variant,in BFIS5; dbSNP:rs879255652
+SCN8A,1483,1496,Helix,
+SCN8A,1497,1497,Modified residue,Phosphoserine; by PKC
+SCN8A,1498,1500,Helix,
+SCN8A,1504,1801,Repeat,IV
+SCN8A,1505,1507,Helix,
+SCN8A,1510,1513,Turn,
+SCN8A,1514,1519,Helix,
+SCN8A,1519,1519,Sequence conflict,in Ref. 1; AAD15789
+SCN8A,1522,1538,Helix,
+SCN8A,1524,1541,Transmembrane,Helical; Name=S1 of repeat IV
+SCN8A,1542,1552,Topological domain,Extracellular
+SCN8A,1548,1572,Helix,
+SCN8A,1553,1571,Transmembrane,Helical; Name=S2 of repeat IV
+SCN8A,1572,1583,Topological domain,Cytoplasmic
+SCN8A,1573,1575,Turn,
+SCN8A,1580,1584,Beta strand,
+SCN8A,1584,1601,Transmembrane,Helical; Name=S3 of repeat IV
+SCN8A,1585,1597,Helix,
+SCN8A,1592,1592,Natural variant,in DEE13; uncertain significance; dbSNP:rs587780454
+SCN8A,1596,1596,Natural variant,in DEE13; uncertain significance; dbSNP:rs879255705
+SCN8A,1598,1598,Natural variant,in DEE13
+SCN8A,1598,1602,Helix,
+SCN8A,1602,1614,Topological domain,Extracellular
+SCN8A,1605,1605,Natural variant,in DEE13; uncertain significance
+SCN8A,1615,1631,Transmembrane,Helical; Name=S4 of repeat IV
+SCN8A,1615,1620,Helix,
+SCN8A,1617,1617,Natural variant,in DEE13; gain-of-function mutation; increased voltage-gated sodium channel activity; impaired channel inactivation; dbSNP:rs587777721
+SCN8A,1621,1631,Helix,
+SCN8A,1632,1650,Topological domain,Cytoplasmic
+SCN8A,1635,1672,Helix,
+SCN8A,1650,1650,Natural variant,in DEE13; dbSNP:rs879255709
+SCN8A,1651,1668,Transmembrane,Helical; Name=S5 of repeat IV
+SCN8A,1669,1690,Topological domain,Extracellular
+SCN8A,1673,1676,Beta strand,
+SCN8A,1684,1690,Beta strand,
+SCN8A,1691,1713,Intramembrane,Pore-forming
+SCN8A,1691,1702,Helix,
+SCN8A,1702,1702,Sequence conflict,in Ref. 5; AAF35390
+SCN8A,1703,1706,Turn,
+SCN8A,1707,1715,Turn,
+SCN8A,1714,1742,Topological domain,Extracellular
+SCN8A,1718,1720,Turn,
+SCN8A,1719,1719,Natural variant,in MYOCL2; decreased voltage-gated sodium channel activity; results in significantly reduced inward sodium current without changes of voltage-dependent channel activation and inactivation; dbSNP:rs1565934070
+SCN8A,1721,1736,Disulfide bond,
+SCN8A,1739,1772,Helix,
+SCN8A,1743,1765,Transmembrane,Helical; Name=S6 of repeat IV
+SCN8A,1754,1754,Natural variant,in DEE13; uncertain significance
+SCN8A,1766,1980,Topological domain,Cytoplasmic
+SCN8A,1768,1768,Natural variant,in DEE13; gain-of-function mutation; results in increased persistent sodium currents and incomplete channel inactivation; dbSNP:rs202151337
+SCN8A,1801,1801,Natural variant,in DEE13; uncertain significance; dbSNP:rs879255710
+SCN8A,1865,1865,Natural variant,in DEE13; uncertain significance
+SCN8A,1872,1872,Natural variant,in DEE13; gain-of-function mutation; increased voltage-gated sodium channel activity; impaired channel inactivation; dbSNP:rs796053229
+SCN8A,1872,1872,Natural variant,in DEE13; gain-of-function mutation; increased voltage-gated sodium channel activity; impaired channel inactivation; dbSNP:rs796053229
+SCN8A,1872,1872,Natural variant,"in DEE13; gain-of-function mutation; increased voltage-gated sodium channel activity; impaired channel inactivation; no effect on interactions with FGF14, SCN1B, GNB2 and GNG3; dbSNP:rs796053228"
+SCN8A,1877,1877,Natural variant,in DEE13 and BFIS5; also found in a patient with drug-resistant focal epilepsy and mild intellectual disability; dbSNP:rs587780455
+SCN8A,1895,1924,Domain,IQ
+SCN8A,1922,1980,Region,Disordered
+SCN8A,1938,1949,Compositional bias,Polar residues
+SCN8A,1951,1980,Compositional bias,Basic and acidic residues

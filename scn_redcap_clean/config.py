@@ -4,14 +4,13 @@ from . import utils
 
 # Data Dictionary CSV
 data_dict = 'ToyDict.csv'
-
+csv_list = []
 
 # Module Specific
 modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
 
 
 raw_module_csv = 'Toy1' # must have all of columns of the module(s) you are filtering by
-
 
 module_suffix_age = {
     'submission_date' : '_toy',
@@ -45,23 +44,26 @@ filter_columns = 'birthdate' # summary notes assume this is just birthdate
 
 # for age on Module submission date
 birthdate = 'birthdate'
+deceased = 'deceased'
+death_month = 'child_death_m'
+death_year = 'child_death_y'
 
-no_translate_cols = [c_genomic, p_genomic, birthdate, merge_on_id_column]
 
 
 # Steps CSV Names
-name_01_main = '01_merged_raw'
-name_02_main = '02_translated'
-name_03_main = '03_removed_duplicates'
-name_04_main = '04_medications'
-name_05_main = '05_genomics_and_standardized'
+name_main1 = '1_assembled'
+name_main2 = '2_translated'
+name_main3 = '3_removed_duplicates'
+name_main4 = 'analysis_ready'
 
 
 
 
-# __Merging___________________________
+# __Data___________________________
 language_text_columns = utils.auto
 drop_na_col = True
+# __base__.csv id's are detected from modules and raw_module_csv configs
+id_subset_csv = '__base__'
 
 # Data Dictionary
 module_column = 'Form Name'
@@ -72,6 +74,8 @@ col_names_column = 'Variable / Field Name'
 
 
 # __Translation_______________________
+no_translate_cols = [c_genomic, p_genomic, birthdate, merge_on_id_column]
+
 translation_script_threshold = 3
 
 # inputs for special terms
@@ -79,6 +83,7 @@ translation_script_threshold = 3
 translation_dict = {
     '布洛芬':'Ibuprofen',
     } 
+
 
 
 

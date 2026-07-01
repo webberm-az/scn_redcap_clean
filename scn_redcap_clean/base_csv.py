@@ -1,11 +1,10 @@
-from pathlib import Path
 from typing import cast
 
 import pandas as pd
 from pandas import DataFrame
 
 from .csv_kit import CsvKit
-from .field_dict import FieldDict
+from .data_dict import DataDict
 from . import config # global configs
 
 
@@ -14,17 +13,16 @@ class BaseCSV:
     def __init__(self, paths):
         self.paths = paths
         self.csvkit = CsvKit()
-        self.dict_df = self.csvkit.try_convert_path_to_df(
-            config.data_dict, Path('ref'))
-        self.data_df = self.csvkit.try_convert_path_to_df(
+        self.dict_df = self.csvkit.try_path_to_df(config.data_dict, self.paths.ref)
+        self.data_df = self.csvkit.try_path_to_df(
             config.raw_module_csv, config.raw_data_dir)
         self.modules = config.modules
 
         if self.dict_df is not None and self.data_df is not None:
-            self.field_dict = FieldDict(self.data_df, self.dict_df)
+            self.data_dict = DataDict(self.data_df, self.dict_df)
 
 
-    def output_base_csv_to_raw(self):
+    def create(self):
         base_df = self.filter_id_by_modules()
 
         if isinstance(base_df, DataFrame):
@@ -36,7 +34,7 @@ class BaseCSV:
         if self._is_data_missing():
             return None
 
-        module_columns = self.field_dict.get_module_columns_by_type(
+        module_columns = self.data_dict.get_columns(
             type = 'checkbox', modules = self.modules)
         
         checkbox_cols = module_columns['checkbox']
@@ -107,7 +105,7 @@ class BaseCSV:
 
 
     def _save_and_report(self, df: pd.DataFrame):
-        self.csvkit.create_main(df, 'base', config.raw_data_dir)
+        self.csvkit.create_main(df, '__base__', config.raw_data_dir)
         print(f'Raw base file response count: {len(df)}\n')
 
 

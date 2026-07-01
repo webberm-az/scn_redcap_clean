@@ -1,13 +1,13 @@
-from .archiver import Archiver
+from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from . import utils
 
 
 class Overrides:
     
-    def __init__(self, step_number, Class, delegate):
-        self.paths = delegate.paths
-        self.archiver = Archiver(self.paths)
+    def __init__(self, step_number, Class, paths):
+        self.paths = paths
+        self.archiver = CsvWriter(self.paths)
         self.step_number = step_number
         self.Class_instance = Class
         
@@ -19,19 +19,19 @@ class Overrides:
         self.override_csv_path = self.csvkit.if_exists_path(
             self.override_csv_name, self.paths.overrides)
         
-        self.archiver.create_archive_overrides(self.override_csv_name)
+        self.archiver.archive_overrides(self.override_csv_name)
 
 
     def get_last_step_df(self):
         last_step = utils.get_step_config(self.step_number - 1)
-        df = self.csvkit.try_convert_path_to_df(last_step, self.paths.steps)
+        df = self.csvkit.try_path_to_df(last_step, self.paths.steps)
 
         return df
 
 
 
     # in Cleaner for Translations, Duplicates, Medication & Genomics
-    def try_run_step(self):
+    def run(self):
         df = self.try_input_override_df()
         self.create_step_main_and_archive(df)
         
@@ -50,13 +50,13 @@ class Overrides:
 
     def create_step_main_and_archive(self, df):
         cur_step = utils.get_step_config(self.step_number)
-        self.archiver.create_csvs_main_and_archive(df, cur_step, self.paths.steps)
+        self.archiver.main_and_archive(df, cur_step, self.paths.steps)
 
 
 
     def _get_class_instance_method(self, method):
         Class_instance = self.Class_instance
-        instance = Class_instance(self.df, self)
+        instance = Class_instance(self.df, self.paths)
         method = getattr(instance, method)
 
         return method

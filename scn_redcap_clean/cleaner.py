@@ -7,9 +7,10 @@ from . import config  # global configs
 from .duplicates import Duplicates
 from .genomics import Genomics
 from .meds import Medications
-from .merging import Merging
+from .data import Data       # refactor
 from .overrides import Overrides
 from .paths import Paths
+from .review import Review
 from .standardize import Standardize
 from .translation import Translation
 
@@ -23,35 +24,34 @@ class Cleaner:
         self.paths = Paths(raw_data_source = config.raw_data_dir)
 
 
-    def step_01_merge_raw_and_review_translations(self, csv_list):
+    def s1_translations(self):
         ''' 
         Creates a 'base' file and merges csvs in csv_list (if csvs are in raw folder).
         'base.csv' is created based on 'config.module' and 'config.raw_module_csv' settings and used to filter only participant_id's with at least 1 response in the specified 'config.module' list. 'Data Dictionary' configs must be set.
         '''
-        
-        merging = Merging(self.paths)
-        df = merging.try_run_step_01(csv_list)
+        data = Data(self.paths)
+        df = data.assemble()
                 
-                        #### track merging.language_columns in new cleaned data dict?
-        Translation(df, self).create_translations_for_review(merging.language_columns)
+           ## track data.language_cols in new cleaned data dict?
+        Review(df, self.paths).translations(data.language_cols)
         
         return
     
 
 
-    def step_02_translated_and_review_duplicates(self):
+    def s2_duplicates(self):
         ''' 
         Only inputs translations if 'translations_manual_override.csv' is in the overrides folder
         '''
-        df = Overrides(2, Translation, self).try_run_step()
+        df = Overrides(2, Translation, self.paths).run()
 
-        Duplicates(df, self).create_duplicates_for_review()
+        Review(df, self.paths).duplicates()
 
         return
     
     
 
-    def step_03_removed_duplicates_and_review_meds(self):
+    def s3_clinical(self):
         '''
         Requires Ollama (local AI): 
         Download and install from: https://ollama.com/download
@@ -63,49 +63,36 @@ class Cleaner:
 
         Expect this step to take a few minutes...
         '''
-        df = Overrides(3, Duplicates, self).try_run_step()
+        df = Overrides(3, Duplicates, self.paths).run()
 
-        Medications(df, self).create_medications_for_review()
+        review = Review(df, self.paths)
+        review.clinical()
 
         return
 
 
 
-    def step_04_medications_and_review_genomics(self):
+    def standardize(self, age_units = ['days', 'months', 'years']):
         '''
-        Requires Ollama (local AI)
-
         The included 'config.meds_dict' csv should be updated based on the 'add_to_ref' column in 'medications_manual_override.csv' before running this step.
 
-        medications_manual_override.csv' must be in the overrides folder 
+        'medications_manual_override.csv' and 'genomics_manual_override.csv' must be in the overrides folder 
 
         Medications/supplements are input as dummy variables by individual med/sup and by their 'functional_class'.
-        '''
-        df = Overrides(4, Medications, self).try_run_step()
-        
-        Genomics(df, self).create_genomics_for_review()
-
-        return
-
-
-
-    def step_05_genomics_and_standardize(self, age_units = ['days', 'months', 'years']):
-        '''
-        genomics_manual_override.csv' must be in the overrides folder 
 
         Splits protein variants (see configs), and maps regions based on UniProt regions
         
         Computes age based on each modules submission_date and the 'birthdate'
-
         (in progress... )
         Standardizes all 'config.age_dependent' columns
         Outputs descriptive statistics of cleaned csv
         '''
-        overrides = Overrides(5, Genomics, self)
+        Overrides(4, Medications, self.paths).run()
+        overrides = Overrides(4, Genomics, self.paths)
 
         df = overrides.try_input_override_df()
-        df = Standardize(df, self).try_get_age(age_units)
+        df = Standardize(df, self.paths).try_get_age(age_units)
 
         overrides.create_step_main_and_archive(df)
-
+        
         return

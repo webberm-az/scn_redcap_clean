@@ -25,12 +25,11 @@ class CsvKit:
 
 
 
-    def try_convert_path_to_df(
+    def try_path_to_df(
         self, csv_name: Union[str, Path],  dir_path: Union[str, Path]
         ) -> Optional[pd.DataFrame]:
         ''' Returns df from csv_name and directory path '''
         if not self.if_exists_path(csv_name, dir_path):
-            print('DEBUG NO PATH EXISTS')
             return None
         
         df = self._try_read_csv()

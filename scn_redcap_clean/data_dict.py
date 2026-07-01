@@ -6,7 +6,7 @@ from pandas import DataFrame
 from . import config # global configs
 
 
-class FieldDict:
+class DataDict:
 
     def __init__(self, data_df: pd.DataFrame, dict_df: pd.DataFrame):
         self.data_df = data_df
@@ -30,7 +30,7 @@ class FieldDict:
 
 
 
-    def get_module_columns_by_type(
+    def get_columns(
         self, type: str, modules: List[str]) -> Dict[str, List[str]]:
         '''Splits relevant data dictionary columns into safe, verified groups.'''
         

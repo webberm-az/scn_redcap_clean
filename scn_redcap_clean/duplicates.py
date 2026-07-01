@@ -2,37 +2,30 @@ import pandas as pd
 
 # local imports
 from . import config # global configs
-from .archiver import Archiver
+from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from . import utils
 from . import console
 
 
 class Duplicates:
-    def __init__(self, df, delegate):
+    def __init__(self, df, paths):
         self.df = df
-        self.paths = delegate.paths
-        self.archiver = Archiver(self.paths)
+        self.paths = paths
+        self.archiver = CsvWriter(self.paths)
         self.csvkit = CsvKit()
         self.dup_col = config.filter_columns
         self.id_col = config.merge_on_id_column
         self.flag_shared_col = 'flag_shared_birthdate'
 
 
-
-    def create_duplicates_for_review(self):
-        ''' 
-        Outputs csv files for duplicates review 
-        (1 file for record keeping and 1 file for manual override editting)
-        Duplicates are identified by dup_col w/ 'birthdate' as default. 
-        '''
-        df = self._get_duplicates_for_review_df()
-        get_version = config.name_02_main
-
-        # outputs csvs to review folder, a version to archive, and txt to overrides
-        self.archiver.create_csvs_review_and_archive(df, 'duplicates', get_version)
-
-        return df
+    def review_df(self):
+        sorted_duplicates_df = self._get_sorted_duplicates()
+        utils.add_column_if_dne('override_explanation', sorted_duplicates_df)
+        final_df = utils.add_column_if_dne(
+            self.flag_shared_col, sorted_duplicates_df, '')
+        
+        return final_df
 
 
 
@@ -65,15 +58,6 @@ class Duplicates:
             self.df = self.csvkit.append_override_rows(override_csv_path, self.df)
         else:
             self._alert_no_override_file(override_filename) # skips manual overrides
-
-
-    def _get_duplicates_for_review_df(self):
-        sorted_duplicates_df = self._get_sorted_duplicates()
-        utils.add_column_if_dne('override_explanation', sorted_duplicates_df)
-        final_df = utils.add_column_if_dne(
-            self.flag_shared_col, sorted_duplicates_df, '')
-        
-        return final_df
 
 
 

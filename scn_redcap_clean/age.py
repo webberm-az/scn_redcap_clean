@@ -23,7 +23,7 @@ class Age:
 
     def get_age_in_days(self, df, sub_date_col, suffix):
         df = self._prepare_dates(df, sub_date_col)
-        df[f'age_in_days{suffix}'] = (df[sub_date_col] - df[config.birthdate]).dt.days
+        df[f'age_in_days{suffix}'] = (df[self.end_date] - df[config.birthdate]).dt.days
         
         return df
 
@@ -60,11 +60,35 @@ class Age:
 
 
     def _prepare_dates(self, df, sub_date_col):
+        df = self._get_end_date(df, sub_date_col)
         df[config.birthdate] = pd.to_datetime(df[config.birthdate]).copy()
         df[sub_date_col] = pd.to_datetime(df[sub_date_col]).copy()
-        
+
         return df
 
+
+
+    def _get_end_date(self, df, sub_date_col):
+        self.end_date = 'end_date'
+        df[self.end_date] = pd.to_datetime(df[sub_date_col]).copy()
+        if config.death_month in df.columns and config.death_year in df.columns:
+            
+            death_dates = self._cat_est_death_dates(df)
+            
+            is_deceased = death_dates.notna() & (death_dates < df[sub_date_col])
+            
+            df.loc[is_deceased, self.end_date] = death_dates[is_deceased]
+            
+        return df
+
+
+    def _cat_est_death_dates(self, df):
+        death_dates = pd.to_datetime(pd.DataFrame(
+            {'year': df[config.death_year], 'month': df[config.death_month], 'day': 15
+            }), errors = 'coerce')
+
+        return death_dates
+            
 
 
     def _get_age_in_unit_list(self, df, unit_list, sub_date_col, suffix):
@@ -91,5 +115,7 @@ class Age:
         
         if 'years' not in unit_list:
             extra_columns_to_drop.append(f'age_in_years{suffix}')
+        
+        extra_columns_to_drop.append(self.end_date)
 
         return extra_columns_to_drop

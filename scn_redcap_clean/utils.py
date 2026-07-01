@@ -138,9 +138,8 @@ def _append_txt(content, file_path):
 
 
 def get_step_config(step_number):
-    step_attr = f"name_{str(step_number).zfill(2)}_main"
+    step_attr = f'name_main{str(step_number).zfill(1)}'
     step = getattr(config, step_attr)
 
     return step
-
     

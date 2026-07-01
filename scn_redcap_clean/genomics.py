@@ -1,5 +1,5 @@
 import pandas as pd
-from .archiver import Archiver
+from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
@@ -12,22 +12,22 @@ from . import bio, config
 class Genomics:
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
     
-    def __init__(self, df, delegate):
+    def __init__(self, df, paths):
 
         self.df = df.copy()
-        self.paths = delegate.paths
-        self.archiver = Archiver(self.paths)
+        self.paths = paths
+        self.archiver = CsvWriter(self.paths)
         self.id_col = config.merge_on_id_column
         self.local_ai = LocalAI(schema = GenomicList, field_name = 'variants')
         self.csvkit = CsvKit()
-        self.genomics_dict_df = self.csvkit.try_convert_path_to_df(
+        self.genomics_dict_df = self.csvkit.try_path_to_df(
             f'{config.gene_name}_position_map_uniprot', self.paths.ref)
         self.extractor_cols = [config.c_genomic, config.p_genomic]
         self.r_term = 'recommended_term'
         self.term = 'clean_term'
 
 
-    def create_genomics_for_review(self):
+    def review_df(self):
         ''' 
         Outputs csv files for genomic variants review 
         (1 file for record keeping and 1 file for manual override editting)
@@ -35,10 +35,6 @@ class Genomics:
         '''
         self._try_create_gene_position_refs()
         df = self._get_genomics_for_review()
-
-        # outputs csvs to review folder, a version to archive, and txt to overrides
-        get_version = config.name_04_main
-        self.archiver.create_csvs_review_and_archive(df, 'genomics', get_version)
 
         return df
 

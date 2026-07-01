@@ -1,0 +1,58 @@
+gene,start_pos,end_pos,type,description,region
+SCN8A,1,132,Topological domain,Cytoplasmic,N-Terminus
+SCN8A,133,151,Transmembrane,Helical; Name=S1 of repeat I,DI-S1
+SCN8A,152,158,Topological domain,Extracellular,Extracellular Loop
+SCN8A,159,179,Transmembrane,Helical; Name=S2 of repeat I,DI-S2
+SCN8A,180,193,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,194,211,Transmembrane,Helical; Name=S3 of repeat I,DI-S3
+SCN8A,212,217,Topological domain,Extracellular,Extracellular Loop
+SCN8A,218,234,Transmembrane,Helical; Name=S4 of repeat I,DI-S4
+SCN8A,235,253,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,254,273,Transmembrane,Helical; Name=S5 of repeat I,DI-S5
+SCN8A,274,355,Topological domain,Extracellular,Extracellular Loop
+SCN8A,356,380,Intramembrane,Pore-forming,Pore-forming Region
+SCN8A,381,387,Topological domain,Extracellular,Extracellular Loop
+SCN8A,388,408,Transmembrane,Helical; Name=S6 of repeat I,DI-S6
+SCN8A,409,753,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,754,772,Transmembrane,Helical; Name=S1 of repeat II,DI-S1
+SCN8A,773,783,Topological domain,Extracellular,Extracellular Loop
+SCN8A,784,803,Transmembrane,Helical; Name=S2 of repeat II,DI-S2
+SCN8A,804,817,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,818,837,Transmembrane,Helical; Name=S3 of repeat II,DI-S3
+SCN8A,838,839,Topological domain,Extracellular,Extracellular Loop
+SCN8A,840,857,Transmembrane,Helical; Name=S4 of repeat II,DI-S4
+SCN8A,858,873,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,874,892,Transmembrane,Helical; Name=S5 of repeat II,DI-S5
+SCN8A,893,921,Topological domain,Extracellular,Extracellular Loop
+SCN8A,922,942,Intramembrane,Pore-forming,Pore-forming Region
+SCN8A,943,955,Topological domain,Extracellular,Extracellular Loop
+SCN8A,956,976,Transmembrane,Helical; Name=S6 of repeat II,DI-S6
+SCN8A,977,1199,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,1200,1217,Transmembrane,Helical; Name=S1 of repeat III,DI-S1
+SCN8A,1218,1230,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1231,1249,Transmembrane,Helical; Name=S2 of repeat III,DI-S2
+SCN8A,1250,1263,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,1264,1282,Transmembrane,Helical; Name=S3 of repeat III,DI-S3
+SCN8A,1283,1290,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1291,1309,Transmembrane,Helical; Name=S4 of repeat III,DI-S4
+SCN8A,1310,1326,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,1327,1346,Transmembrane,Helical; Name=S5 of repeat III,DI-S5
+SCN8A,1347,1399,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1400,1421,Intramembrane,Pore-forming,Pore-forming Region
+SCN8A,1422,1438,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1439,1460,Transmembrane,Helical; Name=S6 of repeat III,DI-S6
+SCN8A,1461,1523,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,1524,1541,Transmembrane,Helical; Name=S1 of repeat IV,DI-S1
+SCN8A,1542,1552,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1553,1571,Transmembrane,Helical; Name=S2 of repeat IV,DI-S2
+SCN8A,1572,1583,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,1584,1601,Transmembrane,Helical; Name=S3 of repeat IV,DI-S3
+SCN8A,1602,1614,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1615,1631,Transmembrane,Helical; Name=S4 of repeat IV,DI-S4
+SCN8A,1632,1650,Topological domain,Cytoplasmic,Cytoplasmic Loop
+SCN8A,1651,1668,Transmembrane,Helical; Name=S5 of repeat IV,DI-S5
+SCN8A,1669,1690,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1691,1713,Intramembrane,Pore-forming,Pore-forming Region
+SCN8A,1714,1742,Topological domain,Extracellular,Extracellular Loop
+SCN8A,1743,1765,Transmembrane,Helical; Name=S6 of repeat IV,DI-S6
+SCN8A,1766,1980,Topological domain,Cytoplasmic,C-Terminus

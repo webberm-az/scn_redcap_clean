@@ -41,7 +41,7 @@ cleaner = Cleaner()
 ```{python}
 #| label: 01 Merge Raw and Review Translations
 
-csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
+config.csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
 
 # if specific terms need overrides after translation add them here & rerun this step
 config.translation_dict = { # planning to track this in notes eventually for each version
@@ -49,7 +49,7 @@ config.translation_dict = { # planning to track this in notes eventually for eac
             'SCN8A':'SCN8A',
            }
 
-cleaner.step_01_merge_raw_and_review_translations(csv_list)
+cleaner.s1_translations()
 ```
 
 **Move edited translations_manual_overrides.csv to the overrides folder.**
@@ -57,7 +57,7 @@ Add comments to the translations_manual_overrides.txt as needed.
 ```{python}
 #| label: 02 Translated and Review Duplicates
 
-cleaner.step_02_translated_and_review_duplicates()
+cleaner.s2_duplicates()
 
 ```
 
@@ -67,7 +67,7 @@ Add comments to the duplicates_manual_overrides.txt as needed.
 ```{python}
 #| label: 03 Remove Duplicates and Review Medications and/or Supplements
 
-cleaner.step_03_removed_duplicates_and_review_meds()
+cleaner.s3_removed_duplicates_and_review_meds()
 
 ```
 
@@ -76,7 +76,7 @@ Add comments to the medications_manual_overrides.txt as needed.
 ```{python}
 #| label: 04 Medications and/or Supplements as Binary and Review Genomics
 
-cleaner.step_04_medications_and_review_genomics()
+cleaner.s4_medications_and_review_genomics()
 
 ```
 
@@ -86,7 +86,7 @@ Add comments to the genomics_manual_overrides.txt as needed.
 ```{python}
 #| label: 05 Genomics and Standardize
 
-cleaner.step_05_genomics_and_standardize()
+cleaner.s5_genomics_and_standardize()
 
 ```
 
