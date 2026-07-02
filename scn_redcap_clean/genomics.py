@@ -4,9 +4,8 @@ from .csv_kit import CsvKit
 from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
 from .schemas import GenomicList
-from .override_manager import OverrideManager
 from .uniprot import UniProtQuery
-from . import bio, config
+from . import bio, config, console, utils
 
 
 class Genomics:
@@ -18,13 +17,12 @@ class Genomics:
         self.paths = paths
         self.archiver = CsvWriter(self.paths)
         self.id_col = config.merge_on_id_column
-        self.local_ai = LocalAI(schema = GenomicList, field_name = 'variants')
         self.csvkit = CsvKit()
         self.genomics_dict_df = self.csvkit.try_path_to_df(
             f'{config.gene_name}_position_map_uniprot', self.paths.ref)
-        self.extractor_cols = [config.c_genomic, config.p_genomic]
         self.r_term = 'recommended_term'
         self.term = 'clean_term'
+        self.step_number = 4
 
 
     def review_df(self):
@@ -42,9 +40,52 @@ class Genomics:
 
     def try_input_override_df(self):
         '''  Maps genomic variants to UniProt position map and inputs into main csv '''
-        df = OverrideManager(5, self).try_input_mapped_long_df(self.genomics_dict_df)
+        self.override_csv_path = self.csvkit.if_exists_path( 
+            'genomics_manual_override', self.paths.overrides)
+        df = self.try_input_mapped_long_df(self.df, self.genomics_dict_df)
         
         return df
+
+
+
+    def try_input_mapped_long_df(self, df, map_df): # for Medications and Genomics
+        ''' 
+        If override_csv_name exists in overrides folder:
+        Maps terms using map_df and inputs into main csv
+        '''
+        self.df = df
+        self.map_df = map_df
+        self.override_csv_path = self.csvkit.if_exists_path( 
+            'genomics_manual_override', self.paths.overrides)
+        if self.df is None or self.override_csv_path is None or self.map_df is None:
+            self._alert_errors()
+            return None
+
+        override_df = self.csvkit.robust_read_csv(self.override_csv_path) 
+        df = self._get_final_df(override_df)
+        
+        return df
+
+
+
+    def _alert_errors(self):
+        if self.df is None:
+            last_step = utils.get_step_config(self.step_number - 1)
+            console.error_missing(last_step, "not in 'steps' folder")
+        
+        if self.override_csv_path is None:
+            console.info_missing_file({self.override_csv_path}, 'overrides')
+
+
+
+    def _get_final_df(self, override_df):
+        mapped_long_df = self.try_get_mapped_long_df(override_df)
+        if mapped_long_df.empty:
+            return self.df
+
+        final_df = self.try_get_merged_final_df(self.df, mapped_long_df)
+
+        return final_df
 
 
 
@@ -85,7 +126,7 @@ class Genomics:
 
         aligned_df = self._align_and_update_main_df(main_df, mapped_long_df)
         final_df = bio.compute_variant_strings(aligned_df)
-        final_df = final_df.drop(columns = self.extractor_cols, errors = 'ignore')
+        final_df = final_df.drop(columns = config.genomic_cols, errors = 'ignore')
 
         return final_df
 
@@ -172,8 +213,17 @@ class Genomics:
 
 
     def _get_genomics_for_review(self):
-        self.prompt = config.prompt_genomics
-        
-        df = ExtractorAI(GenomicList, self).get_for_review()
+        local_ai = LocalAI(schema = GenomicList, field_name = 'variants')
+        extractor_configs = self._get_configs()
+        extractor = ExtractorAI(local_ai, extractor_configs)
+        df = extractor.get_for_review(self.df)
 
         return df
+    def _get_configs(self):
+        extractor_configs = {
+            'name': 'genomics',
+            'cols': config.genomic_cols,
+            'prompt': config.prompt_genomics,
+            'schema': GenomicList}
+
+        return extractor_configs

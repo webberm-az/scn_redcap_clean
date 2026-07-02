@@ -4,15 +4,12 @@ os.environ['SSL_CERT_FILE'] = certifi.where()
 
 # local imports
 from . import config  # global configs
-from .duplicates import Duplicates
-from .genomics import Genomics
-from .meds import Medications
 from .data import Data       # refactor
 from .overrides import Overrides
 from .paths import Paths
 from .review import Review
 from .standardize import Standardize
-from .translation import Translation
+from .step import Step
 
 
 class Cleaner:
@@ -22,6 +19,8 @@ class Cleaner:
     '''
     def __init__(self):
         self.paths = Paths(raw_data_source = config.raw_data_dir)
+        self.overrides = Overrides(self.paths)
+        self.review = Review(self.paths)
 
 
     def s1_translations(self):
@@ -33,7 +32,7 @@ class Cleaner:
         df = data.assemble()
                 
            ## track data.language_cols in new cleaned data dict?
-        Review(df, self.paths).translations(data.language_cols)
+        self.review.translations(df, data.language_cols)
         
         return
     
@@ -43,9 +42,9 @@ class Cleaner:
         ''' 
         Only inputs translations if 'translations_manual_override.csv' is in the overrides folder
         '''
-        df = Overrides(2, Translation, self.paths).run()
+        df = self.overrides.run(Step.translated)
 
-        Review(df, self.paths).duplicates()
+        self.review.duplicates(df)
 
         return
     
@@ -63,10 +62,9 @@ class Cleaner:
 
         Expect this step to take a few minutes...
         '''
-        df = Overrides(3, Duplicates, self.paths).run()
+        df = self.overrides.run(Step.duplicates)
 
-        review = Review(df, self.paths)
-        review.clinical()
+        self.review.clinical(df)
 
         return
 
@@ -87,12 +85,10 @@ class Cleaner:
         Standardizes all 'config.age_dependent' columns
         Outputs descriptive statistics of cleaned csv
         '''
-        Overrides(4, Medications, self.paths).run()
-        overrides = Overrides(4, Genomics, self.paths)
+        df = self.overrides.get_df(Step.clinical)
 
-        df = overrides.try_input_override_df()
         df = Standardize(df, self.paths).try_get_age(age_units)
 
-        overrides.create_step_main_and_archive(df)
+        self.overrides.create_csvs(df)
         
         return

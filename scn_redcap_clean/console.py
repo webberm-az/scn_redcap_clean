@@ -6,12 +6,17 @@ def custom_alert(type, message):
     print(f"\n| {type} | {message}\n")
 
 def alert_missing_config_file(
-    dir, role_name, set_config, file_path = '', message = None):
+    dir, role_name, set_config_str, file_path = '', message = None):
     type = f"{role_name} Missing"
     custom_alert(type, file_path)
-    print(f"set filename using  {set_config} = 'your_file_name'  and store in  '{dir}' folder\n")
+    print(f"set filename using  {set_config_str} = 'your_file_name'  and store in  '{dir}' folder\n")
     if message:
         alternative(message)
+
+def print_missing_override_dict(process_name, set_config_str):
+        alert_missing_config_file('ref', f'{process_name} map', set_config_str)
+
+
 
 def alternative(message):
     print("\n ``Alternatively, {message} \n")

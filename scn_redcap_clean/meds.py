@@ -7,9 +7,7 @@ from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
 from .ref_map import RefMap
 from .schemas import MedicationList
-from .override_manager import OverrideManager
-from . import config
-from . import console
+from . import config, console, utils
 
 
 class Medications:
@@ -21,10 +19,11 @@ class Medications:
         self.paths = paths
         self.archiver = CsvWriter(self.paths)
         self.id_col = config.merge_on_id_column
-        self.local_ai = LocalAI(schema = MedicationList, field_name = 'substances')
         self.csvkit = CsvKit()
         self.meds_dict_df = self.csvkit.try_path_to_df(
             config.meds_dict, self.paths.ref)
+        self.step_number = 4
+
 
 
     def review_df(self):
@@ -48,9 +47,55 @@ class Medications:
         ''' 
         If override_filename exists in overrides folder, maps medications/supplements terms to config.meds_dict and inputs into main csv
         '''
-        df = OverrideManager(4, self).try_input_mapped_long_df(self.meds_dict_df)
+        self.override_csv_path = self.csvkit.if_exists_path( 
+            'medications_manual_override', self.paths.overrides)
+        df = self.try_input_mapped_long_df(self.df, self.meds_dict_df)
         
         return df
+
+
+
+    def try_input_mapped_long_df(self, df, map_df): # for Medications and Genomics
+        ''' 
+        If override_csv_name exists in overrides folder:
+        Maps terms using map_df and inputs into main csv
+        '''
+        self.df = df
+        self.map_df = map_df
+        self.override_csv_path = self.csvkit.if_exists_path( 
+            'medications_manual_override', self.paths.overrides)
+        if self.df is None or self.override_csv_path is None or self.map_df is None:
+            self._alert_errors()
+            return None
+
+        override_df = self.csvkit.robust_read_csv(self.override_csv_path) 
+        df = self._get_final_df(override_df)
+        
+        return df
+
+
+
+    def _alert_errors(self):
+        if self.df is None:
+            last_step = utils.get_step_config(self.step_number - 1)
+            console.error_missing(last_step, "not in 'steps' folder")
+        
+        if self.override_csv_path is None:
+            console.info_missing_file({self.override_csv_path}, 'overrides')
+        
+        if self.map_df is None:
+            console.print_missing_override_dict('medications', 'config.meds_dict')
+
+
+
+    def _get_final_df(self, override_df):
+        mapped_long_df = self.try_get_mapped_long_df(override_df)
+        if mapped_long_df.empty:
+            return self.df
+
+        final_df = self.try_get_merged_final_df(self.df, mapped_long_df)
+
+        return final_df
 
 
 
@@ -76,14 +121,23 @@ class Medications:
 
 
     def _get_meds_for_review(self):
-        
-        self.extractor_cols = config.med_text_cols
-        self.prompt = config.prompt_meds
-
-        df = ExtractorAI(MedicationList, self).get_for_review()
+        local_ai = LocalAI(schema = MedicationList, field_name = 'substances')
+        extractor_configs = self._get_configs()
+        extractor = ExtractorAI(local_ai, extractor_configs)
+        df = extractor.get_for_review(self.df)
         df = self._get_add_to_ref_col(df)
 
         return df
+
+
+    def _get_configs(self):
+        extractor_configs = {
+            'name': 'medications',
+            'cols': config.med_text_cols,
+            'prompt': config.prompt_meds,
+            'schema': MedicationList}
+
+        return extractor_configs
 
 
 

@@ -8,17 +8,16 @@ from .translator import Translator
 from .detector import Detector
 from .translation_packages import TranslationPackages
 from .csv_kit import CsvKit
-from .override_manager import OverrideManager
+from .override_append import OverrideAppend
 from .version import Version
 
 
 class Translation:
 
-    def __init__(self, df, paths, cols_to_translate):
+    def __init__(self, df, paths):
         self.df = df
         self.paths = paths
-        self.cols_to_translate = cols_to_translate
-        self.archiver = CsvWriter(self.paths)
+        self.csv_writer = CsvWriter(self.paths)
         self.id_col = config.merge_on_id_column
         self.detect_script_threshold = config.translation_script_threshold
         self.special_terms = config.translation_dict
@@ -26,21 +25,25 @@ class Translation:
         self.translator = Translator(self.packages)
         self.csvkit = CsvKit()
         self.detect = Detector(self.packages)
-        self.archive_filename = 'translations_for_review'
+        self.archive_csvname = 'translations_for_review'
         self.version = Version(self.paths.archive)
 
 
-    def review_df(self):
+    def review_df(self, cols_to_translate):
         '''
         Outputs csv files for translation review 
         (1 file for record keeping and 1 file for manual override editting)
         '''
+        self.cols_to_translate = cols_to_translate
+        if self.cols_to_translate is None:
+            return 
+
         df = self.df
 
         # df with added english '_orig' cols, '_needs_trans' col, and translated 'cols_to_translate'
         translation_df = self._get_translation_df(df)
         if self._is_no_translations_needed(translation_df):
-            return pd.DataFrame() # if no translations detected returns empty df
+            return 
 
         self.packages.print_language_download_summary() 
         final_translated_df = self._get_translations_for_review_df()
@@ -53,7 +56,7 @@ class Translation:
         If override_filename exists in overrides folder inputs into main csv
         '''
         df = self.df
-        df = OverrideManager(2, self).try_append_override_df()
+        df = OverrideAppend(self.paths, 'translation').append_override_df(df)
         
         return df
 
@@ -93,12 +96,12 @@ class Translation:
         '''
         Creates df of rows needing translation and includes detected langange in '_lang' col
         '''
-        last_review_df = self._get_last_archive_df(self.archive_filename)
+        last_review_df = self._get_last_archive_df(self.archive_csvname)
         if last_review_df is None:
             detected_needs_trans_idx = self._get_detected_needs_trans_idx()
             return detected_needs_trans_idx
         
-        max_version = self.version.get_max_version(self.archive_filename)
+        max_version = self.version.get_max_version(self.archive_csvname)
         if max_version is None:
             detected_needs_trans_idx = self._get_detected_needs_trans_idx()
             return detected_needs_trans_idx
@@ -161,8 +164,9 @@ class Translation:
 
 
 
-    def _get_archived_needs_trans_idx(self, last_version_translations_review_df, max_version):
-        print(f"Using language detections from '{self.archive_filename}' version {max_version}")
+    def _get_archived_needs_trans_idx(
+        self, last_version_translations_review_df, max_version):
+        print(f"Using language detections from '{self.archive_csvname}' version {max_version}")
         self._input_languages_codes(last_version_translations_review_df)
 
         return self.df['_needs_trans']

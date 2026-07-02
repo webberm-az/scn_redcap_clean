@@ -5,58 +5,55 @@ from . import utils
 
 class Overrides:
     
-    def __init__(self, step_number, Class, paths):
+    def __init__(self, paths):
         self.paths = paths
-        self.archiver = CsvWriter(self.paths)
-        self.step_number = step_number
-        self.Class_instance = Class
-        
-        self.process_name = self.Class_instance.__name__.lower()
-        self.override_csv_name = f'{self.process_name}_manual_override'
-
+        self.csv_writer = CsvWriter(self.paths)
         self.csvkit = CsvKit()
-        self.df = self.get_last_step_df()
+
+
+
+    # in Cleaner for Translations, Duplicates, Medication & Genomics
+    def run(self, step):
+        self.df = self.get_df(step)
+        self.create_csvs(self.df)
+                
+        return self.df
+
+
+    def get_df(self, step):
+        self.step = step
+        self._init_step_dependencies()
+        df = self._get_last_step_df()
+        df = self._run_current_step(df)
+
+        return df
+
+
+
+    def create_csvs(self, df):
+        cur_step = utils.get_step_config(self.step.number)
+        self.csv_writer.main_and_archive(df, cur_step, self.paths.steps)
+
+
+    def _run_current_step(self, df):
+        self.csv_writer.archive_overrides(self.override_csv_name)
+        df = self.step.run_override(df, self.paths)
+
+        return df
+
+
+
+    def _init_step_dependencies(self):
+        self.override_csv_name = f'{self.step.process_name}_manual_override'
         self.override_csv_path = self.csvkit.if_exists_path(
             self.override_csv_name, self.paths.overrides)
-        
-        self.archiver.archive_overrides(self.override_csv_name)
 
 
-    def get_last_step_df(self):
-        last_step = utils.get_step_config(self.step_number - 1)
+
+    def _get_last_step_df(self):
+        last_step = utils.get_step_config(self.step.number - 1)
         df = self.csvkit.try_path_to_df(last_step, self.paths.steps)
 
         return df
 
 
-
-    # in Cleaner for Translations, Duplicates, Medication & Genomics
-    def run(self):
-        df = self.try_input_override_df()
-        self.create_step_main_and_archive(df)
-        
-        return df
-
-
-
-    def try_input_override_df(self):
-        df = self.df
-        method = self._get_class_instance_method('try_input_override_df')
-        df = method()
-        
-        return df
-
-
-
-    def create_step_main_and_archive(self, df):
-        cur_step = utils.get_step_config(self.step_number)
-        self.archiver.main_and_archive(df, cur_step, self.paths.steps)
-
-
-
-    def _get_class_instance_method(self, method):
-        Class_instance = self.Class_instance
-        instance = Class_instance(self.df, self.paths)
-        method = getattr(instance, method)
-
-        return method

@@ -5,14 +5,13 @@ from . import utils
 class ExtractorAI:
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
     
-    def __init__(self, schema, delegate):
+    def __init__(self, local_ai, class_configs):
 
-        self.df = delegate.df.copy()
-        self.local_ai = delegate.local_ai
-        self.columns = delegate.extractor_cols
-        self.prompt = delegate.prompt
-        self.schema = schema
-        self.process_name = f'{self.schema.__name__.lower()[:-4]}s'
+        self.local_ai = local_ai
+        self.columns = class_configs['cols']
+        self.prompt = class_configs['prompt']
+        self.schema = class_configs['schema']
+        self.process_name = class_configs['name']
 
         self.ollama_results_col = f'ollama_{self.process_name}_results'
         self.ai_conf_col = 'ollama_confidence'
@@ -20,8 +19,7 @@ class ExtractorAI:
         self.base_long_cols = [self.id_col, 'from_column', 'raw_text']
 
 
-
-    def get_for_review(self):
+    def get_for_review(self, df):
         ''' 
         Outputs csv files for genomic variants review 
         (1 file for record keeping and 1 file for manual override editting)
@@ -29,40 +27,39 @@ class ExtractorAI:
         '''
         self.local_ai.ensure_local_ai()
 
-        final_df = self._get_for_review_df()
+        final_df = self._get_df(df)
 
         return final_df
 
 
 
-    def _get_for_review_df(self):
-        preped_df = self._prep_long_form_df()
+    def _get_df(self, df):
+        long_df = self._get_long_df(df)
+        preped_df = self._prep_long_form_df(long_df)
         extraction_df = self._extract_df(preped_df)
-        sorted_df = extraction_df.sort_values(by = self.ai_conf_col, ascending = True)
-        utils.add_column_if_dne('override_explanation', sorted_df)
+        final_df = self._get_for_review_df(extraction_df)
+
+        return final_df
+
+
+
+    def _get_long_df(self, df):
+        id_vars = [self.id_col]
+        from_col_name = self.base_long_cols[1]
+        raw_extract_col = self.base_long_cols[2]
+        long_df = df.melt(id_vars, self.columns, from_col_name, raw_extract_col)
         
-        return sorted_df
+        return long_df
 
 
 
-    def _prep_long_form_df(self):
-        long_df = self._get_long_df()
+    def _prep_long_form_df(self, long_df):
         
         long_df['raw_text'] = long_df['raw_text'].astype(str).str.strip()
         is_not_empty = long_df['raw_text'] != ''
         is_not_nan = long_df['raw_text'].str.lower() != 'nan'
         active_rows_only = is_not_empty & is_not_nan
         long_df = long_df[active_rows_only]
-        
-        return long_df
-
-
-
-    def _get_long_df(self):
-        id_vars = [self.id_col]
-        from_col_name = self.base_long_cols[1]
-        raw_extract_col = self.base_long_cols[2]
-        long_df = self.df.melt(id_vars, self.columns, from_col_name, raw_extract_col)
         
         return long_df
 
@@ -80,6 +77,13 @@ class ExtractorAI:
         one_ai_term_per_row_df = self._get_exploded_df(df)
         
         return one_ai_term_per_row_df
+
+
+    def _get_for_review_df(self, extraction_df):
+        sorted_df = extraction_df.sort_values(by = self.ai_conf_col, ascending = True)
+        utils.add_column_if_dne('override_explanation', sorted_df)
+        
+        return sorted_df
 
 
 

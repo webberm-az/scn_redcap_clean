@@ -92,6 +92,8 @@ translation_dict = {
 # for UniProt Ref Map
 gene_name = 'SCN8A'
 
+genomic_cols = [c_genomic, p_genomic]
+
 # Schema Columns 
 protein_aa_orig_1 = 'aa_orig_1'
 protein_pos = 'pos_num'

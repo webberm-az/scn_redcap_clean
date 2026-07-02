@@ -67,7 +67,7 @@ Add comments to the duplicates_manual_overrides.txt as needed.
 ```{python}
 #| label: 03 Remove Duplicates and Review Medications and/or Supplements
 
-cleaner.s3_removed_duplicates_and_review_meds()
+cleaner.s3_clinical()
 
 ```
 
@@ -76,7 +76,7 @@ Add comments to the medications_manual_overrides.txt as needed.
 ```{python}
 #| label: 04 Medications and/or Supplements as Binary and Review Genomics
 
-cleaner.s4_medications_and_review_genomics()
+cleaner.standardize()
 
 ```
 
