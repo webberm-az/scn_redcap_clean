@@ -36,7 +36,7 @@ age_dependent = ['toy_check1', 'toy_check2', 'toy_check3', 'toy_check4', 'toy_ye
 
 '''    ____________________________  Defaults  __________________________________    '''
 
-raw_data_dir = 'raw'  # default raw data folder name
+raw_data_dirs = ['cleaning_dump']  # default raw data folder name
 
 merge_on_id_column = 'participant_id'
 

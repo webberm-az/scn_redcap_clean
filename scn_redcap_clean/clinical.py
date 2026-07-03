@@ -4,9 +4,8 @@ from .genomics import Genomics
 class Clinical:
     ''' Combine Medication and Genomics Overrides into one step '''
     
-    def __init__(self, df, paths):
+    def __init__(self, df):
         self.df = df.copy()
-        self.paths = paths
 
 
     def review_dfs(self):
@@ -14,8 +13,8 @@ class Clinical:
         Generates both review dataframes using the ORIGINAL dataframe.
         Returns them in a dictionary for the Review class to archive.
         '''
-        meds_df = Medications(self.df, self.paths).review_df()
-        genomics_df = Genomics(self.df, self.paths).review_df()
+        meds_df = Medications(self.df).review_df()
+        genomics_df = Genomics(self.df).review_df()
 
         return meds_df, genomics_df
     
@@ -23,10 +22,10 @@ class Clinical:
     
     def try_input_override_df(self):
         ''' Runs overrides for Meds, passes the updated df to Genomics, and returns the final df. '''
-        meds = Medications(self.df, self.paths)
+        meds = Medications(self.df)
         self.df = self._safe_input(meds)
 
-        genomics = Genomics(self.df, self.paths)
+        genomics = Genomics(self.df)
         self.df = self._safe_input(genomics)
 
         return self.df

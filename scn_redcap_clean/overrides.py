@@ -1,13 +1,12 @@
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
-from . import utils
+from . import paths, utils
 
 
 class Overrides:
     
-    def __init__(self, paths):
-        self.paths = paths
-        self.csv_writer = CsvWriter(self.paths)
+    def __init__(self):
+        self.csv_writer = CsvWriter()
         self.csvkit = CsvKit()
 
 
@@ -32,12 +31,12 @@ class Overrides:
 
     def create_csvs(self, df):
         cur_step = utils.get_step_config(self.step.number)
-        self.csv_writer.main_and_archive(df, cur_step, self.paths.steps)
+        self.csv_writer.main_and_archive(df, cur_step, paths.STEPS)
 
 
     def _run_current_step(self, df):
         self.csv_writer.archive_overrides(self.override_csv_name)
-        df = self.step.run_override(df, self.paths)
+        df = self.step.run_override(df)
 
         return df
 
@@ -45,14 +44,14 @@ class Overrides:
 
     def _init_step_dependencies(self):
         self.override_csv_name = f'{self.step.process_name}_manual_override'
-        self.override_csv_path = self.csvkit.if_exists_path(
-            self.override_csv_name, self.paths.overrides)
+        self.override_csv_path = self.csvkit.path(
+            self.override_csv_name, paths.OVERRIDES)
 
 
 
     def _get_last_step_df(self):
         last_step = utils.get_step_config(self.step.number - 1)
-        df = self.csvkit.try_path_to_df(last_step, self.paths.steps)
+        df = self.csvkit.path_to_df(last_step, paths.STEPS)
 
         return df
 

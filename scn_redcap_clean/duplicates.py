@@ -1,18 +1,15 @@
 import pandas as pd
 
 # local imports
-from . import config # global configs
+from . import config, console, paths, utils # global configs
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
-from . import utils
-from . import console
 
 
 class Duplicates:
-    def __init__(self, df, paths):
+    def __init__(self, df):
         self.df = df
-        self.paths = paths
-        self.archiver = CsvWriter(self.paths)
+        self.archiver = CsvWriter()
         self.csvkit = CsvKit()
         self.dup_col = config.filter_columns
         self.id_col = config.merge_on_id_column
@@ -52,8 +49,8 @@ class Duplicates:
 
 
     def try_manual_override(self, override_filename):
-        override_csv_path = self.csvkit.if_exists_path(
-            override_filename, self.paths.overrides)        
+        override_csv_path = self.csvkit.path(
+            override_filename, paths.OVERRIDES)        
         if override_csv_path is not None:
             self.df = self.csvkit.append_override_rows(override_csv_path, self.df)
         else:

@@ -6,10 +6,9 @@ from .csv_kit import CsvKit
 
 class Standardize:
 
-    def __init__(self, df, paths):
+    def __init__(self, df):
 
         self.df = df.copy()
-        self.paths = paths
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
 

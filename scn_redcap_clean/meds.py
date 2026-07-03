@@ -1,27 +1,26 @@
 import numpy as np
 import pandas as pd
 
+from . import config, console, paths, utils
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
 from .ref_map import RefMap
 from .schemas import MedicationList
-from . import config, console, utils
 
 
 class Medications:
     ''' Standardizes and dummies medications and supplements using local AI Ollama. '''
     
-    def __init__(self, df, paths):
+    def __init__(self, df):
 
         self.df = df.copy()
-        self.paths = paths
-        self.archiver = CsvWriter(self.paths)
+        self.archiver = CsvWriter()
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
-        self.meds_dict_df = self.csvkit.try_path_to_df(
-            config.meds_dict, self.paths.ref)
+        self.meds_dict_df = self.csvkit.path_to_df(
+            config.meds_dict, paths.REF)
         self.step_number = 4
 
 
@@ -47,8 +46,8 @@ class Medications:
         ''' 
         If override_filename exists in overrides folder, maps medications/supplements terms to config.meds_dict and inputs into main csv
         '''
-        self.override_csv_path = self.csvkit.if_exists_path( 
-            'medications_manual_override', self.paths.overrides)
+        self.override_csv_path = self.csvkit.path( 
+            'medications_manual_override', paths.OVERRIDES)
         df = self.try_input_mapped_long_df(self.df, self.meds_dict_df)
         
         return df
@@ -62,13 +61,13 @@ class Medications:
         '''
         self.df = df
         self.map_df = map_df
-        self.override_csv_path = self.csvkit.if_exists_path( 
-            'medications_manual_override', self.paths.overrides)
+        self.override_csv_path = self.csvkit.path( 
+            'medications_manual_override', paths.OVERRIDES)
         if self.df is None or self.override_csv_path is None or self.map_df is None:
             self._alert_errors()
             return None
 
-        override_df = self.csvkit.robust_read_csv(self.override_csv_path) 
+        override_df = self.csvkit.robust_read(self.override_csv_path) 
         df = self._get_final_df(override_df)
         
         return df

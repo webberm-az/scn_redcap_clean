@@ -116,3 +116,4 @@ class ExtractorAI:
             lambda item: item.get(col, '') if isinstance(item, dict) else '')
 
         return exploded_col 
+        

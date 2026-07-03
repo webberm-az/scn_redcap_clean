@@ -3,10 +3,9 @@ import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
 # local imports
-from . import config  # global configs
-from .data import Data       # refactor
+from . import paths 
+from .data import Data
 from .overrides import Overrides
-from .paths import Paths
 from .review import Review
 from .standardize import Standardize
 from .step import Step
@@ -18,17 +17,18 @@ class Cleaner:
     Each step also copies csv outputs as read-only in archive folder for version history.
     '''
     def __init__(self):
-        self.paths = Paths(raw_data_source = config.raw_data_dir)
-        self.overrides = Overrides(self.paths)
-        self.review = Review(self.paths)
+        ''' 
+        Creates a 'base' file and merges csvs in csv_list (if csvs are in raw folder).
+        '__base__.csv' is created based on 'config.module' and 'config.raw_module_csv' settings and used to filter only participant_id's with at least 1 response in the specified 'config.module' list. 'Data Dictionary' configs must be set.
+        '''
+        paths.setup_workspace()
+        self.overrides = Overrides()
+        self.review = Review()
 
 
     def s1_translations(self):
-        ''' 
-        Creates a 'base' file and merges csvs in csv_list (if csvs are in raw folder).
-        'base.csv' is created based on 'config.module' and 'config.raw_module_csv' settings and used to filter only participant_id's with at least 1 response in the specified 'config.module' list. 'Data Dictionary' configs must be set.
-        '''
-        data = Data(self.paths)
+        ''' Cleanly merges csvs using the 'base' file participant_id's '''
+        data = Data()
         df = data.assemble()
                 
            ## track data.language_cols in new cleaned data dict?
@@ -87,7 +87,7 @@ class Cleaner:
         '''
         df = self.overrides.get_df(Step.clinical)
 
-        df = Standardize(df, self.paths).try_get_age(age_units)
+        df = Standardize(df).try_get_age(age_units)
 
         self.overrides.create_csvs(df)
         

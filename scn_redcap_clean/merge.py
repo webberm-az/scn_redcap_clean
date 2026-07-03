@@ -1,5 +1,5 @@
 # local imports
-from . import config,  utils # global configs
+from . import config, paths, utils # global configs
 from .csv_kit import CsvKit
 
 
@@ -32,16 +32,16 @@ class Merge:
         if self.id_subset_csv is None:
             self.id_subset_csv = config.csv_list[0] # default to first file in list if not specified
         
-        merge_on_file_clean = str(self.csvkit.add_suffix(self.id_subset_csv))
+        merge_on_file_clean = str(self.csvkit.ensure_suffix(self.id_subset_csv))
         
         return merge_on_file_clean
 
 
 
     def _get_merge_on_file_df(self):
-        merge_on_file_clean = self.csvkit.add_suffix(self.id_subset_csv)
+        merge_on_file_clean = self.csvkit.ensure_suffix(self.id_subset_csv)
         merge_on_file_df = self.csvkit.get_df_dropna_subset(
-            config.raw_data_dir, merge_on_file_clean, [self.id_col])
+            paths.RAW, merge_on_file_clean, [self.id_col])
 
         return merge_on_file_df
 
@@ -53,7 +53,7 @@ class Merge:
         Initializes combined_data df with merge_on_file ensuring consistent id_col type
         '''        
         for csv in config.csv_list: 
-            csv_clean = self.csvkit.add_suffix(csv)
+            csv_clean = self.csvkit.ensure_suffix(csv)
             merged_df = self._safe_merge(csv_clean, merge_on_file, merged_df)
         
         return merged_df
@@ -72,7 +72,7 @@ class Merge:
     def _merge(self, csv_name, merged_df):
         ''' Merges df with csv on id_col and returns merged df '''
         merging_df = self.csvkit.get_df_dropna_subset(
-            config.raw_data_dir, csv_name, [self.id_col])
+            paths.RAW, csv_name, [self.id_col])
         merged_df = self.merge_dropping_shared_cols(merged_df, merging_df, csv_name)
 
         return merged_df
@@ -97,7 +97,6 @@ class Merge:
             base_df, merging_df, self.id_col)
         
         if remaining_shared_cols:
-            self.rename_dict = {}
             self.get_rename_dict(remaining_shared_cols, csv_name)
             merging_df = merging_df.rename(columns = self.rename_dict)
         

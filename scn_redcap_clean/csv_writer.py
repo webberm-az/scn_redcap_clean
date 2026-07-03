@@ -1,19 +1,16 @@
 from pathlib import Path
 
 # local import
+from . import console, paths, utils
 from .csv_kit import CsvKit
 from . version import Version
-from . import utils
-from . import console
 
 
 class CsvWriter:
     
-    def __init__(self, paths):
-
-        self.paths = paths
+    def __init__(self):
         self.csvkit = CsvKit()
-        self.version = Version(self.paths.archive)
+        self.version = Version(paths.ARCHIVE)
 
     
     # cleaner
@@ -23,10 +20,10 @@ class CsvWriter:
         Copies CSVs from main_path (with override as default) as read-only in archive folder
         '''
         if main_path is None:
-            main_path = self.paths.overrides
+            main_path = paths.OVERRIDES
         
         main_path = Path(main_path)
-        df = self.csvkit.try_path_to_df(filename, main_path)
+        df = self.csvkit.path_to_df(filename, main_path)
         if df is None: 
             return None
 
@@ -66,10 +63,10 @@ class CsvWriter:
         archive_csv_name = f'{step}_for_review'
 
         self.main_and_archive(
-            df, main_csv_name, self.paths.review, archive_csv_name, csvname_get_version)
+            df, main_csv_name, paths.REVIEW, archive_csv_name, csvname_get_version)
         
         content = 'Additional explanations: \n'
-        utils.write_txt_file(content, main_csv_name, self.paths.overrides)
+        utils.write_txt_file(content, main_csv_name, paths.OVERRIDES)
 
 
 
@@ -97,6 +94,6 @@ class CsvWriter:
         if version is None:
             version = self.version.get_output_version(fname, df)
 
-        filepath = self.paths.archive / f'{fname}_v{version:03d}.csv'
+        filepath = paths.ARCHIVE / f'{fname}_v{version:03d}.csv'
 
         return filepath

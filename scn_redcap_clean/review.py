@@ -9,9 +9,8 @@ from .translation import Translation
 
 class Review:
 
-    def __init__(self, paths):
-        self.paths = paths
-        self.archiver = CsvWriter(self.paths)
+    def __init__(self):
+        self.archiver = CsvWriter()
         self.skip_str = 'skipped not needed'
         
 
@@ -20,7 +19,7 @@ class Review:
         Outputs csv files for translation review 
         (1 file for record keeping and 1 file for manual override editting)
         '''
-        translation = Translation(df, self.paths)
+        translation = Translation(df)
         df = translation.review_df(cols_to_translate)
         if df is None:
             return None
@@ -39,7 +38,7 @@ class Review:
         (1 file for record keeping and 1 file for manual override editting)
         Duplicates are identified by dup_col w/ 'birthdate' as default. 
         '''
-        duplicates = Duplicates(df, self.paths)
+        duplicates = Duplicates(df)
         df = duplicates.review_df()
         if df is None:
             return None
@@ -57,7 +56,7 @@ class Review:
         ''' 
         Outputs csv files for clinical review (Medications and Genomics)
         '''
-        meds_df, genomics_df = Clinical(orig_df, self.paths).review_dfs()
+        meds_df, genomics_df = Clinical(orig_df).review_dfs()
         get_version = config.name_main3
 
         if meds_df is not None:

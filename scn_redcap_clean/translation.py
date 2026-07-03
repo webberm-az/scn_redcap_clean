@@ -2,7 +2,7 @@ import pandas as pd # external imports
 from typing import cast
 
 # local imports
-from . import config, utils # global configs
+from . import config, utils, paths # global configs
 from .csv_writer import CsvWriter
 from .translator import Translator
 from .detector import Detector
@@ -14,10 +14,9 @@ from .version import Version
 
 class Translation:
 
-    def __init__(self, df, paths):
+    def __init__(self, df):
         self.df = df
-        self.paths = paths
-        self.csv_writer = CsvWriter(self.paths)
+        self.csv_writer = CsvWriter()
         self.id_col = config.merge_on_id_column
         self.detect_script_threshold = config.translation_script_threshold
         self.special_terms = config.translation_dict
@@ -26,7 +25,7 @@ class Translation:
         self.csvkit = CsvKit()
         self.detect = Detector(self.packages)
         self.archive_csvname = 'translations_for_review'
-        self.version = Version(self.paths.archive)
+        self.version = Version(paths.ARCHIVE)
 
 
     def review_df(self, cols_to_translate):
@@ -56,7 +55,7 @@ class Translation:
         If override_filename exists in overrides folder inputs into main csv
         '''
         df = self.df
-        df = OverrideAppend(self.paths, 'translation').append_override_df(df)
+        df = OverrideAppend('translation').append_override_df(df)
         
         return df
 

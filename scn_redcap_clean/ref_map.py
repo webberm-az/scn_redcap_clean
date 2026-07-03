@@ -36,7 +36,7 @@ class RefMap:
         if self.dict_df is None or self.dict_df.empty:
             return
 
-        clean_df = self.dict_df.dropna(subset=[self.main]).copy()
+        clean_df = self.dict_df.dropna(subset = [self.main]).copy()
         for _, row in clean_df.iterrows():
             main = str(row[self.main]).strip()
             self._register_term(main, main)

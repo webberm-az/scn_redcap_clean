@@ -3,20 +3,17 @@ from typing import cast
 import pandas as pd
 from pandas import DataFrame
 
+from . import config, paths # global configs
 from .csv_kit import CsvKit
 from .data_dict import DataDict
-from . import config # global configs
 
 
 class BaseCSV:
 
-    def __init__(self, paths):
-        self.paths = paths
+    def __init__(self):
         self.csvkit = CsvKit()
-        self.dict_df = self.csvkit.try_path_to_df(config.data_dict, self.paths.ref)
-        self.data_df = self.csvkit.try_path_to_df(
-            config.raw_module_csv, config.raw_data_dir)
-        self.modules = config.modules
+        self.dict_df = self.csvkit.path_to_df(config.data_dict, paths.REF)
+        self.data_df = self.csvkit.path_to_df(config.raw_module_csv, paths.RAW)
 
         if self.dict_df is not None and self.data_df is not None:
             self.data_dict = DataDict(self.data_df, self.dict_df)
@@ -35,7 +32,7 @@ class BaseCSV:
             return None
 
         module_columns = self.data_dict.get_columns(
-            type = 'checkbox', modules = self.modules)
+            type = 'checkbox', modules = config.modules)
         
         checkbox_cols = module_columns['checkbox']
         other_cols = module_columns['other']
@@ -105,7 +102,7 @@ class BaseCSV:
 
 
     def _save_and_report(self, df: pd.DataFrame):
-        self.csvkit.create_main(df, '__base__', config.raw_data_dir)
+        self.csvkit.create_main(df, '__base__', paths.RAW)
         print(f'Raw base file response count: {len(df)}\n')
 
 

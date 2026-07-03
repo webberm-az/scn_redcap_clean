@@ -5,21 +5,20 @@ from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
 from .schemas import GenomicList
 from .uniprot import UniProtQuery
-from . import bio, config, console, utils
+from . import bio, config, console, paths, utils
 
 
 class Genomics:
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
     
-    def __init__(self, df, paths):
+    def __init__(self, df):
 
         self.df = df.copy()
-        self.paths = paths
-        self.archiver = CsvWriter(self.paths)
+        self.archiver = CsvWriter()
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
-        self.genomics_dict_df = self.csvkit.try_path_to_df(
-            f'{config.gene_name}_position_map_uniprot', self.paths.ref)
+        self.genomics_dict_df = self.csvkit.path_to_df(
+            f'{config.gene_name}_position_map_uniprot', paths.REF)
         self.r_term = 'recommended_term'
         self.term = 'clean_term'
         self.step_number = 4
@@ -40,8 +39,8 @@ class Genomics:
 
     def try_input_override_df(self):
         '''  Maps genomic variants to UniProt position map and inputs into main csv '''
-        self.override_csv_path = self.csvkit.if_exists_path( 
-            'genomics_manual_override', self.paths.overrides)
+        self.override_csv_path = self.csvkit.path( 
+            'genomics_manual_override', paths.OVERRIDES)
         df = self.try_input_mapped_long_df(self.df, self.genomics_dict_df)
         
         return df
@@ -55,13 +54,13 @@ class Genomics:
         '''
         self.df = df
         self.map_df = map_df
-        self.override_csv_path = self.csvkit.if_exists_path( 
-            'genomics_manual_override', self.paths.overrides)
+        self.override_csv_path = self.csvkit.path( 
+            'genomics_manual_override', paths.OVERRIDES)
         if self.df is None or self.override_csv_path is None or self.map_df is None:
             self._alert_errors()
             return None
 
-        override_df = self.csvkit.robust_read_csv(self.override_csv_path) 
+        override_df = self.csvkit.robust_read(self.override_csv_path) 
         df = self._get_final_df(override_df)
         
         return df
@@ -207,7 +206,7 @@ class Genomics:
 
 
     def _try_create_gene_position_refs(self):
-        uniprot = UniProtQuery(self.paths)
+        uniprot = UniProtQuery()
         uniprot.create_gene_position_refs()
 
 

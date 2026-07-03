@@ -49,14 +49,14 @@ class Version:
     def get_version_df(self, version, fname):
         filepath = self.dir_path / f'{fname}_v{version:03d}.csv'
         if filepath.exists():
-            return self.csvkit.robust_read_csv(filepath)
+            return self.csvkit.robust_read(filepath)
 
 
 
     def try_last_version_path(self, fname):
         try:
             last_version_path = self.get_last_version_path(fname)
-            last_version_df = self.csvkit.robust_read_csv(last_version_path)
+            last_version_df = self.csvkit.robust_read(last_version_path)
             return last_version_df
         except Exception:
             return None

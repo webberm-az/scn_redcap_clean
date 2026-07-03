@@ -4,16 +4,14 @@ from typing import cast
 import requests
 import pandas as pd # external import
 
+from . import console, config, paths
 from .csv_kit import CsvKit
-from . import console, config
-
 
 
 class UniProtQuery:
 
-    def __init__(self, paths, url = 'https://rest.uniprot.org/uniprotkb/'):
+    def __init__(self, url = 'https://rest.uniprot.org/uniprotkb/'):
         
-        self.paths = paths
         self.url = url
         self.csvkit = CsvKit()
 
@@ -39,7 +37,7 @@ class UniProtQuery:
 
 
     def _create_filtered_csv(self):
-        df = self.csvkit.robust_read_csv(self.output_path_full)
+        df = self.csvkit.robust_read(self.output_path_full)
         membrane_locations = ['Topological domain', 'Transmembrane', 'Intramembrane']
         reduced_df = df[df['type'].isin(membrane_locations)].copy()
         
@@ -115,9 +113,9 @@ class UniProtQuery:
 
     def get_output_path(self, gene_name):
         fname = f'{gene_name}_position_map_uniprot'
-        dir_ref = Path(self.paths.ref)
-        self.output_path_full = dir_ref / self.csvkit.add_suffix(f"{fname}_full")
-        self.output_path = dir_ref / self.csvkit.add_suffix(fname)
+        dir_ref = Path(paths.REF)
+        self.output_path_full = dir_ref / self.csvkit.ensure_suffix(f"{fname}_full")
+        self.output_path = dir_ref / self.csvkit.ensure_suffix(fname)
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
         
 

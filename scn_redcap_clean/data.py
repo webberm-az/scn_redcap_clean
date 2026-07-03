@@ -1,7 +1,6 @@
 # local imports
-from . import config, console, utils # global configs
+from . import config, console, paths, utils # global configs
 from .csv_writer import CsvWriter 
-from .base_csv import BaseCSV
 from .csv_kit import CsvKit
 from .data_dict import DataDict
 from .merge import Merge
@@ -9,35 +8,29 @@ from .merge import Merge
 
 class Data:
 
-    def __init__(self, paths):
-        self.paths = paths
+    def __init__(self):
         self.id_col = config.merge_on_id_column
-        self.archiver = CsvWriter(self.paths)
+        self.archiver = CsvWriter()
         self.csvkit = CsvKit()
         self.language_cols = config.language_text_columns
 
 
     def assemble(self):
+        '''
+        Cleanly merges csvs using the 'base' file participant_id's and saves to steps and archive folders
+        '''
         df = self._get_merged_module_df()
-        self.archiver.main_and_archive(
-            df, config.name_main1, self.paths.steps)
+        self.archiver.main_and_archive(df, config.name_main1, paths.STEPS)
         
         return df    
 
 
-    def _get_merged_module_df(self, id_subset_csv = '__base__'):
-        '''
-        Creates a 'base' file and merges csvs in csv_list (if csvs are in raw folder).
-        'base.csv' is created based on 'config.module' and 'config.raw_module_csv' settings and used to filter only participant_id's with at least 1 response in the specified 'config.module' list. 'Data Dictionary' configs must be set.
-        '''
+    def _get_merged_module_df(self):
         if not config.csv_list:
             console.error('No data files in raw data folder to assemble')
             return None
         
-        if id_subset_csv == '__base__':
-            BaseCSV(self.paths).create()
-
-        merged_df = Merge(self.language_cols, id_subset_csv).on_id()
+        merged_df = Merge(self.language_cols, config.id_subset_csv).on_id()
         self._try_get_active_text_cols(merged_df)
         existing_filter_columns = self.get_existing_filter_columns(merged_df)
 
@@ -55,6 +48,7 @@ class Data:
 
 
     def get_existing_filter_columns(self, merged_df):
+        ''' Checks 'config.filter_columns' and returns the list of existing columns '''
         filter_cols = self.get_filter_columns()
         existing_filters = self.get_existing_columns(merged_df, filter_cols)  
         
@@ -72,7 +66,7 @@ class Data:
 
 
 
-    def get_existing_columns(self, merged_df, filter_cols):
+    def get_existing_columns(self, merged_df, filter_cols): # add console if missing col
         existing_filters = [col for col in filter_cols if col in merged_df.columns]
 
         return existing_filters
@@ -104,7 +98,7 @@ class Data:
 
 
     def _try_get_auto_text_cols(self, merged_df):
-        dict_df = self.csvkit.try_path_to_df(config.data_dict, self.paths.ref)
+        dict_df = self.csvkit.path_to_df(config.data_dict, paths.REF)
 
         if dict_df is not None:
             self.language_cols = self._get_auto_text_cols(merged_df, dict_df)

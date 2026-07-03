@@ -1,19 +1,18 @@
 from .csv_kit import CsvKit
-from . import config, console, utils # global configs
+from . import config, console, paths, utils # global configs
 
 
 class OverrideAppend:
     
-    def __init__(self, paths, process_name):
+    def __init__(self, process_name):
 
-        self.paths = paths
         self.process_name = process_name
 
         self.override_csv_name = f'{self.process_name}_manual_override'
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
-        self.override_csv_path = self.csvkit.if_exists_path( # need
-            self.override_csv_name, self.paths.overrides)
+        self.override_csv_path = self.csvkit.path( # need
+            self.override_csv_name, paths.OVERRIDES)
 
 
     def append_override_df(self, df): # for Translations
@@ -59,7 +58,7 @@ class OverrideAppend:
 
     def _dropna_id_col(self):
         if self.override_csv_path is not None:
-            override_df = CsvKit().robust_read_csv(self.override_csv_path)
+            override_df = CsvKit().robust_read(self.override_csv_path)
             # drop rows w/ NA id_col in override file for efficiency
             override_df = override_df.dropna(subset = [self.id_col])
 

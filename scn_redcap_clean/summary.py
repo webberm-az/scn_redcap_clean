@@ -1,16 +1,13 @@
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
 import pandas as pd
-from . import config
-from .csv_kit import CsvKit
+from . import config, paths
 from .duplicate_mapper import DuplicateMapper
 from .reporter import Reporter
 
 
 class Summary:
 
-    def __init__(self, paths):
-        self.paths = paths
+    def __init__(self):
         self.id_column = config.merge_on_id_column
         self.bday = config.filter_columns
         self.reporter = Reporter()
@@ -22,7 +19,7 @@ class Summary:
         that share the same tracking version (e.g., v001 pairs with v001).
         """
         # Sorting guarantees: 01_merge_raw_v001 comes right before 02_translated_v001
-        archived_files = sorted(list(self.paths.archive.glob("*.csv")), key=lambda p: p.name)
+        archived_files = sorted(list(paths.ARCHIVE.glob("*.csv")), key=lambda p: p.name)
 
         for i in range(len(archived_files) - 1):
             base_file = archived_files[i]
@@ -81,7 +78,7 @@ class Summary:
 
     def _read_explanation_log(self, stage_base_name: str) -> str:
         """Finds matching static manual explanation notes."""
-        explanation_path = self.paths.overrides / f"{stage_base_name}.txt"
+        explanation_path = paths.OVERRIDES / f"{stage_base_name}.txt"
         if explanation_path.exists():
             return explanation_path.read_text(encoding='utf-8')
         return ""
@@ -89,6 +86,6 @@ class Summary:
     def _write_summary_file(self, comparison_key: str, version_tag: str, content: str) -> None:
         """Writes the output file, keeping the version tag neatly inside the name."""
         output_name = f"{comparison_key}_{version_tag.strip('_')}_summary.md"
-        output_file = self.paths.notes_overrides / output_name
+        output_file = paths.NOTES_OVERRIDE / output_name
         output_file.write_text(content, encoding='utf-8')
         print(f"| Summary Created | {output_file.name}")

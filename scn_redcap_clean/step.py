@@ -18,9 +18,9 @@ class Step(Enum):
         self.skip_reason = None
 
 
-    def run_override(self, df, paths):
+    def run_override(self, df):
         ''' Instantiates the specific class and runs the method. '''
-        instance = self.class_name(df, paths)
+        instance = self.class_name(df)
         df = instance.try_input_override_df()
         self._track_skipped(df)
 

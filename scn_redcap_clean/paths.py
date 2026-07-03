@@ -1,84 +1,262 @@
 from pathlib import Path
+import shutil
 from typing import Union
 
-from . import console
+from .base_csv import BaseCSV
+from .csv_kit import CsvKit
+
+from . import config, console
 
 
 
-class Paths:
+ROOT = Path.cwd().resolve()
+
+# Main Folders
+REF = ROOT / 'ref'
+REVIEW = ROOT / 'review'
+STEPS = ROOT / 'steps'
+OVERRIDES = ROOT / 'overrides'
+NOTES = ROOT / 'notes'
+
+# Hidden Folders
+RAW = ROOT / '__raw__'
+ARCHIVE = ROOT / '__archive__'
+
+
+# Sub-contents
+NOTES_OVERRIDE = NOTES / 'override_summaries'
+NOTES_JUSTIFY = NOTES / 'decision_logs'
+SCRATCHPAD = NOTES / 'scratchpad.md'
+TODO = NOTES / 'todo.md'
+
+csvkit = CsvKit()
+
+def init_directories():
+    # Create main directories
+    main_folders = [RAW, ARCHIVE, STEPS, OVERRIDES, REVIEW, REF, NOTES]
+    sub_folders = [NOTES_OVERRIDE, NOTES_JUSTIFY]
     
-    def __init__(self, raw_data_source: Union[str, Path] = 'raw'):
-        self.root = Path.cwd().resolve()
-        self.set_raw_data_path(raw_data_source, strict = False)
-        self.archive = self._make_dir('archive')
-        self.steps = self._make_dir('steps')
-        self.overrides = self._make_dir('overrides')
-        self.review = self._make_dir('review')
-        self.ref = self._make_dir('ref')
-        self.docs = self._make_dir('docs')
-        self.notes = self._make_dir('notes')
-        self._init_notes_subcontents()
-        self._make_notes_subcontents()
-    
-
-
-    def _make_dir(self, name): # auto created directory folders
-        dir_path = self.root / name
+    folders = main_folders + sub_folders
+    for dir_path in folders:
         dir_path.mkdir(parents = True, exist_ok = True)
-        return dir_path
+    
+    SCRATCHPAD.touch(exist_ok = True)
+    TODO.touch(exist_ok = True)
 
 
 
-    def _init_notes_subcontents(self):
-        self.notes_overrides = self.notes / 'override_summaries'
-        self.notes_justifications = self.notes / 'decision_logs'
-        self.scratchpad = self.notes / 'scratchpad.md'
-        self.todo = self.notes / 'todo.md'
+def setup_workspace():
+    '''
+    Create folders and copy files from user_data_source to __raw__ or ref based on configs.
+    '''
+    init_directories()
+
+    orig_data_paths = _get_path_list()
+    if not orig_data_paths:
+        _create_orig_dir()
+        return
+
+    if not _is_data_dict_to_ref(orig_data_paths):
+        return
+    
+    _meds_dict_to_ref(orig_data_paths)
+    _to_raw(orig_data_paths)
 
 
 
-    def _make_notes_subcontents(self):
-        self.notes_overrides.mkdir(parents=True, exist_ok=True)
-        self.notes_justifications.mkdir(parents=True, exist_ok=True)
-        if not self.scratchpad.exists():
-            self.scratchpad.touch()
+def copy_meds_dict():
+    '''Stand alone copy the meds dictionary to the ref folder before medications step'''
+    orig_data_paths = _get_path_list()
+    if not orig_data_paths:
+        return
+    _meds_dict_to_ref(orig_data_paths)
+
+
+
+def make_dir(name):
+    ''' create new (local) directory folder if needed '''
+    dir_path = ROOT / name
+    dir_path.mkdir(parents = True, exist_ok = True)
+    
+    return dir_path
+
+
+
+def _create_orig_dir():
+    created_dir = ROOT / 'cleaning_dump'
+    created_dir.mkdir(parents = True, exist_ok = True)
+    console.alert_missing_file('Original data to clean', config.raw_data_dirs)
+    console.custom_alert('Missing', "Location of original data to clean 'config.raw_data_dirs' does not exist.")
+    print("A 'cleaning_dump' folder has been created. Add your data before proceeding. \n")
+
+    return created_dir
+
+
+
+def _get_path_list():
+    if not config.raw_data_dirs:
+        return []
+    if isinstance(config.raw_data_dirs, (str, Path)): 
+        path_list = [Path(config.raw_data_dirs)]
+    else:
+        path_list = [Path(p) for p in config.raw_data_dirs]
+
+    valid_paths = _get_valid_path_list(path_list)
+            
+    return valid_paths
+
+
+def _get_valid_path_list(path_list):
+    valid_paths = []
+    for path_obj in path_list:
+        valid_paths = _get_valid_path(path_obj, valid_paths)
+            
+    return valid_paths
+
+
+def _get_valid_path(path_obj, valid_paths):
+    
+    if not path_obj.is_absolute():
+        path_obj = ROOT / path_obj
         
-        if not self.todo.exists():
-            self.todo.touch()
+    if path_obj.exists() and path_obj.is_dir():
+        valid_paths.append(path_obj)
+            
+    return valid_paths 
 
 
 
-    def set_raw_data_path(self, raw_data_source, strict = True):
-        '''Updates the raw data location and verifies it exists.'''
-        self.try_set_raw_path(raw_data_source)
-        self._if_not_exist_make_raw_dir()
+def _to_raw(orig_data_paths):
+    _required_to_raw(orig_data_paths)
+    if not _is_id_subset_csv2raw(orig_data_paths):
+        ensure_id_subset_csv_to_raw()
+
+
+
+def ensure_id_subset_csv_to_raw():
+    id_subset_csv = csvkit.ensure_suffix(config.id_subset_csv)
+    if Path(id_subset_csv) == Path('__base__.csv'):
+        base_csv = BaseCSV()
+        base_csv.create()
+
+
+
+def _required_to_raw(orig_data_paths):
+    required_csvs = _get_required_csv_list()
+
+    for csv_name in required_csvs:
+        _required_csv2raw(csv_name, orig_data_paths)
+
+
+
+def _get_required_csv_list():
+    required_csvs = set(config.csv_list)
+    if config.raw_module_csv:
+        required_csvs.add(config.raw_module_csv)
+    
+    return required_csvs
+
+
+
+def _required_csv2raw(csv_name, orig_data_paths):
+    csv_name = csvkit.ensure_suffix(csv_name)
+    found_file = _find_file(csv_name, orig_data_paths)
+    if not found_file:
+        console.error_missing(csv_name, f'not found in {config.raw_data_dirs}')
+        raise FileNotFoundError()
+    
+    shutil.copy2(found_file, RAW / csv_name)
+
+
+
+def _is_id_subset_csv2raw(orig_data_paths):
+    id_subset_csv = csvkit.ensure_suffix(config.id_subset_csv)
+    if Path(id_subset_csv) == Path('__base__.csv'):
+        return False
+        
+    found_file = _find_file(id_subset_csv, orig_data_paths)
+    if found_file:
+        shutil.copy2(found_file, RAW / id_subset_csv)
+        return True
+
+    _loud_alerts_config_change()
+    config.id_subset_csv = '__base__'
+    
+    return False
+    
+
+def _loud_alerts_config_change():
+    message_reset = "\n Resetting 'config.id_subset_csv' to default:\n            \
+                       config.id_subset_csv = '__base__'"
+    console.custom_alert('ALERT ALERT', message_reset)
+    
+    message_not_found = f"not found in '{config.raw_data_dirs}'"
+    console.error_missing(config.id_subset_csv, message_not_found)
+    print(f"Replacing '{config.id_subset_csv}' with '__base__' based on active {config.merge_on_id_column}'s in '{config.raw_module_csv}' for '{config.modules}'")
+
+
+def _is_data_dict_to_ref(orig_data_paths):
+    orig_data_dict = _find_file(config.data_dict, orig_data_paths)
+    
+    if not orig_data_dict:
+        console.alert_missing_config_file('ref','data dictionary', 'config.data_dict')
+        return False
+
+    orig_data_dict = _confirm_required_columns(orig_data_dict)
+    if not orig_data_dict:
+        return False
+    
+    shutil.copy2(orig_data_dict, REF / config.data_dict)
+    return True
     
 
 
-    def try_set_raw_path(self, raw_data_source):
-        input_path = Path(raw_data_source)
-        self.get_path(input_path)
-        self.raw_data_source = raw_data_source
+def _find_file(filename, folders) -> Union[Path, None]:
+    ''' Helper to locate a file across one or more source directories. '''
 
-
-
-    def get_path(self, input_path: Path):
-        if input_path.is_absolute(): # if input is full path
-            self.raw = input_path
-        else: # if not full path assume in root directory
-            self.raw = self.root / input_path
-
-
-
-    def _if_not_exist_make_raw_dir(self):
-        if not self.raw.exists():
-            self._create_raw_dir_and_alert()
-
-
-
-    def _create_raw_dir_and_alert(self):
-        self.raw.mkdir(parents = True, exist_ok = True)
-        console.alert_missing_file('Raw data directory', self.raw)
-        print('A raw folder has been created. Add your data before proceeding. \n')
-
+    # is there a cleaner way to code this ???
+    for folder in folders:
+        found_path = _search_folder(filename, folder)
+        if found_path:
+            return found_path
     
+    return None
+
+
+def _search_folder(filename, folder) -> Union[Path, None]:
+    ''' Searches all files in folder, including subfolder files '''
+    for file_path in folder.rglob(filename):
+        if file_path.is_file():
+            return file_path
+            
+    return None
+
+
+
+def _meds_dict_to_ref(orig_data_paths):
+    meds_dict_src = _find_file(config.meds_dict, orig_data_paths)
+    if meds_dict_src:
+        shutil.copy2(meds_dict_src, REF / config.meds_dict)
+
+
+
+def _confirm_required_columns(orig_data_dict):            
+    missing_cols = _get_missing_cols(orig_data_dict)
+    if missing_cols:
+        message = f'column(s) are not in {config.data_dict}. \
+            Ensure correct file and data dictionary configs.'
+        console.error_missing(missing_cols, message)
+        return None
+    
+    return orig_data_dict
+
+
+def _get_missing_cols(file_path):
+    required_columns = [
+        config.module_column, config.field_type_column, config.col_names_column] 
+        
+    data_dict_df = csvkit.robust_read(file_path)
+            
+    missing_cols = [col for col in required_columns if col not in data_dict_df]
+
+    return missing_cols

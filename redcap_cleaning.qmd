@@ -57,7 +57,7 @@ Add comments to the translations_manual_overrides.txt as needed.
 ```{python}
 #| label: 02 Translated and Review Duplicates
 
-cleaner.s2_duplicates()
+cleaner.s2_duplicates() # add a blank line between birthdate changes ??? or better
 
 ```
 
