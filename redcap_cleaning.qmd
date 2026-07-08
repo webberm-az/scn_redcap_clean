@@ -44,7 +44,7 @@ config.translation_dict = { # planning to track this in notes eventually for eac
             'SCN8A':'SCN8A',
            }
 
-cleaner = Cleaner('ignore')
+cleaner = Cleaner(use_existing_overrides = False)
 ```
 
 
@@ -74,6 +74,21 @@ Add comments to the medications_manual_overrides.txt and genomics_manual_overrid
 ```{python}
 #| label: proceed from clinical overrides
 cleaner.proceed.clinical()
+
+```
+
+
+
+
+
+```{python}
+#| label: Extra: do not use existing overrides
+
+# initiate with 
+cleaner = Cleaner(use_existing_overrides = False)
+
+# or to change in the middle of cleaning
+cleaner.proceed.use_existing_overrides = False
 
 ```
 

@@ -47,7 +47,8 @@ class CsvWriter:
         self.path = self.csvkit.main_path
 
         if csvname_get_version is not None:
-            csvname_get_version = self.version.get_max_version(csvname_get_version)
+            max_version = self.version.get_max_version(csvname_get_version)
+            csvname_get_version = max_version + 1
         
         self.archive_if_changed(archive_csvname, df, csvname_get_version)
 

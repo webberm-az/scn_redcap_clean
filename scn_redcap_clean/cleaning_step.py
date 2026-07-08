@@ -7,5 +7,4 @@ class CleaningStep(ABC):
 
     @abstractmethod
     def input_override(self) -> pd.DataFrame:
-        '''Every subclass MUST implement this exact method.'''
         pass

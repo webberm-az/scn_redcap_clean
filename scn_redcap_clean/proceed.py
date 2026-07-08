@@ -8,33 +8,28 @@ from .standardize import Standardize
 
 class Proceed:
 
-    def __init__(self, override = 'if_exists'):
+    def __init__(self):
         self.step_manager = StepManager()
         self.overrides = Overrides()
         self.review = Review()
-        self.override = override
+        self.use_existing_overrides = True
 
 
-    def translated(self, action = 'override', override = 'default'):
+    def translated(self, skip_input = False):
         '''
         Proceeds with clean from translated override.
         Only inputs translations if 'translations_manual_override.csv' is in the overrides folder
-
-        If action = None or action = 'skip' no translations will be input from the overrides folder. 
         '''
-        if action in (None, 'skip'):
+        if skip_input:
             df = self.step_manager.get_last_step_df(Step.translated.config_name)
         else:
             df = self.overrides.run(Step.translated)
-
-        if override == 'default':
-            override = self.override
         
-        self._review_duplicates(df, override)
+        self._review_duplicates(df)
 
 
 
-    def duplicates(self, action = 'override', override  = 'default'):
+    def duplicates(self, keep_all = False):
         '''
         Requires Ollama (local AI): 
         Download and install from: https://ollama.com/download
@@ -43,26 +38,21 @@ class Proceed:
         If duplicates_manual_override is not in overrides folder, removes all but the last submission. (Duplicate based on 'config.filter_columns' with default birthdate) 
         Only inputs manual overrides if 'duplicates_manual_override.csv' is in the overrides folder (keep flag_shared column empty unless a 'config.filter_columns' is shared by 2 different individuals, only flag the shared 'config.filter_columns' individual with the smaller 'participant_id' number)
 
-        If action = 'keep' all duplicates will remain unchanged (no override occurs). 
-
+        If 'keep_all = True' all duplicates will remain unchanged (no override occurs). 
 
         Continues to prepare medications and genomics for review using Ollama (local AI)
-
         Expect this step to take a few minutes...
         '''
-        if action == 'keep':
+        if keep_all:
             df = self.step_manager.get_last_step_df(Step.duplicates.config_name)
         else:
             df = self.overrides.run(Step.duplicates)
 
-        if override == 'default':
-            override = self.override
-        
-        self._review_clinical(df, override)
+        self._review_clinical(df)
         
         
 
-    def clinical(self, action = 'override'):
+    def clinical(self, skip_input = False):
         '''
         The included 'config.meds_dict' csv should be updated based on the 'add_to_ref' column in 'medications_manual_override.csv' before running this step.
 
@@ -74,7 +64,7 @@ class Proceed:
         
         Computes age based on each modules 'submission_date' and the 'birthdate'
         '''
-        if action == 'skip':
+        if skip_input:
             df = self.step_manager.get_last_step_df(Step.clinical.config_name)
         else:
             df = self.overrides.run(Step.clinical)
@@ -83,12 +73,9 @@ class Proceed:
         
 
 
-    def review_translations(self, df, lang_cols, override = 'default'):
-        if override == 'default':
-            override = self.override
-
-        if self._is_input_override(Step.translated, override):
-            self.translated(override = override)
+    def review_translations(self, df, lang_cols):
+        if self._is_input_override(Step.translated):
+            self.translated()
             return
 
         review_translations = self.review.translations(df, lang_cols)
@@ -97,16 +84,13 @@ class Proceed:
             console.move_to_overrides('cleaner.proceed.translated()')
             return
 
-        self._review_duplicates(df, override)
+        self._review_duplicates(df)
 
 
     
-    def _review_duplicates(self, df, override = 'default'):
-        if override == 'default':
-            override = self.override
-
-        if self._is_input_override(Step.duplicates, override):
-            self.duplicates(override = override)
+    def _review_duplicates(self, df):
+        if self._is_input_override(Step.duplicates):
+            self.duplicates()
             return
 
         review_duplicates = self.review.duplicates(df)
@@ -114,16 +98,13 @@ class Proceed:
             console.move_to_overrides('cleaner.proceed.duplicates()')
             return
         
-        self._review_clinical(df, override)
+        self._review_clinical(df)
 
 
     
-    def _review_clinical(self, df, override = 'default'):
-        if override == 'default':
-            override = self.override
-            
-        if self._is_input_override(
-            Step.medications, override) and self.overrides.exists(Step.genomics):
+    def _review_clinical(self, df):
+        if self._is_input_override(Step.medications) and self.overrides.exists(
+            Step.genomics):
             
             self.clinical()
             return
@@ -144,8 +125,9 @@ class Proceed:
         self.overrides.create_csvs(df)
 
 
-    def _is_input_override(self, step_enum, override):
-        if override == 'if_exists' and self.overrides.exists(step_enum):
+
+    def _is_input_override(self, step_enum):
+        if self.use_existing_overrides and self.overrides.exists(step_enum):
             return True
         
         return False

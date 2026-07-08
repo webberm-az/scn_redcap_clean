@@ -8,7 +8,7 @@ from .meds import Medications
 from .translation import Translation
 
 class Step(Enum):
-    ''' Handles all file system state for the cleaning steps. '''
+    ''' Handles all cleaning steps. '''
     translated = (Translation.process_name, Translation, config.step_name_translated)
     duplicates = (Duplicates.process_name, Duplicates, config.step_name_duplicates)
     clinical = (Clinical.process_name, Clinical, config.step_name_clinical)
@@ -28,4 +28,3 @@ class Step(Enum):
         df = instance.input_override()
 
         return df
-

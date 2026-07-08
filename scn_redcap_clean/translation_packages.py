@@ -16,7 +16,6 @@ class TranslationPackages:
         self.success_downloads = set()
 
 
-
     def ensure_lang_installed(self, from_code):
         ''' Checks if the language package is already loaded or installed '''
         from_code = self.normalize_from_code(from_code)
