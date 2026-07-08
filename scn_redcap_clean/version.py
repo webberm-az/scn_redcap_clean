@@ -35,14 +35,17 @@ class Version:
 
 
     def get_max_version(self, fname):
-        existing = self.dir_path.glob(f'{fname}_v*.csv')
-        past_versions_found = [0]
-        for file in existing: 
-            self._collect_file_versions(file, past_versions_found)
-
-        max_version = max(past_versions_found)
-
+        current_files = Path(self.dir_path).glob(f'{fname}_v*.csv')
+        max_version, _ = utils.get_max_file_index(current_files, self._extract_v_number)
         return max_version
+
+
+
+    def _extract_v_number(self, filepath):
+        ''' Gets each file version suffix '_v{number}' existing in the directory '''
+        version_number = filepath.stem.rsplit('_v', 1)[-1]
+        if version_number.isdigit():
+            return int(version_number)
 
 
 
@@ -72,14 +75,6 @@ class Version:
             return max_version
         
         return None
-
-
-
-    def _collect_file_versions(self, file, versions):
-        ''' Gets each file version suffix existing in the directory '''
-        suffix = file.stem.rsplit('_v', 1)[-1]
-        if suffix.isdigit():
-            versions.append(int(suffix))
 
 
 

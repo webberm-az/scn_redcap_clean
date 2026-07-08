@@ -20,7 +20,7 @@ class Data:
         Cleanly merges csvs using the 'base' file participant_id's and saves to steps and archive folders
         '''
         df = self._get_merged_module_df()
-        self.archiver.main_and_archive(df, config.name_main1, paths.STEPS)
+        self.archiver.main_and_archive(df, f'1_{config.step_name_assembled}', paths.STEPS)
         
         return df    
 

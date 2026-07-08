@@ -8,10 +8,16 @@ execute:
   dir: project
 ---
 
+## Set Configs
+**Raw data & the data dictionary must be in the config.original_data folder before running**
+Raw data (config.csv_list) & data dictionary (config.data_dict) config.raw_data_dirs
+
 ```{python}
 #| label: Imports and Config
 from scn_redcap_clean import Cleaner, config # local import
 
+# Original Data Folder(s) (files can be in subfolders of these folders too)
+raw_data_dirs = ['cleaning_dump']
 
 # Data Dictionary
 config.data_dict = 'ToyDict.csv'
@@ -26,20 +32,9 @@ config.c_genomic = 'genomic_text1'
 config.p_genomic = 'genomic_p._text2'
 # all columns marked text in the data dictionary you don't want translated
 config.no_translate_cols = [
-      config.c_genomic,
-      config.p_genomic,
-      config.birthdate,
-      config.merge_on_id_column,
-      ]
+      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column]
 
 config.med_text_cols = ['toy_meds', 'toy_supps']
-
-cleaner = Cleaner()
-```
-
-**Make sure raw data is in the raw folder & data dictionary in the ref folder before continuing**
-```{python}
-#| label: 01 Merge Raw and Review Translations
 
 config.csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
 
@@ -49,63 +44,47 @@ config.translation_dict = { # planning to track this in notes eventually for eac
             'SCN8A':'SCN8A',
            }
 
-cleaner.s1_translations()
+cleaner = Cleaner('ignore')
 ```
 
-**Move edited translations_manual_overrides.csv to the overrides folder.**
+
+```{python}
+#| label: clean
+cleaner.clean()
+```
+
+### If clean() or proceed() outputs a translations_for_review
 Add comments to the translations_manual_overrides.txt as needed.
 ```{python}
-#| label: 02 Translated and Review Duplicates
-
-cleaner.s2_duplicates() # add a blank line between birthdate changes ??? or better
-
+#| label: proceed from translated override
+cleaner.proceed.translated()
 ```
 
-**If manual override needed, move edited duplicates_manual_overrides.csv to the overrides folder.**
+### if clean() or proceed() outputs a duplicates_for_review
 Add comments to the duplicates_manual_overrides.txt as needed.
 *For manual overrides Participant_id should be written as {last Participant_id per bday}.999*
 ```{python}
-#| label: 03 Remove Duplicates and Review Medications and/or Supplements
-
-cleaner.s3_clinical()
+#| label: proceed from duplicates override
+cleaner.proceed.duplicates()
 
 ```
 
-**Move edited medications_manual_overrides.csv to the overrides folder.**
-Add comments to the medications_manual_overrides.txt as needed.
+### if clean() or proceed()  outputs a medications_for_review and/or genomics_for_review
+Add comments to the medications_manual_overrides.txt and genomics_manual_overrides.txt as needed.
 ```{python}
-#| label: 04 Medications and/or Supplements as Binary and Review Genomics
-
-cleaner.standardize()
-
-```
-
-**Move edited genomics_manual_overrides.csv to the overrides folder.**
-Add comments to the genomics_manual_overrides.txt as needed.
-
-```{python}
-#| label: 05 Genomics and Standardize
-
-cleaner.s5_genomics_and_standardize()
+#| label: proceed from clinical overrides
+cleaner.proceed.clinical()
 
 ```
 
 
 
-Create Manual overrides file...
-
-# Final Format Genetic text, Speculative ION channel Function, and Phenotype
-
-'?function_eric' and '?phenotype_eric' columns are based on Eric's AI generated spreadsheet based on a variety of Sources papers ('?function_eric_ref')
 
 
+          in progress
+          
 
-# Speculative ION channel Function based on Participant Responses
+summary
+reporter
 
-I'm not sure if this is possible to compute for IS. You will probably need some adjustments
-if you use this function.
-'by_symp' is computed based on:
--seizure onset -seizure history -non-absense seizures -DQ (developmental quotient)\<50
-'by_med' is computed based on:
--by current medication type -(and/or med history)
--seizure type (separate out myoclonic lof as separate category)
+add descriptive statistics

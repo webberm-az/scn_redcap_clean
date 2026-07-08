@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from . import config, console, paths, utils
+from . import config, console, paths
+from .cleaning_step import CleaningStep
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .extract_ai import ExtractorAI
@@ -10,8 +11,10 @@ from .ref_map import RefMap
 from .schemas import MedicationList
 
 
-class Medications:
+class Medications(CleaningStep):
     ''' Standardizes and dummies medications and supplements using local AI Ollama. '''
+    
+    process_name = 'medications'
     
     def __init__(self, df):
 
@@ -21,7 +24,9 @@ class Medications:
         self.csvkit = CsvKit()
         self.meds_dict_df = self.csvkit.path_to_df(
             config.meds_dict, paths.REF)
-        self.step_number = 4
+        self.process_name = Medications.process_name
+        self.class_prefix = 'class'
+        self.temp_prefix = 'NEW_DUMMY'
 
 
 
@@ -42,12 +47,12 @@ class Medications:
 
 
 
-    def try_input_override_df(self): # called in Override
+    def input_override(self): # called in Override
         ''' 
         If override_filename exists in overrides folder, maps medications/supplements terms to config.meds_dict and inputs into main csv
         '''
         self.override_csv_path = self.csvkit.path( 
-            'medications_manual_override', paths.OVERRIDES)
+            f'{self.process_name}_manual_override', paths.OVERRIDES)
         df = self.try_input_mapped_long_df(self.df, self.meds_dict_df)
         
         return df
@@ -61,8 +66,6 @@ class Medications:
         '''
         self.df = df
         self.map_df = map_df
-        self.override_csv_path = self.csvkit.path( 
-            'medications_manual_override', paths.OVERRIDES)
         if self.df is None or self.override_csv_path is None or self.map_df is None:
             self._alert_errors()
             return None
@@ -76,14 +79,13 @@ class Medications:
 
     def _alert_errors(self):
         if self.df is None:
-            last_step = utils.get_step_config(self.step_number - 1)
-            console.error_missing(last_step, "not in 'steps' folder")
+            console.error("No step csvs found in 'steps' folder")
         
         if self.override_csv_path is None:
             console.info_missing_file({self.override_csv_path}, 'overrides')
         
         if self.map_df is None:
-            console.print_missing_override_dict('medications', 'config.meds_dict')
+            console.print_missing_override_dict(self.process_name, 'config.meds_dict')
 
 
 
@@ -131,7 +133,7 @@ class Medications:
 
     def _get_configs(self):
         extractor_configs = {
-            'name': 'medications',
+            'name': self.process_name,
             'cols': config.med_text_cols,
             'prompt': config.prompt_meds,
             'schema': MedicationList}
@@ -250,7 +252,6 @@ class Medications:
 
 
     def _get_class_dummies_df(self, df):
-        self.class_prefix = 'class'
         class_dummies = pd.get_dummies(df[self.function], prefix = self.class_prefix)
         class_dummies[self.id_col] = df[self.id_col].values
         class_matrix = class_dummies.groupby(self.id_col).max()
@@ -260,7 +261,6 @@ class Medications:
 
 
     def _get_med_dummies_df(self, df):
-        self.temp_prefix = 'NEW_DUMMY'
         med_dumms = pd.crosstab(index = df[self.id_col], columns = df[self.main])
         med_dumms.columns = [f"{self.temp_prefix}_{col}" for col in med_dumms.columns]
         med_dummies_df = (med_dumms > 0).astype(int)

@@ -14,6 +14,23 @@ class CsvKit:
         self.read_only_path = None
 
 
+    def robust_read(self, filepath: Union[str, Path]) -> pd.DataFrame:
+        """Reads a CSV file securely, handling mixed international encodings."""
+        # Encodings to try in order of likelihood for international Excel users
+        encodings_to_try = ['utf-8-sig', 'cp1252', 'latin1', 'utf-16']
+        
+        for encoding in encodings_to_try:
+            try:
+                return pd.read_csv(filepath, encoding = encoding)
+            except (UnicodeDecodeError, LookupError):
+                continue
+        
+        df = pd.read_csv(filepath, encoding = 'utf-8-sig', encoding_errors = 'replace')
+        
+        return df
+
+
+
     def ensure_suffix(self, csv_name: Union[str, Path]) -> Path:
         ''' Adds .csv to name if needed '''
         csv_name = Path(csv_name)
@@ -46,6 +63,13 @@ class CsvKit:
         self.main_path = potential_path
         
         return self.main_path
+
+
+
+    def exists(self, csv_name: Union[str, Path], dir_path: Union[str, Path]) -> bool:
+        potential_path = Path(dir_path) / self.ensure_suffix(csv_name)
+        
+        return potential_path.exists()
 
 
 
@@ -159,19 +183,3 @@ class CsvKit:
         except Exception as e:
             console.error(f'{e}')
             return None
-
-
-    def robust_read(self, filepath: Union[str, Path]) -> pd.DataFrame:
-        """Reads a CSV file securely, handling mixed international encodings."""
-        # Encodings to try in order of likelihood for international Excel users
-        encodings_to_try = ['utf-8-sig', 'cp1252', 'latin1', 'utf-16']
-        
-        for encoding in encodings_to_try:
-            try:
-                return pd.read_csv(filepath, encoding = encoding)
-            except (UnicodeDecodeError, LookupError):
-                continue
-        
-        df = pd.read_csv(filepath, encoding = 'utf-8-sig', encoding_errors = 'replace')
-        
-        return df

@@ -13,7 +13,7 @@ class CsvWriter:
         self.version = Version(paths.ARCHIVE)
 
     
-    # cleaner
+    # for Overrides()
     def archive_overrides(self, filename, main_path = None):
         '''
         For manual override archiving
@@ -33,7 +33,7 @@ class CsvWriter:
 
 
 
-    # cleaner
+    # for Overrides(), Data(), Step(), self
     def main_and_archive(
             self, df, main_csvname, main_path, 
             archive_csvname = None, csvname_get_version = None):
@@ -54,7 +54,7 @@ class CsvWriter:
         return self.path
 
 
-
+    # for Review()
     def review_and_archive(self, df, step, csvname_get_version = None):
         '''
         Create CSVs editable version to main_path and read-only to archive folder
@@ -69,7 +69,7 @@ class CsvWriter:
         utils.write_txt_file(content, main_csv_name, paths.OVERRIDES)
 
 
-
+    # for self
     def archive_if_changed(self, filename, df, version = None):
         ''' 
         Create read-only csv with version suffixed filename based on filenames in directory

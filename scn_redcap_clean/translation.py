@@ -3,6 +3,7 @@ from typing import cast
 
 # local imports
 from . import config, utils, paths # global configs
+from .cleaning_step import CleaningStep
 from .csv_writer import CsvWriter
 from .translator import Translator
 from .detector import Detector
@@ -12,8 +13,10 @@ from .override_append import OverrideAppend
 from .version import Version
 
 
-class Translation:
+class Translation(CleaningStep):
 
+    process_name = 'translation'
+    
     def __init__(self, df):
         self.df = df
         self.csv_writer = CsvWriter()
@@ -24,7 +27,8 @@ class Translation:
         self.translator = Translator(self.packages)
         self.csvkit = CsvKit()
         self.detect = Detector(self.packages)
-        self.archive_csvname = 'translations_for_review'
+        self.process_name = Translation.process_name
+        self.archive_csvname = f'{self.process_name}s_for_review'
         self.version = Version(paths.ARCHIVE)
 
 
@@ -42,6 +46,7 @@ class Translation:
         # df with added english '_orig' cols, '_needs_trans' col, and translated 'cols_to_translate'
         translation_df = self._get_translation_df(df)
         if self._is_no_translations_needed(translation_df):
+            self.skipped = True
             return 
 
         self.packages.print_language_download_summary() 
@@ -50,12 +55,12 @@ class Translation:
         return final_translated_df
 
 
-    def try_input_override_df(self): # called in Override
+    def input_override(self): # called in Override
         ''' 
         If override_filename exists in overrides folder inputs into main csv
         '''
         df = self.df
-        df = OverrideAppend('translation').append_override_df(df)
+        df = OverrideAppend(self.process_name).append_override_df(df)
         
         return df
 
@@ -104,7 +109,7 @@ class Translation:
         if max_version is None:
             detected_needs_trans_idx = self._get_detected_needs_trans_idx()
             return detected_needs_trans_idx
-        archive_version = self.version.get_max_version(config.name_main1)
+        archive_version = self.version.get_max_version(config.step_name_assembled)
         if float(max_version) >= float(archive_version):
             archived_needs_trans_idx = self._get_archived_needs_trans_idx(last_review_df, max_version)
             return archived_needs_trans_idx

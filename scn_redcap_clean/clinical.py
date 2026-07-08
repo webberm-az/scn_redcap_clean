@@ -1,9 +1,12 @@
+from .cleaning_step import CleaningStep
 from .meds import Medications
 from .genomics import Genomics
 
-class Clinical:
+class Clinical(CleaningStep):
     ''' Combine Medication and Genomics Overrides into one step '''
     
+    process_name = 'clinical'
+
     def __init__(self, df):
         self.df = df.copy()
 
@@ -20,7 +23,7 @@ class Clinical:
     
 
     
-    def try_input_override_df(self):
+    def input_override(self):
         ''' Runs overrides for Meds, passes the updated df to Genomics, and returns the final df. '''
         meds = Medications(self.df)
         self.df = self._safe_input(meds)
@@ -33,7 +36,7 @@ class Clinical:
 
 
     def _safe_input(self, instance):
-        df = instance.try_input_override_df()
+        df = instance.input_override()
         if df is not None:
             return df
         

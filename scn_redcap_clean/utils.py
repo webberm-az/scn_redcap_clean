@@ -22,6 +22,25 @@ def is_n_matches(pattern: Pattern[str], string: str, n: int) -> bool:
 
 
 
+def get_max_file_index(existing_files, extract_int_func):
+    '''
+    Scans a directory and extracts an ingteger using extract_int_func.
+    extract_int_func(filename_str) must return an int (or None).
+    '''
+    max_num = 0
+    latest_file = None
+
+    for file in existing_files:
+        number = extract_int_func(file)
+        
+        if number is not None and number > max_num:
+            max_num = number
+            latest_file = file
+
+    return max_num, latest_file
+
+
+
 #       df:
 
 def get_cols_if_in_df(

@@ -1,54 +1,31 @@
 from enum import Enum
 
+from . import config
 from .clinical import Clinical
+from .genomics import Genomics
 from .duplicates import Duplicates
+from .meds import Medications
 from .translation import Translation
 
 class Step(Enum):
-    translated = (2, Translation)
-    duplicates = (3, Duplicates)
-    clinical = (4, Clinical)
-
-    def __init__(self, number, class_name):
-        self.number = number
+    ''' Handles all file system state for the cleaning steps. '''
+    translated = (Translation.process_name, Translation, config.step_name_translated)
+    duplicates = (Duplicates.process_name, Duplicates, config.step_name_duplicates)
+    clinical = (Clinical.process_name, Clinical, config.step_name_clinical)
+    medications = (Medications.process_name, Medications, None)
+    genomics = (Genomics.process_name, Genomics, None)
+    
+    
+    def __init__(self, process_name, class_name, config_name):
+        self.process_name = process_name
         self.class_name = class_name
-        self.process_name = class_name.__name__.lower()
-        self.did_run = False
-        self.skipped = False
-        self.skip_reason = None
+        self.config_name = config_name
 
-
+    
     def run_override(self, df):
         ''' Instantiates the specific class and runs the method. '''
         instance = self.class_name(df)
-        df = instance.try_input_override_df()
-        self._track_skipped(df)
+        df = instance.input_override()
 
         return df
 
-
-    def _track_skipped(self, df):
-        self.did_run = df is not None
-        self.skipped = df is None
-
-        if self.skipped:
-            self.skip_reason = "override returned None"
-
-        return df
-
-
-
-    def should_run(self, context):
-        if self is Step.translated:
-            return context.has_language_columns and not context.is_english_only
-
-        return True
-
-''' for Cleaner
-for step in Step:
-    if not step.should_run(context):
-        step.skipped = True
-        continue
-
-    df = step.run_override(df, paths)
-'''

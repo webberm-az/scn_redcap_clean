@@ -1,10 +1,12 @@
 from . import utils
 
-'''    ____________________________  Required  __________________________________    '''
+'''     ________________________     Required     ______________________________     '''
+
 
 # Data Dictionary CSV
 data_dict = 'ToyDict.csv'
 csv_list = []
+
 
 # Module Specific
 modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
@@ -33,10 +35,19 @@ age_dependent = ['toy_check1', 'toy_check2', 'toy_check3', 'toy_check4', 'toy_ye
 
 
 
+'''     ______________________     Recommended     ____________________________     '''
 
-'''    ____________________________  Defaults  __________________________________    '''
+age_units = ['days', 'months', 'years']
 
-raw_data_dirs = ['cleaning_dump']  # default raw data folder name
+
+original_data_folder = ['cleaning_dump']  # default raw data folder name
+
+
+# for UniProt Ref Map
+gene_name = 'SCN8A'
+
+
+'''     ________________________     Defaults     ______________________________     '''
 
 merge_on_id_column = 'participant_id'
 
@@ -51,11 +62,10 @@ death_year = 'child_death_y'
 
 
 # Steps CSV Names
-name_main1 = '1_assembled'
-name_main2 = '2_translated'
-name_main3 = '3_removed_duplicates'
-name_main4 = 'analysis_ready'
-
+step_name_assembled = 'assembled'
+step_name_translated = 'translated'
+step_name_duplicates = 'removed_duplicates'
+step_name_clinical = 'clinical'
 
 
 
@@ -72,7 +82,6 @@ col_names_column = 'Variable / Field Name'
 
 
 
-
 # __Translation_______________________
 no_translate_cols = [c_genomic, p_genomic, birthdate, merge_on_id_column]
 
@@ -86,11 +95,7 @@ translation_dict = {
 
 
 
-
-
 #  __Genomics_________________________
-# for UniProt Ref Map
-gene_name = 'SCN8A'
 
 genomic_cols = [c_genomic, p_genomic]
 

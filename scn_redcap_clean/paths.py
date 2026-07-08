@@ -8,7 +8,6 @@ from .csv_kit import CsvKit
 from . import config, console
 
 
-
 ROOT = Path.cwd().resolve()
 
 # Main Folders
@@ -85,7 +84,7 @@ def make_dir(name):
 def _create_orig_dir():
     created_dir = ROOT / 'cleaning_dump'
     created_dir.mkdir(parents = True, exist_ok = True)
-    console.alert_missing_file('Original data to clean', config.raw_data_dirs)
+    console.alert_missing_file('Original data to clean', config.original_data_folder)
     console.custom_alert('Missing', "Location of original data to clean 'config.raw_data_dirs' does not exist.")
     print("A 'cleaning_dump' folder has been created. Add your data before proceeding. \n")
 
@@ -94,16 +93,17 @@ def _create_orig_dir():
 
 
 def _get_path_list():
-    if not config.raw_data_dirs:
+    if not config.original_data_folder:
         return []
-    if isinstance(config.raw_data_dirs, (str, Path)): 
-        path_list = [Path(config.raw_data_dirs)]
+    if isinstance(config.original_data_folder, (str, Path)): 
+        path_list = [Path(config.original_data_folder)]
     else:
-        path_list = [Path(p) for p in config.raw_data_dirs]
+        path_list = [Path(p) for p in config.original_data_folder]
 
     valid_paths = _get_valid_path_list(path_list)
             
     return valid_paths
+
 
 
 def _get_valid_path_list(path_list):
@@ -112,6 +112,7 @@ def _get_valid_path_list(path_list):
         valid_paths = _get_valid_path(path_obj, valid_paths)
             
     return valid_paths
+
 
 
 def _get_valid_path(path_obj, valid_paths):
@@ -162,7 +163,7 @@ def _required_csv2raw(csv_name, orig_data_paths):
     csv_name = csvkit.ensure_suffix(csv_name)
     found_file = _find_file(csv_name, orig_data_paths)
     if not found_file:
-        console.error_missing(csv_name, f'not found in {config.raw_data_dirs}')
+        console.error_missing(csv_name, f'not found in {config.original_data_folder}')
         raise FileNotFoundError()
     
     shutil.copy2(found_file, RAW / csv_name)
@@ -185,14 +186,16 @@ def _is_id_subset_csv2raw(orig_data_paths):
     return False
     
 
+
 def _loud_alerts_config_change():
     message_reset = "\n Resetting 'config.id_subset_csv' to default:\n            \
                        config.id_subset_csv = '__base__'"
     console.custom_alert('ALERT ALERT', message_reset)
     
-    message_not_found = f"not found in '{config.raw_data_dirs}'"
+    message_not_found = f"not found in '{config.original_data_folder}'"
     console.error_missing(config.id_subset_csv, message_not_found)
     print(f"Replacing '{config.id_subset_csv}' with '__base__' based on active {config.merge_on_id_column}'s in '{config.raw_module_csv}' for '{config.modules}'")
+
 
 
 def _is_data_dict_to_ref(orig_data_paths):
@@ -223,6 +226,7 @@ def _find_file(filename, folders) -> Union[Path, None]:
     return None
 
 
+
 def _search_folder(filename, folder) -> Union[Path, None]:
     ''' Searches all files in folder, including subfolder files '''
     for file_path in folder.rglob(filename):
@@ -251,6 +255,7 @@ def _confirm_required_columns(orig_data_dict):
     return orig_data_dict
 
 
+
 def _get_missing_cols(file_path):
     required_columns = [
         config.module_column, config.field_type_column, config.col_names_column] 
@@ -260,3 +265,4 @@ def _get_missing_cols(file_path):
     missing_cols = [col for col in required_columns if col not in data_dict_df]
 
     return missing_cols
+

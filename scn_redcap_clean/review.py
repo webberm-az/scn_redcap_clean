@@ -1,17 +1,18 @@
 
 # local imports
+
 from . import config # global configs
 from .csv_writer import CsvWriter
 from .duplicates import Duplicates
 from .clinical import Clinical
 from .translation import Translation
+from .step import Step
 
 
 class Review:
 
     def __init__(self):
         self.archiver = CsvWriter()
-        self.skip_str = 'skipped not needed'
         
 
     def translations(self, df, cols_to_translate):
@@ -23,10 +24,11 @@ class Review:
         df = translation.review_df(cols_to_translate)
         if df is None:
             return None
-        get_version = config.name_main1
+
+        get_version = config.step_name_assembled
 
         # outputs csvs to review folder, a version to archive, and txt to overrides
-        self.archiver.review_and_archive(df, 'translations', get_version)
+        self.archiver.review_and_archive(df, Step.translated.process_name, get_version)
 
         return df
 
@@ -43,10 +45,10 @@ class Review:
         if df is None:
             return None
 
-        get_version = config.name_main2
+        get_version = config.step_name_translated
 
         # outputs csvs to review folder, a version to archive, and txt to overrides
-        self.archiver.review_and_archive(df, 'duplicates', get_version)
+        self.archiver.review_and_archive(df, Step.duplicates.process_name, get_version)
 
         return df
 
@@ -57,11 +59,14 @@ class Review:
         Outputs csv files for clinical review (Medications and Genomics)
         '''
         meds_df, genomics_df = Clinical(orig_df).review_dfs()
-        get_version = config.name_main3
+
+        if meds_df is None and genomics_df is None:
+            return None
+
+        get_version = config.step_name_duplicates
 
         if meds_df is not None:
             self.archiver.review_and_archive(meds_df, 'medications', get_version)
-
 
         if genomics_df is not None:
             self.archiver.review_and_archive(genomics_df, 'genomics', get_version)

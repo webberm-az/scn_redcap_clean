@@ -22,6 +22,12 @@ def alternative(message):
     print("\n ``Alternatively, {message} \n")
 
 
+def move_to_overrides(run_command):
+    message = f"After any manual edits, run '{run_command}' to continue cleaning"
+    custom_alert("Move to 'Overrides'", message)
+
+
+
 #       Error
 
 def error(message):

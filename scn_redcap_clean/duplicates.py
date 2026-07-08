@@ -2,11 +2,15 @@ import pandas as pd
 
 # local imports
 from . import config, console, paths, utils # global configs
+from .cleaning_step import CleaningStep
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 
 
-class Duplicates:
+class Duplicates(CleaningStep):
+
+    process_name = 'duplicates'
+
     def __init__(self, df):
         self.df = df
         self.archiver = CsvWriter()
@@ -14,10 +18,14 @@ class Duplicates:
         self.dup_col = config.filter_columns
         self.id_col = config.merge_on_id_column
         self.flag_shared_col = 'flag_shared_birthdate'
+        self.process_name = Duplicates.process_name
 
 
     def review_df(self):
         sorted_duplicates_df = self._get_sorted_duplicates()
+        if sorted_duplicates_df is None:
+            self.skipped = True
+            return None
         utils.add_column_if_dne('override_explanation', sorted_duplicates_df)
         final_df = utils.add_column_if_dne(
             self.flag_shared_col, sorted_duplicates_df, '')
@@ -26,12 +34,12 @@ class Duplicates:
 
 
 
-    def try_input_override_df(self):
+    def input_override(self):
         ''' 
         Removes duplicates in dup_col keeping submission with highest id_col value 
         '''
         
-        self.try_manual_override('duplicates_manual_override')
+        self.try_manual_override(f'{self.process_name}_manual_override')
         df = self.clean_duplicates()
         self.df = self._drop_override_note_cols(df)
         
@@ -61,6 +69,8 @@ class Duplicates:
     def _get_sorted_duplicates(self):
         # df of all duplicates based on dup_col
         duplicates_df = self._get_duplicates_df()
+        if duplicates_df is None:
+            return None
         sorted_duplicates_df = self._sort_duplicates(duplicates_df)
         
         return sorted_duplicates_df 
@@ -69,7 +79,7 @@ class Duplicates:
 
     def _get_duplicates_df(self):
         if self.df is None:
-            return
+            return None
         
         duplicates = self.df.duplicated(self.dup_col, keep = False)
         duplicates_df = self.df[duplicates]

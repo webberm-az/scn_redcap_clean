@@ -1,16 +1,20 @@
 import pandas as pd
+
+from .cleaning_step import CleaningStep
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
 from .schemas import GenomicList
 from .uniprot import UniProtQuery
-from . import bio, config, console, paths, utils
+from . import bio, config, console, paths
 
 
-class Genomics:
+class Genomics(CleaningStep):
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
     
+    process_name = 'genomics'
+
     def __init__(self, df):
 
         self.df = df.copy()
@@ -21,7 +25,7 @@ class Genomics:
             f'{config.gene_name}_position_map_uniprot', paths.REF)
         self.r_term = 'recommended_term'
         self.term = 'clean_term'
-        self.step_number = 4
+        self.process_name = Genomics.process_name
 
 
     def review_df(self):
@@ -37,10 +41,10 @@ class Genomics:
 
 
 
-    def try_input_override_df(self):
+    def input_override(self):
         '''  Maps genomic variants to UniProt position map and inputs into main csv '''
         self.override_csv_path = self.csvkit.path( 
-            'genomics_manual_override', paths.OVERRIDES)
+            f'{self.process_name}_manual_override', paths.OVERRIDES)
         df = self.try_input_mapped_long_df(self.df, self.genomics_dict_df)
         
         return df
@@ -54,8 +58,6 @@ class Genomics:
         '''
         self.df = df
         self.map_df = map_df
-        self.override_csv_path = self.csvkit.path( 
-            'genomics_manual_override', paths.OVERRIDES)
         if self.df is None or self.override_csv_path is None or self.map_df is None:
             self._alert_errors()
             return None
@@ -69,8 +71,7 @@ class Genomics:
 
     def _alert_errors(self):
         if self.df is None:
-            last_step = utils.get_step_config(self.step_number - 1)
-            console.error_missing(last_step, "not in 'steps' folder")
+            console.error("No step csvs found in 'steps' folder")
         
         if self.override_csv_path is None:
             console.info_missing_file({self.override_csv_path}, 'overrides')
@@ -220,7 +221,7 @@ class Genomics:
         return df
     def _get_configs(self):
         extractor_configs = {
-            'name': 'genomics',
+            'name': self.process_name,
             'cols': config.genomic_cols,
             'prompt': config.prompt_genomics,
             'schema': GenomicList}
