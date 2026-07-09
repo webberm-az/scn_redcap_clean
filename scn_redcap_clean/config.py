@@ -1,4 +1,5 @@
 from . import utils
+from .units import Unit
 
 '''     ________________________     Required     ______________________________     '''
 
@@ -37,7 +38,7 @@ age_dependent = ['toy_check1', 'toy_check2', 'toy_check3', 'toy_check4', 'toy_ye
 
 '''     ______________________     Recommended     ____________________________     '''
 
-age_units = ['days', 'months', 'years']
+age_units = [Unit.days, Unit.months, Unit.years]
 
 
 original_data_folder = ['cleaning_dump']  # default raw data folder name
@@ -53,12 +54,18 @@ merge_on_id_column = 'participant_id'
 
 filter_columns = 'birthdate' # summary notes assume this is just birthdate
 
+
 # for age on Module submission date
 birthdate = 'birthdate'
 deceased = 'deceased'
 death_month = 'child_death_m'
 death_year = 'child_death_y'
 
+
+# Skip a step (False)
+run_translation = True
+run_duplicates = True
+run_clinical = True
 
 
 # Steps CSV Names

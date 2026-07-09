@@ -13,8 +13,8 @@ class Standardize:
         self.csvkit = CsvKit()
 
 
-    def try_get_age(self, age_units):
-        if age_units is not None:
-            df = Age().get_age(self.df, units = age_units)
+    def get_age(self):
+        if config.age_units is not None:
+            df = Age().get_age(self.df, units = config.age_units)
         
         return df

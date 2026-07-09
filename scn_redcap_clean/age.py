@@ -1,14 +1,16 @@
 import pandas as pd
 
 from . import config
+from .units import Unit
 
 
 class Age: 
     def __init__(self):
         self.ave_days_in_month = 365 / 12
+        self.end_date = 'end_date'
 
 
-    def get_age(self, df, units = ['days', 'months', 'years']):
+    def get_age(self, df, units = [Unit.days, Unit.months, Unit.years]):
         unit_list = [units] if isinstance(units, str) else units
         for sub_date_col, suffix in config.module_suffix_age.items():
             if sub_date_col not in df.columns:
@@ -69,7 +71,6 @@ class Age:
 
 
     def _get_end_date(self, df, sub_date_col):
-        self.end_date = 'end_date'
         df[self.end_date] = pd.to_datetime(df[sub_date_col]).copy()
         if config.death_month in df.columns and config.death_year in df.columns:
             
@@ -92,13 +93,13 @@ class Age:
 
 
     def _get_age_in_unit_list(self, df, unit_list, sub_date_col, suffix):
-        if 'years' in unit_list:
+        if Unit.years in unit_list:
                 df = self.get_age_in_years(df, sub_date_col, suffix)
             
-        elif 'months' in unit_list:
+        elif Unit.months in unit_list:
             df = self.get_age_in_months(df, sub_date_col, suffix)
         
-        elif 'days' in unit_list:
+        elif Unit.days in unit_list:
             df = self.get_age_in_days(df, sub_date_col, suffix)
 
         return df
@@ -107,13 +108,13 @@ class Age:
 
     def _get_columns_to_drop(self, unit_list, suffix):
         extra_columns_to_drop = []
-        if 'days' not in unit_list:
+        if Unit.days not in unit_list:
             extra_columns_to_drop.append(f'age_in_days{suffix}')
         
-        if 'months' not in unit_list:
+        if Unit.months not in unit_list:
             extra_columns_to_drop.append(f'age_in_months{suffix}')
         
-        if 'years' not in unit_list:
+        if Unit.years not in unit_list:
             extra_columns_to_drop.append(f'age_in_years{suffix}')
         
         extra_columns_to_drop.append(self.end_date)

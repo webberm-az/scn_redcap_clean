@@ -23,14 +23,47 @@ class Duplicates(CleaningStep):
 
     def review_df(self):
         sorted_duplicates_df = self._get_sorted_duplicates()
-        if sorted_duplicates_df is None:
+        if sorted_duplicates_df is None or sorted_duplicates_df.empty:
             self.skipped = True
             return None
-        utils.add_column_if_dne('override_explanation', sorted_duplicates_df)
-        final_df = utils.add_column_if_dne(
-            self.flag_shared_col, sorted_duplicates_df, '')
+        
+        final_df = self._format_review_df(sorted_duplicates_df)
         
         return final_df
+
+
+    def _format_review_df(self, sorted_df):
+        utils.add_column_if_dne('override_explanation', sorted_df)
+        utils.add_column_if_dne(self.flag_shared_col, sorted_df)
+
+        dup_cols_first_df = self._put_dup_cols_first(sorted_df)
+        final_df_with_spacing = self._add_duplicate_row_pad(dup_cols_first_df)
+
+        return final_df_with_spacing
+
+
+    def _put_dup_cols_first(self, df):
+        dup_cols = [self.dup_col] if isinstance(self.dup_col, str) else self.dup_col
+        remaining_cols = [column for column in df.columns if column not in dup_cols]
+        dup_cols_first_df = df[dup_cols + remaining_cols]
+        
+        return dup_cols_first_df
+
+
+
+    def _add_duplicate_row_pad(self, df):
+        grouped = df.groupby(self.dup_col, sort = False)
+        spaced_duplicates = []
+        
+        blank_row = pd.DataFrame([{col: '' for col in df.columns}])
+        
+        for _, group in grouped:
+            spaced_duplicates.append(group)
+            spaced_duplicates.append(blank_row)
+            
+        spaced_df = pd.concat(spaced_duplicates, ignore_index = True)
+        
+        return spaced_df.iloc[:-1]
 
 
 
@@ -111,7 +144,7 @@ class Duplicates(CleaningStep):
         '''
 
         df_sorted = self.df.sort_values(by = self.id_col, ascending = True)
-        is_duplicate = df_sorted.duplicated(subset=self.dup_col, keep='last')
+        is_duplicate = df_sorted.duplicated(subset = self.dup_col, keep = 'last')
         is_protected = df_sorted[self.id_col].isin(shared_birthdate_ids)
         drop_mask = is_duplicate & ~is_protected
 

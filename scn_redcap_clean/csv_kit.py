@@ -131,11 +131,11 @@ class CsvKit:
             self, override_csv: Union[str, Path], df: pd.DataFrame) -> pd.DataFrame:
         ''' Adds all rows in override_csv to df '''
         override_df = self._get_matching_col_df(df, override_csv)
-    
+        override_df = override_df.dropna(subset = [config.merge_on_id_column])
+        df = self._drop_duplicate_id(df, override_df)
         df = pd.concat([df, override_df], ignore_index = True)
         
         return df
-
 
 
     def _get_matching_col_df(self, df, override_csv):
@@ -168,6 +168,16 @@ class CsvKit:
         except Exception as e:
             console.error(f'Could not match columns: {e}')
             return override_df[col]
+
+
+
+    def _drop_duplicate_id(self, base_df, override_df):
+        override_id = override_df[config.merge_on_id_column].unique().tolist()
+        is_duplicate_id = base_df[config.merge_on_id_column].isin(override_id)
+        
+        df = cast(pd.DataFrame, base_df[~is_duplicate_id])
+
+        return df
 
 
 

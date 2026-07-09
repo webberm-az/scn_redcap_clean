@@ -10,19 +10,18 @@ from . import config, console
 
 ROOT = Path.cwd().resolve()
 
-# Main Folders
-REF = ROOT / 'ref'
-REVIEW = ROOT / 'review'
-STEPS = ROOT / 'steps'
-OVERRIDES = ROOT / 'overrides'
-NOTES = ROOT / 'notes'
-
-# Hidden Folders
-RAW = ROOT / '__raw__'
-ARCHIVE = ROOT / '__archive__'
+PROJECT = ROOT / 'project'
+REF = PROJECT / 'ref'
+REVIEW = PROJECT / 'review'
+STEPS = PROJECT / 'steps'
+OVERRIDES = PROJECT / 'overrides'
 
 
-# Sub-contents
+HIDDEN = PROJECT / '.__internal__'
+RAW = HIDDEN / 'raw'
+ARCHIVE = HIDDEN / 'archive'
+NOTES = HIDDEN / 'notes'
+
 NOTES_OVERRIDE = NOTES / 'override_summaries'
 NOTES_JUSTIFY = NOTES / 'decision_logs'
 SCRATCHPAD = NOTES / 'scratchpad.md'
@@ -32,10 +31,10 @@ csvkit = CsvKit()
 
 def init_directories():
     # Create main directories
-    main_folders = [RAW, ARCHIVE, STEPS, OVERRIDES, REVIEW, REF, NOTES]
-    sub_folders = [NOTES_OVERRIDE, NOTES_JUSTIFY]
+    folders = [
+        PROJECT, HIDDEN, STEPS, OVERRIDES, REVIEW, REF, 
+        RAW, ARCHIVE, NOTES, NOTES_OVERRIDE, NOTES_JUSTIFY]
     
-    folders = main_folders + sub_folders
     for dir_path in folders:
         dir_path.mkdir(parents = True, exist_ok = True)
     
@@ -74,7 +73,7 @@ def copy_meds_dict():
 
 def make_dir(name):
     ''' create new (local) directory folder if needed '''
-    dir_path = ROOT / name
+    dir_path = PROJECT / name
     dir_path.mkdir(parents = True, exist_ok = True)
     
     return dir_path
@@ -82,11 +81,11 @@ def make_dir(name):
 
 
 def _create_orig_dir():
-    created_dir = ROOT / 'cleaning_dump'
+    created_dir = ROOT / 'original_files'
     created_dir.mkdir(parents = True, exist_ok = True)
     console.alert_missing_file('Original data to clean', config.original_data_folder)
     console.custom_alert('Missing', "Location of original data to clean 'config.raw_data_dirs' does not exist.")
-    print("A 'cleaning_dump' folder has been created. Add your data before proceeding. \n")
+    print("A '{created_dir.name}' folder has been created. Add your data before proceeding. \n")
 
     return created_dir
 

@@ -1,4 +1,9 @@
-from .cleaner import Cleaner
 from . import config
+from .cleaner import Cleaner
+from .units import Unit
 
-__all__ = ["Cleaner", "config"]
+days = Unit.days
+months = Unit.months
+years = Unit.years
+
+__all__ = ['Cleaner', 'config', 'Unit']

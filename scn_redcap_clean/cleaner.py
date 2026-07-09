@@ -18,7 +18,6 @@ class Cleaner:
     def __init__(self, use_existing_overrides = True):
         paths.setup_workspace()
         self.data = Data()
-        self.do_use_existing_overrides = use_existing_overrides
         self.proceed = Proceed()
         self.proceed.use_existing_overrides = use_existing_overrides
 

@@ -14,10 +14,10 @@ Raw data (config.csv_list) & data dictionary (config.data_dict) config.raw_data_
 
 ```{python}
 #| label: Imports and Config
-from scn_redcap_clean import Cleaner, config # local import
+from scn_redcap_clean import Cleaner, config, days, months, years # local import
 
 # Original Data Folder(s) (files can be in subfolders of these folders too)
-raw_data_dirs = ['cleaning_dump']
+original_data_folder = ['cleaning_dump']
 
 # Data Dictionary
 config.data_dict = 'ToyDict.csv'
@@ -25,31 +25,36 @@ config.data_dict = 'ToyDict.csv'
 # Module Specific
 config.modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
 
+config.csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
+
 # csv must have all columns of the module(s) you are filtering by (extra modules/cols are fine)
 config.raw_module_csv = 'Toy1'
 
+config.med_text_cols = ['toy_meds', 'toy_supps']
+
 config.c_genomic = 'genomic_text1'
 config.p_genomic = 'genomic_p._text2'
+
 # all columns marked text in the data dictionary you don't want translated
 config.no_translate_cols = [
       config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column]
 
-config.med_text_cols = ['toy_meds', 'toy_supps']
+config.age_units = [days, months, years]
 
-config.csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
 
-# if specific terms need overrides after translation add them here & rerun this step
-config.translation_dict = { # planning to track this in notes eventually for each version
-            '布洛芬':'Ibuprofen',
-            'SCN8A':'SCN8A',
-           }
-
-cleaner = Cleaner(use_existing_overrides = False)
+cleaner = Cleaner()
 ```
 
 
 ```{python}
 #| label: clean
+
+config.translation_dict = { # !!! planning to track this in notes eventually for each version
+            '布洛芬':'Ibuprofen',
+            'SCN8A':'SCN8A',
+           }
+
+
 cleaner.clean()
 ```
 
@@ -65,6 +70,7 @@ Add comments to the duplicates_manual_overrides.txt as needed.
 *For manual overrides Participant_id should be written as {last Participant_id per bday}.999*
 ```{python}
 #| label: proceed from duplicates override
+config.run_clinical = True
 cleaner.proceed.duplicates()
 
 ```
@@ -95,8 +101,7 @@ cleaner.proceed.use_existing_overrides = False
 
 
 
-
-          in progress
+        to be continued...
           
 
 summary

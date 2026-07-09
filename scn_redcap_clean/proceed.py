@@ -20,7 +20,10 @@ class Proceed:
         Proceeds with clean from translated override.
         Only inputs translations if 'translations_manual_override.csv' is in the overrides folder
         '''
-        if skip_input:
+        is_override_in_folder = self.overrides.exists(Step.translated)
+        self._alert_if_no_override_csv(is_override_in_folder)
+
+        if skip_input or not is_override_in_folder:
             df = self.step_manager.get_last_step_df(Step.translated.config_name)
         else:
             df = self.overrides.run(Step.translated)
@@ -64,16 +67,20 @@ class Proceed:
         
         Computes age based on each modules 'submission_date' and the 'birthdate'
         '''
-        if skip_input:
+
+        if skip_input or not config.run_clinical:
             df = self.step_manager.get_last_step_df(Step.clinical.config_name)
+            self._input_age(df)
         else:
             df = self.overrides.run(Step.clinical)
-        
-        self._input_age(df)
-        
+                
 
 
     def review_translations(self, df, lang_cols):
+        if not config.run_translation:
+            self._review_duplicates(df)
+            return
+
         if self._is_input_override(Step.translated):
             self.translated()
             return
@@ -89,9 +96,15 @@ class Proceed:
 
     
     def _review_duplicates(self, df):
+        if not config.run_duplicates:
+            self._review_clinical(df)
+            return
+
         if self._is_input_override(Step.duplicates):
             self.duplicates()
             return
+
+        
 
         review_duplicates = self.review.duplicates(df)
         if review_duplicates is not None:
@@ -103,6 +116,11 @@ class Proceed:
 
     
     def _review_clinical(self, df):
+        if not config.run_clinical:
+            self._input_age(df)
+            return
+            
+
         if self._is_input_override(Step.medications) and self.overrides.exists(
             Step.genomics):
             
@@ -115,12 +133,12 @@ class Proceed:
             console.move_to_overrides('cleaner.proceed.clinical()')
             return
 
-        self._input_age(df)
 
 
 
     def _input_age(self, df):
-        df = Standardize(df).try_get_age(config.age_units)
+        standardize = Standardize(df)
+        df = standardize.get_age()
 
         self.overrides.create_csvs(df)
 
@@ -131,4 +149,12 @@ class Proceed:
             return True
         
         return False
-        
+
+
+    
+    def _alert_if_no_override_csv(self, is_override_in_folder):
+        if not is_override_in_folder:
+            process_name = Step.translated.process_name
+            override_csv_name = f'{process_name}_manual_override'
+            console.missing_override(
+                override_csv_name, f'{process_name} input', f'without {process_name}s')
