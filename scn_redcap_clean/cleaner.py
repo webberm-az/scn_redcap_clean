@@ -16,10 +16,11 @@ class Cleaner:
     '''
 
     def __init__(self, use_existing_overrides = True):
+        self.use_existing_overrides = use_existing_overrides
         paths.setup_workspace()
         self.data = Data()
         self.proceed = Proceed()
-        self.proceed.use_existing_overrides = use_existing_overrides
+        self.proceed.use_existing_overrides = self.use_existing_overrides
 
 
     def clean(self):
@@ -29,6 +30,12 @@ class Cleaner:
 
         Automatically runs the cleaning steps until a manual review is needed. 
         '''
+        if not (paths.RAW / '__base__.csv').exists():
+            paths.setup_workspace()
+            self.data = Data()
+            self.proceed = Proceed()
+            self.proceed.use_existing_overrides = self.use_existing_overrides
+
         df = self.data.assemble()
 
         self.proceed.review_translations(df, self.data.language_cols)

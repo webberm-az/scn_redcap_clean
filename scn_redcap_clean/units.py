@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import Enum, auto
 
 class Unit(Enum):
-    days = 'days'
-    months = 'months'
-    years = 'years'
+    days = auto()
+    months = auto()
+    years = auto()

@@ -16,8 +16,8 @@ modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
 raw_module_csv = 'Toy1' # must have all of columns of the module(s) you are filtering by
 
 module_suffix_age = {
-    'submission_date' : '_toy',
-    'submission_date_2': '_mod2' # if more than 1 module is timestamped
+    'submission_date' : 'toy',
+    'submission_date_2': 'mod2' # if more than 1 module is timestamped
 }
 
 
@@ -38,10 +38,44 @@ age_dependent = ['toy_check1', 'toy_check2', 'toy_check3', 'toy_check4', 'toy_ye
 
 '''     ______________________     Recommended     ____________________________     '''
 
+original_data_folder = ['original_data_folder']  # default raw data folder name
+
 age_units = [Unit.days, Unit.months, Unit.years]
 
-
-original_data_folder = ['cleaning_dump']  # default raw data folder name
+include_age_groups = True
+# age group bins (always starts at 0)
+age_groups = {
+    Unit.days: [
+        (7, '0-7 days'),
+        (28, '8-28 days'),
+        (90, '29-90 days'),
+        (180, '3-5 months'),
+        (270, '6-8 months'),
+        (365, '9-12 months'),
+        (float('inf'), '1+ years')],
+    Unit.months: [
+        (1, '0-1 month'),
+        (3, '1-3 months'),
+        (6, '4-6 months'),
+        (9, '7-8 months'),
+        (12, '9-11 months'),
+        (24, '12-23 months'),
+        (36, '24-35 months'),
+        (72, '3-5 years'),
+        (float('inf'), '5+ years')],
+    Unit.years: [
+        (1, '< 1'),
+        (3, '1-2'),
+        (5, '3-4'),
+        (12, '5-11'),
+        (18, '12-17'),
+        (25, '18-24'),
+        (35, '25-34'),
+        (45, '35-44'),
+        (55, '45-54'),
+        (65, '55-64'),
+        (float('inf'), '65+')]
+}
 
 
 # for UniProt Ref Map

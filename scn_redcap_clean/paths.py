@@ -83,11 +83,12 @@ def make_dir(name):
 def _create_orig_dir():
     created_dir = ROOT / 'original_files'
     created_dir.mkdir(parents = True, exist_ok = True)
+    config.original_data_folder = created_dir
     console.alert_missing_file('Original data to clean', config.original_data_folder)
-    console.custom_alert('Missing', "Location of original data to clean 'config.raw_data_dirs' does not exist.")
-    print("A '{created_dir.name}' folder has been created. Add your data before proceeding. \n")
+    console.custom_alert('Missing', "Location of original data to clean set by 'config.original_data_folder' does not exist.")
+    print(f"An '{created_dir.name}' folder has been created. config.original_data_folder has been updated to this location. Add your data before proceeding. \n ")
 
-    return created_dir
+    return
 
 
 
@@ -187,8 +188,7 @@ def _is_id_subset_csv2raw(orig_data_paths):
 
 
 def _loud_alerts_config_change():
-    message_reset = "\n Resetting 'config.id_subset_csv' to default:\n            \
-                       config.id_subset_csv = '__base__'"
+    message_reset = "\n Resetting 'config.id_subset_csv' to default:\n config.id_subset_csv = '__base__'"
     console.custom_alert('ALERT ALERT', message_reset)
     
     message_not_found = f"not found in '{config.original_data_folder}'"
@@ -246,8 +246,7 @@ def _meds_dict_to_ref(orig_data_paths):
 def _confirm_required_columns(orig_data_dict):            
     missing_cols = _get_missing_cols(orig_data_dict)
     if missing_cols:
-        message = f'column(s) are not in {config.data_dict}. \
-            Ensure correct file and data dictionary configs.'
+        message = f'column(s) are not in {config.data_dict}. Ensure correct file and data dictionary configs.'
         console.error_missing(missing_cols, message)
         return None
     

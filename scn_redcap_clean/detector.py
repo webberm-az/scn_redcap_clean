@@ -1,5 +1,4 @@
 import os
-import re
 
 # external imports
 import langdetect
@@ -14,14 +13,9 @@ os.environ['ARGOS_DEVICE_TYPE'] = 'cpu'
 
 
 class Detector:
-    ''' Translates non-English text to English using argostranslate and langdetect packages '''
-
-    _ASTERISK_CLEANER = re.compile(r'''
-            \s* # match zero or more spaces on the left side
-            \* # match asterisk character (*)
-            \s* # match zero or more spaces on the right side
-        ''', re.VERBOSE)
-
+    ''' 
+    Translates non-English text to English using argostranslate and langdetect packages 
+    '''
 
     def __init__(self, packages):
 
