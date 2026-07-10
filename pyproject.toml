@@ -1,34 +1,33 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ['setuptools>=61.0']
+build-backend = 'setuptools.build_meta'
 
 [project]
-name = "scn_redcap_clean"
-version = "0.1.0"
-description = "Data cleaning and preprocessing for Hammer Lab REDCap SCN genomics data"
-#dynamic = ["dependencies"]
+name = 'scn_redcap_clean'
+version = '0.1.0'
+description = 'Data cleaning and preprocessing for Hammer Lab REDCap SCN genomics data'
 dependencies = [
     'pandas>=2.0.0',
     'argostranslate',
-    'langdetect',
-    'certifi',
+    'lingua-language-detector',
+    'certifi>=2026.03.04',
     'ollama>=0.6.2',
     'biopython',
-    ]
+]
 
 [tool.setuptools]
 # Force Python to only look at your core package directory
-packages = ["scn_redcap_clean"]
+packages = ['scn_redcap_clean']
 
 #[tool.setuptools.dynamic]
 # Points to the correct, relative path inside your package folder
-#dependencies = {file = ["scn_redcap_clean/requirements.txt"]}
+#dependencies = {file = ['scn_redcap_clean/requirements.txt']}
 
 
 
 
 [tool.pyright]
-venvPath = "."
-venv = ".venv"
-extraPaths = ["."]
-typeCheckingMode = "basic"
+venvPath = '.'
+venv = '.venv'
+extraPaths = ['.']
+typeCheckingMode = 'basic'

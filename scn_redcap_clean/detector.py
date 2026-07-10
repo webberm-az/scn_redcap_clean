@@ -1,14 +1,13 @@
 import os
 
 # external imports
-import langdetect
+from lingua import Language, LanguageDetectorBuilder
 import pandas as pd
 
 # local imports
-from .script import Script
 from . import config # global configs
+from .script import Script
 
-langdetect.DetectorFactory.seed = 0 # not working?
 os.environ['ARGOS_DEVICE_TYPE'] = 'cpu'
 
 
@@ -18,9 +17,7 @@ class Detector:
     '''
 
     def __init__(self, packages):
-
-        langdetect.DetectorFactory.seed = 0 # not working?
-        
+        self.detector = LanguageDetectorBuilder.from_all_languages().build()
         # e.g. special_terms = {'布洛芬':'Ibuprofen',}  inputs for special terms
         self.special_terms = self._format_special_terms(config.translation_dict)
         
@@ -111,7 +108,7 @@ class Detector:
     def _get_detected_lang(self, combined_text):
         ''' Returns language code for translation '''
         try:
-            predictions = langdetect.detect_langs(combined_text)
+            predictions = self.detector.compute_language_confidence_values(combined_text)
 
             # map Chinese codes zh-cn or zh-tw to zh for argostranslate.translate.translate()
             lang = self._get_lang_prediction_defaults(predictions)
@@ -124,17 +121,21 @@ class Detector:
 
     def _get_lang_prediction_defaults(self, predictions):
         top_prediction = predictions[0]
+        
         is_probably_english = self._is_probably_english(top_prediction)
         if is_probably_english: 
             return 'en'
 
-        lang = self.packages.normalize_from_code(top_prediction.lang) # not needed for english
+        lang_code = top_prediction.language.iso_code_639_1.name.lower()
+
+        lang = self.packages.normalize_from_code(lang_code) # not needed for english
         
         return lang
 
 
     
     def _is_probably_english(self, top_prediction):
-        is_prob_english = (top_prediction.lang == 'en' and top_prediction.prob > 0.8)
+        is_prob_english = (
+            top_prediction.language == Language.ENGLISH and top_prediction.prob > 0.8)
 
         return is_prob_english
