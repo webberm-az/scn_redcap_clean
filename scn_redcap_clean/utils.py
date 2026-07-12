@@ -3,7 +3,7 @@ from typing import Union, List, Pattern, Any, Iterable, cast
 
 import pandas as pd # external import
 
-from . import config, console
+from . import console
 
 
 auto = {"id": "utils.auto"} # creates a parameter_input = utils.auto 
@@ -101,6 +101,31 @@ def make_duplicate_orig_cols(df: pd.DataFrame, rep_cols: List[str]) -> pd.DataFr
 
 
 
+def format_id_column(id_column_set) -> pd.DataFrame:
+    ''' 
+    Formats IDs to strings, dropping .0 for integers but keeping true decimals 
+    '''
+    id_column_set = id_column_set.copy()
+
+    id_column_set = id_column_set.apply(format_id)
+    
+    return id_column_set
+
+
+def format_id(value):
+    if pd.isna(value) or value == '':
+        return value
+        
+    try:
+        float_val = float(value)
+        if float_val.is_integer():
+            return str(int(float_val))
+        return str(float_val)
+    except (ValueError, TypeError):
+        return str(value)
+
+
+
 #       txt:
 
 def write_txt_file(content: str, filename: Union[str, Path], output_dir: Path) -> None:
@@ -114,27 +139,36 @@ def write_txt_file(content: str, filename: Union[str, Path], output_dir: Path) -
 
 def create_txt(content, filename, file_path):
     # Path.write_text automatically opens, writes, and closes the file safely.
-    file_path.write_text(content, encoding='utf-8')
+    file_path.write_text(content, encoding = 'utf-8')
     console.file_saved(filename, file_path)
 
 
 
 def get_txt_filepath(filename, output_dir):
-    filename = add_txt_suffix(filename)
+    filename = ensure_txt_suffix(filename)
     file_path = output_dir / filename
 
     return file_path
 
 
 
-def add_txt_suffix(filename):
-    if not isinstance(filename, str):
-        filename = str(filename)
-    
-    if not filename.endswith('.txt'):
-        filename = f'{filename}.txt'
+def ensure_txt_suffix(filename):
+    ''' Adds '.txt' to name if needed '''
+    filename = ensure_suffix(filename, '.txt')
     
     return filename
+
+
+
+def ensure_suffix(filename: Union[str, Path], suffix_str) -> Path:
+        ''' Adds suffix_str to name if needed '''
+
+        if not suffix_str.startswith('.'):
+            suffix_str = f'.{suffix_str}'
+
+        filename = Path(filename).with_suffix(suffix_str)
+
+        return filename
 
 
 
@@ -153,12 +187,3 @@ def append_to_txt(content: str, filename: Union[str, Path], output_dir: Path) ->
 def _append_txt(content, file_path):
     with open(file_path, mode='a', encoding='utf-8') as file:
         file.write(f'{content}\n')
-
-
-
-def get_step_config(step_number):
-    step_attr = f'name_main{str(step_number).zfill(1)}'
-    step = getattr(config, step_attr)
-
-    return step
-    

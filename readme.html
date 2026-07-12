@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>readme</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="readme_files/libs/clipboard/clipboard.min.js"></script>
+<script src="readme_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="readme_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="readme_files/libs/quarto-html/popper.min.js"></script>
+<script src="readme_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="readme_files/libs/quarto-html/anchor.min.js"></script>
+<link href="readme_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="readme_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="readme_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="readme_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="readme_files/libs/bootstrap/bootstrap-138a6193a3bd40baf1e627da441a4734.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">readme</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="create-a-project-vitual-environment" class="level3">
+<h3 class="anchored" data-anchor-id="create-a-project-vitual-environment">Create a project Vitual Environment</h3>
+<p>(highly recommended, but not required)</p>
+<p><code></code> ` run in terminal</p>
+<p>python3 -m venv venv</p>
+<p>Code chunks must be run in order. If you make changes to inputs in an earlier code chunk rerun all (and review manual overrides as needed) chunks below in order.</p>
+<p><code></code> <code></code> <code></code> run in terminal if venv not activated in new session</p>
+<p>source venv/bin/activate</p>
+</section>
+<section id="install-required-packages" class="level2">
+<h2 class="anchored" data-anchor-id="install-required-packages">Install Required Packages</h2>
+<p>(install scn_redcap_clean in editable mode)</p>
+<p><code></code> ` {run in terminal}</p>
+<p>pip install -e .</p>
+<p><code></code> <code></code> <code></code> {run in terminal if the code chunk in your qmd aren’t running}</p>
+<p>pip install jupyter</p>
+</section>
+<section id="required-imports-config-and-download" class="level1">
+<h1>Required Imports, Config and Download</h1>
+<p>For additional config settings you can also look in config.py</p>
+<p>(If you change anything in this chunk, or any config.py variables you must rerun all the chunks below)</p>
+<p><strong>Raw data &amp; the data dictionary must be in the config.original_data folder before running</strong> Raw data (config.csv_list) &amp; data dictionary (config.data_dict) config.raw_data_dirs</p>
+<p>Update all config. before running</p>
+<p><strong>Download and install from: https://ollama.com/download .</strong> (Only required for local ai text extraction in medication and genomics steps) [If you don’t need either step, you can skip clinical instead (see Extra Configs)]</p>
+<div id="imports-and-config" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scn_redcap_clean <span class="im">import</span> Cleaner, config, days, months, years <span class="co"># local import</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Original Data Folder(s) (files can be in subfolders of these folders too)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>original_data_folder <span class="op">=</span> [<span class="st">'cleaning_dump'</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Data Dictionary</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>config.data_dict <span class="op">=</span> <span class="st">'ToyDict.csv'</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Module Specific</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>config.modules <span class="op">=</span> [<span class="st">'toy'</span>,] <span class="co"># as listed in the Data Dictionary 'Form Name' column</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>config.csv_list <span class="op">=</span> [<span class="st">'Toy1'</span>, <span class="st">'Toy2.csv'</span>]  <span class="co"># raw data csvs for merge</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="co"># csv must have all columns of the module(s) you are filtering by (extra modules/cols are fine)</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>config.raw_module_csv <span class="op">=</span> <span class="st">'Toy1'</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>config.med_text_cols <span class="op">=</span> [<span class="st">'toy_meds'</span>, <span class="st">'toy_supps'</span>]</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>config.c_genomic <span class="op">=</span> <span class="st">'genomic_text1'</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>config.p_genomic <span class="op">=</span> <span class="st">'genomic_p._text2'</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>config.genomic_cols <span class="op">=</span> [config.c_genomic , config.p_genomic ]</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="co"># all columns marked text in the data dictionary you don't want translated</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>config.no_translate_cols <span class="op">=</span> [</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column]</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># alternatively you can manually set language_text_columns you want translated (see extras)</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>config.original_data_folder <span class="op">=</span> [<span class="st">'files_toy'</span>]</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>age_units <span class="op">=</span> [days, months, years]</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>include_age_groups <span class="op">=</span> <span class="va">True</span> </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># ignore 'age_groups' if include_age_groups = False</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="co"># age group bins (always starts at 0)</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>age_groups <span class="op">=</span> { <span class="co"># adjust with  (max. age in days/months/years, 'label for ages included in interval')</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    days: [</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">7</span>, <span class="st">'0-7 days'</span>),</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">28</span>, <span class="st">'8-28 days'</span>),</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">90</span>, <span class="st">'29-90 days'</span>),</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">180</span>, <span class="st">'3-5 months'</span>),</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">270</span>, <span class="st">'6-8 months'</span>),</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">365</span>, <span class="st">'9-12 months'</span>),</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        (<span class="bu">float</span>(<span class="st">'inf'</span>), <span class="st">'1+ years'</span>)],</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    months: [</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>, <span class="st">'0-1 month'</span>),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">3</span>, <span class="st">'1-3 months'</span>),</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">6</span>, <span class="st">'4-6 months'</span>),</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">9</span>, <span class="st">'7-8 months'</span>),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">12</span>, <span class="st">'9-11 months'</span>),</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">24</span>, <span class="st">'12-23 months'</span>),</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">36</span>, <span class="st">'24-35 months'</span>),</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">72</span>, <span class="st">'3-5 years'</span>),</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>        (<span class="bu">float</span>(<span class="st">'inf'</span>), <span class="st">'5+ years'</span>)],</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    years: [</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">1</span>, <span class="st">'&lt; 1'</span>),</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">3</span>, <span class="st">'1-2'</span>),</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">5</span>, <span class="st">'3-4'</span>),</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">12</span>, <span class="st">'5-11'</span>),</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">18</span>, <span class="st">'12-17'</span>),</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">25</span>, <span class="st">'18-24'</span>),</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">35</span>, <span class="st">'25-34'</span>),</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">45</span>, <span class="st">'35-44'</span>),</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">55</span>, <span class="st">'45-54'</span>),</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>        (<span class="dv">65</span>, <span class="st">'55-64'</span>),</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>        (<span class="bu">float</span>(<span class="st">'inf'</span>), <span class="st">'65+'</span>)]</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a><span class="co"># auto creates project folders next to your .qmd file</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>cleaner <span class="op">=</span> Cleaner()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'__base__' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/raw/__base__.csv
+Raw base file response count: 9
+</code></pre>
+</div>
+</div>
+<section id="extra-configs" class="level5">
+<h5 class="anchored" data-anchor-id="extra-configs">Extra Configs:</h5>
+<p><em>Custom raw data folder(s) location</em></p>
+<p>If you want your original raw data folder stored separately from this .qmd file this should be the entire folder path (or paths is stored in multiple folders)</p>
+<p>config.original_data_folder = [‘entire_older_path’, ‘if_2nd_folder’,] # run before running cleaner = Cleaner()</p>
+<p><em>Skip certain steps</em> (age will be included in the last run_{step} = True csv if config.age_units is not None and ‘birthdate’ and ‘submission date’ columns exist and are set in config) config.run_translation = False config.run_duplicates = False config.run_clinical = False</p>
+<p><em>Manually setting text columns for translation</em> List all langauge-dependent text columns (exclude genomic text, etc.) for translation e.g. config.language_text_columns = [ ‘toy_text1’, ‘toy_text2’, ‘toy_text3’, ‘toy_text4’, ‘toy_text5’]</p>
+<p>By default filter_columns = ‘birthdate’ for creating the duplicate review csv but you should be able to use more than 1 column; avoid any open text responses for filters due to typos</p>
+<p>e.g. config.filter_columns = [‘birthdate’, ‘country’]</p>
+<p><code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code></p>
+</section>
+</section>
+<section id="cleaner.clean" class="level1">
+<h1>cleaner.clean()</h1>
+<p>Outputs csvs to the ‘steps’ folder, {step}_manual_override for review and edits in the ‘review’ folder, and a .txt for logging any manual override explanations to the overrides folder.</p>
+<p>The data dictionary is used as a map to automatically get all ‘Field Type’ = ‘text’ for translation.</p>
+<p>Archive also stores read only copies which will be used for auto summaries. Rerunning the same stage with different inputs will overwrite files in the ‘steps’ folder. Version history csv files are stored in the ‘archive’ folder for every run with different back to back input if the contents for the main step file is changed. (e.g.&nbsp;2 runs in a row without <em>any</em> changes will not create new archive files)</p>
+<p>See Extra for manually setting specific columns you do want translated instead.</p>
+<div id="clean" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># if specific terms need overrides after translation add them here &amp; rerun this chunk</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>config.translation_dict <span class="op">=</span> { </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>            <span class="st">'布洛芬'</span>:<span class="st">'Ibuprofen'</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">'SCN8A'</span>:<span class="st">'SCN8A'</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>           }</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>cleaner.clean()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'1_assembled' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/steps/1_assembled.csv
+ ( Archive version saved as read-only to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/archive/1_assembled_v001.csv )
+
+Detecting language (based on whole row language context)...
+Translating each text column (if non-english detected)...
+</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>2026-07-09 17:48:11 WARNING: Language pt package default expects mwt, which has been added
+2026-07-09 17:48:14 WARNING: Language es package default expects mwt, which has been added</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+| Info | Local ArgosTranslate package(s) | Language(s): da, es, et, it, pt, zh
+
+'translation_manual_override' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/review/translation_manual_override.csv
+ ( Archive version saved as read-only to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/archive/translation_for_review_v001.csv )
+
+
+| Info | 'translation_manual_override' txt file saved to: /Users/melissa/Documents/ToyEpCleaning/project/overrides/translation_manual_override.txt
+
+
+| Move to 'Overrides' | After any manual edits, run 'cleaner.proceed.translated()' to continue cleaning
+</code></pre>
+</div>
+</div>
+<p>Other Info: - Any exact duplicate columns in more than one original raw csv will only be included once. - A suffix ’_{filename}’ will be added to identical column names containing at least one different input for a given participant id. - config.translation_dict input: non-english must be the key and the translation (or medical term) the value</p>
+<section id="extra-config-translation_script_threshold" class="level5">
+<h5 class="anchored" data-anchor-id="extra-config-translation_script_threshold">Extra Config (translation_script_threshold):</h5>
+<p>If translations are failing involving non-latin scripts adjust config.translation_script_threshold (detects non-latin characters and assigns language after 3 characters match a specific char. script) run anywhere before cleaner.clean()</p>
+<p>e.g. config.translation_script_threshold = 4 # if you don’t have many language_text_columns this should be 1 or 2</p>
+<p><code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code></p>
+</section>
+</section>
+<section id="if-clean-outputs-a-translations_for_review" class="level1">
+<h1>If clean() outputs a translations_for_review</h1>
+<section id="cleaner.proceed.translated-replaces-non-english-with-english-translations-and-continues-cleaning" class="level2">
+<h2 class="anchored" data-anchor-id="cleaner.proceed.translated-replaces-non-english-with-english-translations-and-continues-cleaning">cleaner.proceed.translated() Replaces non-english with english translations and continues cleaning</h2>
+<p>After outputing translations, manually review and edit translations_manual_override.csv in the review folder as needed. The final column in translations_manual_override should be used to record reasons you made any adjustments to a row. <strong>Once manual edits are complete move translations_manual_override to the overrides folder.</strong></p>
+<p>Keep the final version of this file without altering filename or column names in the manual_overrides folder <em>before running</em> cleaner.proceed.translated()</p>
+<p>The .txt file in the overrides folder is for recording general and brief override explanations and row deletion (e.g.&nbsp;‘Deleted false positives, language was already english.’) Keep this file in the overrides folder (the summary will eventually archive it).</p>
+<div id="proceed-from-translated-override" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cleaner.proceed.translated()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+| Info | translation_manual_override not found in overrides folder
+
+No translation input performed.
+Proceeding without translations
+
+'duplicates_manual_override' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/review/duplicates_manual_override.csv
+ ( Archive version saved as read-only to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/archive/duplicates_for_review_v001.csv )
+
+
+| Info | 'duplicates_manual_override' txt file saved to: /Users/melissa/Documents/ToyEpCleaning/project/overrides/duplicates_manual_override.txt
+
+
+| Move to 'Overrides' | After any manual edits, run 'cleaner.proceed.duplicates()' to continue cleaning
+</code></pre>
+</div>
+</div>
+<section id="extra-cleaner.proceed.translated" class="level5">
+<h5 class="anchored" data-anchor-id="extra-cleaner.proceed.translated">Extra cleaner.proceed.translated():</h5>
+<p>If you want to proceed without inputing any translations instead:</p>
+<p>cleaner.proceed.translated(skip_input = True)</p>
+<p><code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code></p>
+</section>
+</section>
+</section>
+<section id="if-clean-or-proceed-outputs-a-duplicates_for_review" class="level1">
+<h1>if clean() or proceed() outputs a duplicates_for_review</h1>
+<section id="cleaner.proceed.duplicates-removes-duplicate-submissions-based-on-birthdate" class="level2">
+<h2 class="anchored" data-anchor-id="cleaner.proceed.duplicates-removes-duplicate-submissions-based-on-birthdate">cleaner.proceed.duplicates() removes duplicate submissions based on ‘birthdate’</h2>
+<p>Again, manually review and edit duplicates_manual_override.csv as needed, leaving explanations in the overrides column of the manual_overrides file and general comments in the txt.</p>
+<p><em>For manual overrides Participant_id should be written as {last Participant_id per bday}.999</em> Example: participant_id’s for birthdate 1/2/02 are 3, 5, 8 If a manual override is needed the override should be 8.999</p>
+<p>(.888 works too, just choose an integer that stands out for you.) If no manual override (last submission is best) these rows do not need to be included in the manual override, but it should still work if they are. Add the final version without altering column names to the overrides folder.</p>
+<p>If <strong>all</strong> duplicates do not need a <em>manual</em> override, you do not need to move the duplicate overrides file to the overrides folder, just run the code chunk below to remove earlier submission duplicates.</p>
+<p>Duplicates are identified based on birthdate. (Confirm they are actual duplicates and not just <strong>shared</strong> birthdates.)</p>
+<p><strong>keep ‘flag_shared_birthdate’ column empty, unless 2 different people share a birthdate</strong></p>
+<p>See ‘Shared Birthdates’ below for instructions if needed.</p>
+<p><strong>Once manual edits are complete move this file to the overrides folder.</strong></p>
+<p>[If cleaning config.med_text_cols or config.genomic_cols, expect cleaner.proceed.duplicates() to take time.]</p>
+<div id="proceed-from-duplicates-override" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cleaner.proceed.duplicates()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+| Info | duplicates_manual_override not found in overrides folder
+
+No manual override duplicates performed.
+Proceeding with last submission for each duplicated 'birthdate'
+
+'2_removed_duplicates.csv' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/steps/2_removed_duplicates.csv
+ ( Archive version saved as read-only to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/archive/2_removed_duplicates_v001.csv )
+
+Ensuring local model 'llama3:latest'...
+Extracting medications text using local 'llama3:latest' and calculating confidence scores...
+Accessing UniProt for SCN8A (Q9UQD0)...
+Created UniProt ref for SCN8A (Q9UQD0)...
+File saved to: /Users/melissa/Documents/ToyEpCleaning/project/ref/SCN8A_position_map_uniprot.csv
+Ensuring local model 'llama3:latest'...
+Extracting genomics text using local 'llama3:latest' and calculating confidence scores...
+'medications_manual_override' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/review/medications_manual_override.csv
+ ( Archive version saved as read-only to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/archive/medications_for_review_v001.csv )
+
+
+| Info | 'medications_manual_override' txt file saved to: /Users/melissa/Documents/ToyEpCleaning/project/overrides/medications_manual_override.txt
+
+'genomics_manual_override' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/review/genomics_manual_override.csv
+ ( Archive version saved as read-only to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/archive/genomics_for_review_v001.csv )
+
+
+| Info | 'genomics_manual_override' txt file saved to: /Users/melissa/Documents/ToyEpCleaning/project/overrides/genomics_manual_override.txt
+
+
+| Move to 'Overrides' | After any manual edits, run 'cleaner.proceed.clinical()' to continue cleaning
+</code></pre>
+</div>
+</div>
+<section id="extra-cleaner.proceed.translated-1" class="level5">
+<h5 class="anchored" data-anchor-id="extra-cleaner.proceed.translated-1">Extra cleaner.proceed.translated():</h5>
+<p>If you want to proceed with all duplicates instead:</p>
+<p>cleaner.proceed.duplicates(keep_all = True)</p>
+<p>all duplicates will remain unchanged (no override occurs)</p>
+<p><code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code></p>
+</section>
+<section id="shared-birthdates" class="level5">
+<h5 class="anchored" data-anchor-id="shared-birthdates">Shared Birthdates</h5>
+<p>If any duplicates are clearly different people, the manual override must mark the flag_shared_birthdate column for the early submission. If the birthdates are not shared this must remain empty.</p>
+<p>Flagging a row makes that specific row stay in the final dataset no mater what.</p>
+<p><em>e.g.</em> all rows will be kept id 1 bday 1/2/10 flag X</p>
+<p>id 3 bday 1/2/10 flag X</p>
+<p>id 4 bday 1/2/10 flag X</p>
+<p><em>e.g.</em> the id 1 and id 4 will kept id 1 bday 1/2/10 flag X</p>
+<p>id 3 bday 1/2/10 flag</p>
+<p>id 4 bday 1/2/10 flag</p>
+<p><em>e.g.</em> id 3 and id 4 will kept id 1 bday 1/2/10 flag</p>
+<p>id 3 bday 1/2/10 flag</p>
+<p>id 4 bday 1/2/10 flag X</p>
+</section>
+<section id="if-clean-or-proceed-outputs-a-medications_for_review-andor-genomics_for_review" class="level3">
+<h3 class="anchored" data-anchor-id="if-clean-or-proceed-outputs-a-medications_for_review-andor-genomics_for_review">if clean() or proceed() outputs a medications_for_review and/or genomics_for_review</h3>
+</section>
+</section>
+<section id="cleaner.proceed.clinical-inputs-binary-and-categorized-meds-and-genomics" class="level2">
+<h2 class="anchored" data-anchor-id="cleaner.proceed.clinical-inputs-binary-and-categorized-meds-and-genomics">cleaner.proceed.clinical() inputs binary and categorized meds and genomics</h2>
+<p>Medications and Supplements are extracted using local AI and reported with lowest AI confidence scores at the top fo the medications_manual_override.csv (saved to review).</p>
+<p>Each AI recommended term is listed in the ‘recommended_text’ next to the full ‘raw_text’ entry.</p>
+<p>Again, manually review and edit medications_manual_override.csv as needed, leaving explanations in the overrides column of the manual_overrides file and general comments in the txt.</p>
+<p>Change the ‘recommended_term’ as needed (along with the ‘from_column’ if it was submitted in the wrong column e.g.&nbsp;a supplement in seizure medication)</p>
+<p>The ‘add_to_ref’ column tracks ‘MISSING IN REF’ medicatons and supplements. If the ‘recommended_term’ is an alias add it to the alias column of the ‘meds_dict.csv’ <strong>in the ‘ref’ folder.</strong>. If it’s a new medication or supplement, insert a new row with the ‘functional_class’ (if applicable), ‘Generic Name’, and any aliases/abbr. (All other columns are optional for your reference, and not included in the code.)</p>
+<p><strong>Once manual edits are complete move ‘medications_manual_override’ to overrides folder.</strong> The meds_dict.csv <strong>in the ‘ref’ folder.</strong> should be updated based on the ‘add_to_ref’ column in ‘medications_manual_override.csv’ <strong>before running this step.</strong></p>
+<section id="if-clean-or-proceed-outputs-a-medications_for_review-andor-genomics_for_review-1" class="level3">
+<h3 class="anchored" data-anchor-id="if-clean-or-proceed-outputs-a-medications_for_review-andor-genomics_for_review-1">if clean() or proceed() outputs a medications_for_review and/or genomics_for_review</h3>
+<p>Add comments to the medications_manual_overrides.txt and genomics_manual_overrides.txt as needed.</p>
+<div id="proceed-from-clinical-overrides" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cleaner.proceed.clinical()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+| Info | {None} not found in overrides folder
+
+
+| Info | {None} not found in overrides folder
+
+'3_clinical.csv' file saved to: /Users/melissa/Documents/ToyEpCleaning/project/steps/3_clinical.csv
+ ( Archive version saved as read-only to: /Users/melissa/Documents/ToyEpCleaning/project/.__internal__/archive/3_clinical_v001.csv )
+</code></pre>
+</div>
+</div>
+<section id="extra-option-cleaner" class="level5">
+<h5 class="anchored" data-anchor-id="extra-option-cleaner">Extra option Cleaner:</h5>
+<p>If you’ve already run and moved overrides to the overrides folder, but still want a new review csv, you can either the change use_existing_overrides settings when creating cleaner or at any point in the cleaning process.</p>
+<p>Initiate with: cleaner = Cleaner(use_existing_overrides = False)</p>
+<p><em>or to change in the middle of cleaning</em> cleaner.proceed.use_existing_overrides = False</p>
+<p><code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code> <code></code></p>
+</section>
+</section>
+</section>
+</section>
+<section id="steps-folder-csvs" class="level1">
+<h1>Steps folder csvs</h1>
+<p>(if all steps are needed; numbers will adjust if a step is skipped)</p>
+<section id="assembled" class="level3">
+<h3 class="anchored" data-anchor-id="assembled">1_assembled</h3>
+<p>Merged csvs from csv_list filtered by ‘config.module’ and ‘config.raw_module_csv’. Only includes participant_id’s with at least 1 response in the specified ‘config.module’.</p>
+</section>
+<section id="translations" class="level3">
+<h3 class="anchored" data-anchor-id="translations">2_translations</h3>
+<p>Replaces non-english with english translations if ‘translations_manual_override.csv’ is in the overrides folder</p>
+</section>
+<section id="duplicates" class="level3">
+<h3 class="anchored" data-anchor-id="duplicates">3_duplicates</h3>
+<p>If ‘duplicates_manual_override’ is not in overrides folder, contains only the last submission from the previous step file (usually ‘2_translations.csv’). (Duplicate detection is based on ‘config.filter_columns’ with default birthdate.)</p>
+<p>If ‘duplicates_manual_override.csv’ is in the overrides folder, contains the last submission based on ‘duplicates_manual_override.csv’. Also keeps any rows where the ‘flag_shared’ column is not empty</p>
+</section>
+<section id="clinical" class="level3">
+<h3 class="anchored" data-anchor-id="clinical">4_clinical</h3>
+<p>Medications/supplements are input as dummy (binary) variables by individual med/sup and by the ‘functional_class’ specified in ‘meds_dict.csv’ in the ‘ref’ folder.</p>
+<p>Splits protein variants into mutliple columns including both 1 letter and 3 letter amino acid codes, and a column with the mutation region based on UniProt regions (see ‘ref’ folder).</p>
+<p>Includes approximate age based on each modules ‘submission_date’ and ‘birthdate’ (or year and month of death)s. Columns included are based on ‘config.age_units’</p>
+<pre><code>    to be continued...</code></pre>
+<p>```</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

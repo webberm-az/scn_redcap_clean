@@ -15,6 +15,6 @@ class Standardize:
 
     def get_age(self):
         if config.age_units is not None:
-            df = Age().get_age(self.df, units = config.age_units)
+            df = Age().insert(self.df, units = config.age_units)
         
         return df

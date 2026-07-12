@@ -54,6 +54,6 @@ class Clinical(CleaningStep):
             return self.df
 
         age = Age()
-        self.df = age.get_age(self.df, units = config.age_units)
+        self.df = age.insert(self.df, units = config.age_units)
     
         return self.df

@@ -15,7 +15,7 @@ class CsvKit:
 
 
     def robust_read(self, filepath: Union[str, Path]) -> pd.DataFrame:
-        """Reads a CSV file securely, handling mixed international encodings."""
+        '''Reads a CSV file securely, handling mixed international encodings.'''
         # Encodings to try in order of likelihood for international Excel users
         encodings_to_try = ['utf-8-sig', 'cp1252', 'latin1', 'utf-16']
         
@@ -33,8 +33,7 @@ class CsvKit:
 
     def ensure_suffix(self, csv_name: Union[str, Path]) -> Path:
         ''' Adds .csv to name if needed '''
-        csv_name = Path(csv_name)
-        csv_name = csv_name.with_suffix('.csv')
+        csv_name = utils.ensure_suffix(csv_name, '.csv')
 
         return csv_name
 

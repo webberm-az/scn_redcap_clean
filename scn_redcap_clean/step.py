@@ -20,11 +20,3 @@ class Step(Enum):
         self.process_name = process_name
         self.class_name = class_name
         self.config_name = config_name
-
-    
-    def run_override(self, df):
-        ''' Instantiates the specific class and runs the method. '''
-        instance = self.class_name(df)
-        df = instance.input_override()
-
-        return df

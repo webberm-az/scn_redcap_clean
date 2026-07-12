@@ -4,13 +4,15 @@ from .step import Step
 from .step_manager import StepManager
 from .overrides import Overrides
 from .review import Review
+from .summary import Summary
 from .standardize import Standardize
 
 class Proceed:
 
     def __init__(self):
+        self.step_changes = []
         self.step_manager = StepManager()
-        self.overrides = Overrides()
+        self.overrides = Overrides(self.step_changes)
         self.review = Review()
         self.use_existing_overrides = True
 
@@ -21,6 +23,7 @@ class Proceed:
         Only inputs translations if 'translations_manual_override.csv' is in the overrides folder
         '''
         is_override_in_folder = self.overrides.exists(Step.translated)
+        
         self._alert_if_no_override_csv(is_override_in_folder)
 
         if skip_input or not is_override_in_folder:
@@ -81,7 +84,7 @@ class Proceed:
             self._review_duplicates(df)
             return
 
-        if self._is_input_override(Step.translated):
+        if self._is_existing_override(Step.translated):
             self.translated()
             return
 
@@ -100,7 +103,7 @@ class Proceed:
             self._review_clinical(df)
             return
 
-        if self._is_input_override(Step.duplicates):
+        if self._is_existing_override(Step.duplicates):
             self.duplicates()
             return
 
@@ -120,11 +123,13 @@ class Proceed:
             self._input_age(df)
             return
             
-
-        if self._is_input_override(Step.medications) and self.overrides.exists(
-            Step.genomics):
+        is_existing_overrides = self._is_existing_override(
+            Step.medications) and self.overrides.exists(Step.genomics)
+        
+        if is_existing_overrides:
             
             self.clinical()
+            self._summary()
             return
 
         review_clinical = self.review.clinical(df)
@@ -141,10 +146,11 @@ class Proceed:
         df = standardize.get_age()
 
         self.overrides.create_csvs(df)
+        self._summary()
 
 
 
-    def _is_input_override(self, step_enum):
+    def _is_existing_override(self, step_enum):
         if self.use_existing_overrides and self.overrides.exists(step_enum):
             return True
         
@@ -158,3 +164,9 @@ class Proceed:
             override_csv_name = f'{process_name}_manual_override'
             console.missing_override(
                 override_csv_name, f'{process_name} input', f'without {process_name}s')
+    
+
+
+    def _summary(self):
+        summary = Summary(self.step_changes)
+        summary.changes()

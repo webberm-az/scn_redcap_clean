@@ -3,22 +3,22 @@ import pandas as pd
 # local imports
 from . import config, console, paths, utils # global configs
 from .cleaning_step import CleaningStep
-from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
+from .duplicate_map import DuplicateMap
 
 
 class Duplicates(CleaningStep):
 
     process_name = 'duplicates'
 
-    def __init__(self, df):
-        self.df = df
-        self.archiver = CsvWriter()
+    def __init__(self, data):
+        self.data = data.copy()
         self.csvkit = CsvKit()
         self.dup_col = config.filter_columns
         self.id_col = config.merge_on_id_column
         self.flag_shared_col = 'flag_shared_birthdate'
         self.process_name = Duplicates.process_name
+        self.protected_ids = set()
 
 
     def review_df(self):
@@ -30,6 +30,25 @@ class Duplicates(CleaningStep):
         final_df = self._format_review_df(sorted_duplicates_df)
         
         return final_df
+
+
+
+    def input_override(self):
+        ''' 
+        Removes duplicates in dup_col keeping submission with highest id_col value 
+        '''
+        self._attempt_manual_override(f'{self.process_name}_manual_override')
+
+        full_data = self.data.copy()
+
+        df = self._clean_duplicates()
+        self.data = self._drop_override_note_cols(df)
+        self.data[self.id_col] = utils.format_id_column(self.data[self.id_col])
+        duplicate_map = DuplicateMap(full_data, self.data, self.protected_ids)
+        duplicate_map.to_ref_and_archive()
+
+        return self.data
+
 
 
     def _format_review_df(self, sorted_df):
@@ -67,35 +86,21 @@ class Duplicates(CleaningStep):
 
 
 
-    def input_override(self):
-        ''' 
-        Removes duplicates in dup_col keeping submission with highest id_col value 
-        '''
-        
-        self.try_manual_override(f'{self.process_name}_manual_override')
-        df = self.clean_duplicates()
-        self.df = self._drop_override_note_cols(df)
-        
-        return self.df
+    def _clean_duplicates(self):
+        self.protected_ids = self._get_flagged_ids()
+        df = self._drop_duplicates()
+        self.data = df.sort_values(self.id_col).reset_index(drop = True)
+
+        return self.data 
 
 
 
-    def clean_duplicates(self):
-        shared_birthdate_ids = self._get_flagged_ids()
-        df = self._drop_duplicates(shared_birthdate_ids)
-        self.df = df.sort_values(self.id_col).reset_index(drop = True)
-
-        return self.df 
-
-
-
-    def try_manual_override(self, override_filename):
-        override_csv_path = self.csvkit.path(
-            override_filename, paths.OVERRIDES)        
+    def _attempt_manual_override(self, override_filename):
+        override_csv_path = self.csvkit.path(override_filename, paths.OVERRIDES)        
         if override_csv_path is not None:
-            self.df = self.csvkit.append_override_rows(override_csv_path, self.df)
+            self.data = self.csvkit.append_override_rows(override_csv_path, self.data)
         else:
-            self._alert_no_override_file(override_filename) # skips manual overrides
+            self._alert_no_override_file(override_filename)
 
 
 
@@ -111,11 +116,11 @@ class Duplicates(CleaningStep):
     
 
     def _get_duplicates_df(self):
-        if self.df is None:
+        if self.data is None:
             return None
         
-        duplicates = self.df.duplicated(self.dup_col, keep = False)
-        duplicates_df = self.df[duplicates]
+        duplicates = self.data.duplicated(self.dup_col, keep = False)
+        duplicates_df = self.data[duplicates]
 
         return duplicates_df
 
@@ -137,21 +142,21 @@ class Duplicates(CleaningStep):
 
 
 
-    def _drop_duplicates(self, shared_birthdate_ids):
+    def _drop_duplicates(self):
         ''' 
         Drops duplicates in dup_col keeping submission with highest id_col value 
         and restores original id_col order (ascending)
         '''
 
-        df_sorted = self.df.sort_values(by = self.id_col, ascending = True)
+        df_sorted = self.data.sort_values(by = self.id_col, ascending = True)
         is_duplicate = df_sorted.duplicated(subset = self.dup_col, keep = 'last')
-        is_protected = df_sorted[self.id_col].isin(shared_birthdate_ids)
+        is_protected = df_sorted[self.id_col].isin(list(self.protected_ids))
         drop_mask = is_duplicate & ~is_protected
 
-        self.df = df_sorted[~drop_mask].sort_values(
+        self.data = df_sorted[~drop_mask].sort_values(
             by = self.id_col).reset_index(drop = True) # type: ignore
         
-        return self.df
+        return self.data
     
     
 
@@ -175,14 +180,14 @@ class Duplicates(CleaningStep):
 
     def _get_flagged_ids(self):
         ''' Returns a set of IDs where the shared birthdate flag has been set '''
-        if self.flag_shared_col not in self.df.columns:
+        if self.flag_shared_col not in self.data.columns:
             return set()
             
-        cleaned_text = self.df[self.flag_shared_col].fillna('').astype(str).str.strip()
+        cleaned_text = self.data[self.flag_shared_col].fillna('').astype(str).str.strip()
         
         is_not_blank = cleaned_text != ''
 
-        is_flagged_id = set(self.df.loc[is_not_blank, self.id_col])
+        is_flagged_id = set(self.data.loc[is_not_blank, self.id_col])
         
         return is_flagged_id
 
@@ -190,7 +195,7 @@ class Duplicates(CleaningStep):
 
     def _drop_override_note_cols(self, df):
         drop_cols = ['override_explanation', self.flag_shared_col]
-        self.df = df.drop(columns = drop_cols, errors = 'ignore')
+        self.data = df.drop(columns = drop_cols, errors = 'ignore')
 
-        return self.df
+        return self.data
 

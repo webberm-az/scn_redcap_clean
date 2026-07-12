@@ -12,55 +12,55 @@ class Age:
         self.include_age_groups = config.include_age_groups
 
 
-    def get_age(self, df, units = [Unit.days, Unit.months, Unit.years]):
-        df = df.copy()
+    def insert(self, data, units = [Unit.days, Unit.months, Unit.years]):
+        data = data.copy()
 
         self.unit_list = [units] if isinstance(units, Unit) else units
         for sub_date_col, suffix in config.module_suffix_age.items():
-            if sub_date_col not in df.columns:
+            if sub_date_col not in data.columns:
                 continue
             
-            df = self._get_age_in_unit_list(df, sub_date_col, suffix)
-            df = self._cleaned_df(df, suffix)
+            data = self._get_age_in_unit_list(data, sub_date_col, suffix)
+            data = self._cleaned_df(data, suffix)
             if self.include_age_groups:
-                df = self._add_age_groups(df, suffix)
+                data = self._insert_age_groups(data, suffix)
 
-        self.df = df
+        self.data = data
                 
-        return self.df
+        return self.data
 
 
 
-    def get_age_in_days(self, df, sub_date_col, suffix):
-        df = df.copy()
+    def insert_in_days(self, data, sub_date_col, suffix):
+        data = data.copy()
         
-        df = self._prepare_dates(df, sub_date_col)
+        data = self._prepare_dates(data, sub_date_col)
         days_col = self._get_column_name(Unit.days, suffix)
-        df[days_col] = (df[self.end_date] - df[config.birthdate]).dt.days
+        data[days_col] = (data[self.end_date] - data[config.birthdate]).dt.days
         
-        return df
+        return data
 
 
 
-    def get_age_in_months(self, df, sub_date_col, suffix):
-        df = df.copy()
+    def insert_in_months(self, data, sub_date_col, suffix):
+        data = data.copy()
         days_col = self._get_column_name(Unit.days, suffix)
-        if days_col not in df.columns:
-            df = self.get_age_in_days(df, sub_date_col, suffix)
+        if days_col not in data.columns:
+            data = self.insert_in_days(data, sub_date_col, suffix)
 
         months_col = self._get_column_name(Unit.months, suffix)
-        df[months_col] = (df[days_col] / self.ave_days_in_month).round(1)
+        data[months_col] = (data[days_col] / self.ave_days_in_month).round(1)
         
-        return df
+        return data
 
 
 
-    def get_age_in_years(self, df, sub_date_col, suffix):
+    def insert_in_years(self, df, sub_date_col, suffix):
         df = df.copy()
 
         months_col = self._get_column_name(Unit.months, suffix)
         if months_col not in df.columns:
-            df = self.get_age_in_months(df, sub_date_col, suffix)
+            df = self.insert_in_months(df, sub_date_col, suffix)
 
         years_col = self._get_column_name(Unit.years, suffix)
         df[years_col] = (df[months_col] / 12).round(2)
@@ -77,7 +77,7 @@ class Age:
 
 
 
-    def _add_age_groups(self, df, suffix):
+    def _insert_age_groups(self, df, suffix):
         age_group = AgeGroup(df)
         for unit in self.unit_list:
             self._add_age_group_col(df, unit, suffix, age_group)
@@ -106,9 +106,9 @@ class Age:
 
 
     def _get_column_name(self, unit, suffix):
-        new_col_name = f'age_in_{unit.name}_{suffix}'
+        column_name = f'age_in_{unit.name}_{suffix}'
 
-        return new_col_name
+        return column_name
 
 
 
@@ -128,8 +128,9 @@ class Age:
 
     def _cat_est_death_dates(self, df):
         death_dates = pd.to_datetime(pd.DataFrame(
-            {'year': df[config.death_year], 'month': df[config.death_month], 'day': 15
-            }), errors = 'coerce')
+            {'year': df[config.death_year], 
+            'month': df[config.death_month], 
+            'day': 15 }), errors = 'coerce')
 
         return death_dates
             
@@ -137,33 +138,33 @@ class Age:
 
     def _get_age_in_unit_list(self, df, sub_date_col, suffix):
         if Unit.years in self.unit_list:
-                df = self.get_age_in_years(df, sub_date_col, suffix)
+                df = self.insert_in_years(df, sub_date_col, suffix)
             
         elif Unit.months in self.unit_list:
-            df = self.get_age_in_months(df, sub_date_col, suffix)
+            df = self.insert_in_months(df, sub_date_col, suffix)
         
         elif Unit.days in self.unit_list:
-            df = self.get_age_in_days(df, sub_date_col, suffix)
+            df = self.insert_in_days(df, sub_date_col, suffix)
 
         return df
 
 
     
     def _get_columns_to_drop(self, suffix):
-        extra_columns_to_drop = [self.end_date]
-        extra_columns_list = self._get_extra_unit_columns(suffix)
-        extra_columns_to_drop.extend(extra_columns_list)
+        columns = [self.end_date]
+        columns_list = self._get_extra_unit_columns(suffix)
+        columns.extend(columns_list)
         
-        return extra_columns_to_drop
+        return columns
 
 
     def _get_extra_unit_columns(self, suffix):
-        extra_columns = []
+        columns = []
         for unit in Unit:
             column_name_list = self._get_extra_column(unit, suffix)
-            extra_columns.extend(column_name_list)
+            columns.extend(column_name_list)
             
-        return extra_columns
+        return columns
 
 
     def _get_extra_column(self, unit, suffix):
