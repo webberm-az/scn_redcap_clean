@@ -10,9 +10,8 @@ from .standardize import Standardize
 class Proceed:
 
     def __init__(self):
-        self.step_changes = []
         self.step_manager = StepManager()
-        self.overrides = Overrides(self.step_changes)
+        self.overrides = Overrides()
         self.review = Review()
         self.use_existing_overrides = True
 
@@ -31,6 +30,7 @@ class Proceed:
         else:
             df = self.overrides.run(Step.translated)
         
+        self._summary()
         self._review_duplicates(df)
 
 
@@ -54,6 +54,7 @@ class Proceed:
         else:
             df = self.overrides.run(Step.duplicates)
 
+        self._summary()
         self._review_clinical(df)
         
         
@@ -74,8 +75,10 @@ class Proceed:
         if skip_input or not config.run_clinical:
             df = self.step_manager.get_last_step_df(Step.clinical.config_name)
             self._input_age(df)
-        else:
-            df = self.overrides.run(Step.clinical)
+            return
+
+        df = self.overrides.run(Step.clinical)
+        self._summary()
                 
 
 
@@ -129,7 +132,6 @@ class Proceed:
         if is_existing_overrides:
             
             self.clinical()
-            self._summary()
             return
 
         review_clinical = self.review.clinical(df)
@@ -168,5 +170,5 @@ class Proceed:
 
 
     def _summary(self):
-        summary = Summary(self.step_changes)
+        summary = Summary()
         summary.changes()

@@ -2,7 +2,7 @@ import pandas as pd # external imports
 from typing import cast
 
 # local imports
-from . import config, utils, paths # global configs
+from . import config, utils # global configs
 from .cleaning_step import CleaningStep
 from .csv_writer import CsvWriter
 from .translator import Translator
@@ -29,7 +29,7 @@ class Translation(CleaningStep):
         self.detect = Detector(self.packages)
         self.process_name = Translation.process_name
         self.archive_csvname = f'{self.process_name}s_for_review'
-        self.version = Version(paths.ARCHIVE)
+        self.version = Version()
 
 
     def review_df(self, cols_to_translate):

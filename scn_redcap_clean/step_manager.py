@@ -12,6 +12,16 @@ class StepManager():
         self.csv_writer = CsvWriter()
 
 
+    def get_paths_steps(self):
+        ''' Returns a list of all step CSVs chronologically sorted by step number '''
+        step_csvs = list(paths.STEPS.glob('*.csv'))
+        
+        step_csvs.sort(key = self._extract_step_number)
+        
+        return step_csvs
+
+
+
     def output_step_number(self, step_process_name):
         last_step_number, _ = self._get_last_step(step_process_name)
 

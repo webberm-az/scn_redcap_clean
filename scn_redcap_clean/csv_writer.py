@@ -10,7 +10,7 @@ class CsvWriter:
     
     def __init__(self):
         self.csvkit = CsvKit()
-        self.version = Version(paths.ARCHIVE)
+        self.version = Version()
 
     
     # for Overrides()

@@ -1,5 +1,4 @@
 from . import paths
-from .audit import Audit
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .step_manager import StepManager
@@ -7,8 +6,7 @@ from .step_manager import StepManager
 
 class Overrides:
     
-    def __init__(self, step_changes):
-        self.step_changes = step_changes
+    def __init__(self):
         self.csv_writer = CsvWriter()
         self.csvkit = CsvKit()
         self.step_manager = StepManager()
@@ -31,8 +29,6 @@ class Overrides:
         self.step_number = last_step_number + 1
         current_data = self._run_current_step(last_step_data)
 
-        self._record_step_changes(last_step_data, current_data)
-
         return current_data
 
 
@@ -52,14 +48,9 @@ class Overrides:
 
 
     def create_csvs(self, data):
-        filename = f'{self.step_number}_{self.step.config_name}.csv'
-        self.csv_writer.main_and_archive(data, filename, paths.STEPS)
+        self.filename = f'{self.step_number}_{self.step.config_name}.csv'
+        self.csv_writer.main_and_archive(data, self.filename, paths.STEPS)
 
-
-    def _record_step_changes(self, last_step_data, current_data):
-        audit = Audit(self.step, last_step_data, current_data)
-        audit.overrides()
-        self.step_changes.append(audit.changes)
 
 
     def _run_current_step(self, data):

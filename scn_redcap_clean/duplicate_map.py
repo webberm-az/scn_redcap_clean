@@ -3,7 +3,6 @@ import pandas as pd # external import
 # local imports
 from . import config, paths, utils
 from .csv_writer import CsvWriter
-from .step import Step
 
 
 class DuplicateMap:
@@ -19,7 +18,7 @@ class DuplicateMap:
         
         self._cleaned_ids = set(self._cleaned_data[self.id_col])
         self._map_data = []
-        self.map_csvname = f"{Step.duplicates.process_name}_submission_id_map"
+        self.map_csvname = ''
         self.csv_writer = CsvWriter()
 
 

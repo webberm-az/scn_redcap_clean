@@ -1,27 +1,55 @@
 
+from pathlib import Path
+from . import config, paths
 from .changes import Changes
 from .csv_kit import CsvKit
 from .step import Step
-from . import paths
+
 
 class Audit:
     
-    def __init__(self, step_enum, data_in, data_out):
-        self.step_enum = step_enum
-        self.data_in = data_in.copy()
-        self.data_out = data_out.copy()
-        self.in_cols = set(self.data_in.columns)
-        self.out_cols = set(self.data_out.columns)
+    def __init__(self, original_data_path, revised_data_path):
+        self.path_in = original_data_path
+        self.path_out = revised_data_path
         self.csvkit = CsvKit()
 
-        self.changes = Changes(self.step_enum)
+        self.step_enum = self._get_step_enum()
+        self.data_in = self.csvkit.robust_read(self.path_in)
+        self.data_out = self.csvkit.robust_read(self.path_out)
+        self.in_cols = set(self.data_in.columns)
+        self.out_cols = set(self.data_out.columns)
+
+        id = config.merge_on_id_column
+        self.in_ids = set(self.data_in[id].dropna()) if id in self.data_in else set()
+        self.out_ids = set(self.data_out[id].dropna()) if id in self.data_out else set()
+
+        self._init_changes()
+        self._insert_details()
+
+
+    def _init_changes(self):
+        self.changes = Changes()
+        self.changes.step_name = self.step_enum.process_name
+        self.changes.previous_csv_name = Path(self.path_in).name
+        self.changes.current_csv_name = Path(self.path_out).name
+
         self.changes.added_rows = max(0, len(self.data_out) - len(self.data_in))
         self.changes.deleted_rows = max(0, len(self.data_in) - len(self.data_out))
-        self.changes.added_cols = list(self.out_cols - self.in_cols)
-        self.changes.deleted_cols = list(self.in_cols - self.out_cols)
+        self.changes.step_total_rows = len(self.data_out)
+
+        self.changes.added_ids = list(self.out_ids - self.in_ids)
+        self.changes.deleted_ids = list(self.in_ids - self.out_ids)
+        self.changes.added_ids_count = len(self.changes.added_ids)
+        self.changes.deleted_ids_count = len(self.changes.deleted_ids)
+        
+        self.changes.added_columns = list(self.out_cols - self.in_cols)
+        self.changes.deleted_columns = list(self.in_cols - self.out_cols)
+        self.changes.added_column_count = len(self.changes.added_columns)
+        self.changes.deleted_column_count = len(self.changes.deleted_columns)
 
 
-    def overrides(self): # assuming there's a better way to do this...
+
+    def _insert_details(self): # assuming there's a better way to do this...
         if self.step_enum is Step.translated:
             # self._translated()
             return
@@ -39,34 +67,43 @@ class Audit:
             return
 
         # ??? instead
-        #method_name = f"_{self.step_enum.process_name}"
+        #method_name = f'_{self.step_enum.process_name}'
         #step_method = getattr(self, method_name, None)
         
         #if step_method:
             #step_method()
             
 
+    def _get_step_enum(self):
+        filename = self.path_out.name
+        for step in Step:
+            is_step_file = step.process_name in filename or step.config_name in filename
+            
+            if is_step_file:
+                return step
+                
+        raise ValueError(f"Unknown step file: {filename}")
+
+
 
     def _duplicates(self):
-        map_df = self._read_map()
-        self._record_duplicate_details(map_df)
+        map_data, map_csvname = self._get_map()
+        self._record_duplicate_details(map_data, map_csvname)
 
 
 
-    def _read_map(self):
-        map_csvname = f"{self.step_enum.process_name}_submission_id_map"
-        map_df = self.csvkit.path_to_df(map_csvname, paths.REF)
+    def _get_map(self):
+        # safer way to do this than an f''?
+        map_csvname = f'{self.step_enum.process_name}_submission_id_map'
+        map_data = self.csvkit.path_to_df(map_csvname, paths.REF)
         
-        return map_df
+        return map_data, map_csvname
 
 
 
-    def _record_duplicate_details(self, map_data):
-        filename = f'{self.step_enum.process_name}_mappings'
-
+    def _record_duplicate_details(self, map_data, filename):
         if map_data is None or map_data.empty:
-            self.changes.details[filename] = []
             return
             
-        mappings_list = map_data.to_dict(orient = 'records')
+        mappings_list = map_data.to_dict('records')
         self.changes.details[filename] = mappings_list

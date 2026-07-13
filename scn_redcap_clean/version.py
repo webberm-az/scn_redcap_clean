@@ -2,14 +2,14 @@ from pathlib import Path
 
 # local import
 from .csv_kit import CsvKit
-from . import utils
+from . import utils, paths
 
 
 class Version:
     
-    def __init__(self, dir_path):
+    def __init__(self):
         self.csvkit = CsvKit()
-        self.dir_path = dir_path
+        self.dir_path = paths.ARCHIVE
 
     # archiver
     def get_output_version(self, fname, df):

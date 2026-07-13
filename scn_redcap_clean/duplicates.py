@@ -44,10 +44,16 @@ class Duplicates(CleaningStep):
         df = self._clean_duplicates()
         self.data = self._drop_override_note_cols(df)
         self.data[self.id_col] = utils.format_id_column(self.data[self.id_col])
-        duplicate_map = DuplicateMap(full_data, self.data, self.protected_ids)
-        duplicate_map.to_ref_and_archive()
+        self._create_map(full_data)
 
         return self.data
+
+
+
+    def _create_map(self, full_data):
+        duplicate_map = DuplicateMap(full_data, self.data, self.protected_ids)
+        duplicate_map.map_csvname = f'{self.process_name}_submission_id_map'
+        duplicate_map.to_ref_and_archive()
 
 
 
@@ -198,4 +204,4 @@ class Duplicates(CleaningStep):
         self.data = df.drop(columns = drop_cols, errors = 'ignore')
 
         return self.data
-
+        
