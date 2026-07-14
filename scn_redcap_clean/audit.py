@@ -87,6 +87,9 @@ class Audit:
 
 
     def _duplicates(self):
+        if 'override' in str(self.path_out):
+            return
+
         map_data, map_csvname = self._get_map()
         self._record_duplicate_details(map_data, map_csvname)
 

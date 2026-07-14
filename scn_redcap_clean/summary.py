@@ -14,21 +14,21 @@ class Summary:
 
 
     def changes(self):
-        summary = self._write_summary()
+        summary = self._write()
         if summary is None:
             return
 
-        self._create_summary(summary)
+        self._create(summary)
 
 
-    def _create_summary(self, summary):
-        filepath = paths.NOTES_OVERRIDE / 'step_changes.md'
+    def _create(self, summary):
+        filepath = paths.STEPS / 'step_changes.md'
         
         with open(filepath, 'w') as file:
             file.write(summary)
 
 
-    def _write_summary(self):
+    def _write(self):
         self.record = ['# Steps Summary \n']
         self.record.append('--- \n')
         
@@ -40,18 +40,27 @@ class Summary:
         return '\n'.join(self.record)
 
 
+
     def _write_changes(self):
         self.summarized_step_names = []
         for change in self.all_changes:
-            self._step_header(change)
-            
-            self._files_header(change)
-            self._rows(change)
-            self._columns(change)
-            self._details(change)
-            
-            self.record.append('\n--- \n')
-                
+            self._write_change(change)
+    
+
+
+    def _write_change(self, change):
+        self._step_header(change)
+        self._files_header(change)
+        self. _body(change)
+        self.record.append('\n--- \n')
+
+
+
+    def _body(self, change):
+        self._rows(change)
+        self._columns(change)
+        self._details(change)
+
 
     def _step_header(self, change):
         formated_step_name = change.step_name.replace('_', ' ').title()
@@ -62,8 +71,9 @@ class Summary:
 
 
     def _files_header(self, change):
-        subtitle = f'#### {change.previous_csv_name} --> {change.current_csv_name}\n'
-        self.record.append(subtitle)
+        subtitle = f'{change.previous_csv_name}  -->  {change.current_csv_name}\n'
+        self._append_header(subtitle)
+
 
 
     def _rows(self, change):
@@ -72,7 +82,7 @@ class Summary:
         if not is_id_change:
             return
 
-        self.record.append(f'*  *IDs Added:* {change.added_ids  }  \n\n    *Deleted:* {change.deleted_ids}')
+        self.record.append(f'\n*Added IDs:* {change.added_ids  }  \n*Deleted IDs:* {change.deleted_ids}')
 
 
 
@@ -82,7 +92,7 @@ class Summary:
 
         unique_ids = self._format_counts(
             'Unique IDs', change.added_ids_count, change.deleted_ids_count)
-        self.record.append(unique_ids)
+        self.record.append(f'{unique_ids}\n')
 
 
 
@@ -120,27 +130,71 @@ class Summary:
 
 
     def _append_detail(self, filename, data_list):
-        self.record.append(f"\n#### {filename.replace('_', ' ').title()}")
-        self._append_list(data_list)
+        header = self._snake_to_title(filename)
+        self._append_header(header)
+        if isinstance(data_list[0], dict):
+            self._append_table(data_list)
+        else:
+            self._append_list(data_list)
+            
         self.record.append('') 
+
+
+
+    def _append_header(self, header):
+        formatted_header = f'\n#### {header} \n'
+        self.record.append(formatted_header)
+
+
+
+    def _append_table(self, data_list):
+        keys = list(data_list[0].keys())
+        
+        headers = [self._snake_to_title(key) for key in keys]
+        
+        self._table_row(headers)
+        self._table_row(['---'] * len(headers))
+        
+        for item in data_list:
+            row_values = self._get_row_values(item, keys)    
+            self._table_row(row_values)
+
+
+    def _table_row(self, text):
+        self.record.append('| ' + ' | '.join(text) + ' |')
+
+
+
+    def _get_row_values(self, item, keys):
+        row_values = []
+        for key in keys:
+            value = self._get_cell_value(item, key)
+            row_values.append(value)
+
+        return row_values
+
+
+
+    def _get_cell_value(self, item, key):
+        value = str(item.get(key, '')).strip()
+        if value == 'nan': 
+            value = '-'
+        
+        return value
+
+
+
+    def _snake_to_title(self, snake_case):
+        _title = snake_case.replace('_', ' ').title()
+
+        return _title
 
 
 
     def _append_list(self, data_list):
         for item in data_list:
-            formatted_item = self._format_bullet(item)
-            self.record.append(formatted_item)
+            self.record.append(f'* {item}')
 
-
-
-    def _format_bullet(self, item):
-        ''' Flattens a dictionary record into a single bullet point string '''
-        if not isinstance(item, dict):
-            return f'* {item}'
-        format = '* ' + ', '.join(f'{key}:   {value}' for key, value in item.items())
-
-        return format
-    
 
 
     def _append_count_list(self, label, count, listed):

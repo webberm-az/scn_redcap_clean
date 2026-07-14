@@ -11,10 +11,15 @@ class DuplicateMap:
         self.subset_columns = config.filter_columns
         self.id_col = config.merge_on_id_column
         self._full_data = full_data.copy()
+
+        self._full_data[self.id_col] = utils.format_id_column(
+            self._full_data[self.id_col])
+
         self.is_duplicated = self._full_data.duplicated(self.subset_columns, False)
         self._duplicates_data = self._full_data[self.is_duplicated]
         self._cleaned_data = cleaned_data.copy()
-        self._protected_ids = set(protected_ids)
+        formatted_protected = [utils.format_id(i) for i in protected_ids]
+        self._protected_ids = set(formatted_protected)
         
         self._cleaned_ids = set(self._cleaned_data[self.id_col])
         self._map_data = []
@@ -44,26 +49,18 @@ class DuplicateMap:
 
 
     def _map_subset(self, subset_key, subset_ids):
-        deleted_ids = self._get_deleted_ids(subset_ids)
+        deleted_ids = subset_ids - self._cleaned_ids
         if not deleted_ids:
             return
             
         record = {
             'duplicate_match_value': self._format_duplicate_keys(subset_key),
-            'kept_ids': self._get_kept_ids(subset_ids),
-            'deleted_ids': deleted_ids,
+            'kept_id': self._get_kept_ids(subset_ids, deleted_ids),
+            'deleted_ids': self._join_ids(deleted_ids),
             'shared_birthdate_flag': self._is_protected(subset_ids)
         }
 
         self._map_data.append(record)
-
-
-
-    def _get_deleted_ids(self, subset_ids):
-        ids = subset_ids - self._cleaned_ids
-        ids = self._join_ids(ids)
-
-        return ids
 
 
 
@@ -75,8 +72,8 @@ class DuplicateMap:
 
 
 
-    def _get_kept_ids(self, subset_ids):
-        ids = subset_ids.intersection(self._cleaned_ids)
+    def _get_kept_ids(self, subset_ids, deleted_ids):
+        ids = set(subset_ids) - set(deleted_ids)
         ids = self._join_ids(ids)
 
         return ids
@@ -92,12 +89,9 @@ class DuplicateMap:
         
 
 
-
     def _join_ids(self, ids):
-        ids = sorted(list(ids))
         formatted_ids = [utils.format_id(i) for i in ids]
-        joined_ids = ', '.join(map(str, formatted_ids))
+        sorted_ids = sorted(list(formatted_ids))
+        joined_ids = ', '.join(map(str, sorted_ids))
 
         return joined_ids
-
-    
