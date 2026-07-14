@@ -105,7 +105,7 @@ run_clinical = True
 # Steps CSV Names
 step_name_assembled = 'assembled'
 step_name_translated = 'translated'
-step_name_duplicates = 'removed_duplicates'
+step_name_duplicates = 'duplicate_accounts_removed'
 step_name_clinical = 'clinical'
 
 

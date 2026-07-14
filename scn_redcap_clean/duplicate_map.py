@@ -15,6 +15,7 @@ class DuplicateMap:
         self._full_data[self.id_col] = utils.format_id_column(
             self._full_data[self.id_col])
 
+        # in functions
         self.is_duplicated = self._full_data.duplicated(self.subset_columns, False)
         self._duplicates_data = self._full_data[self.is_duplicated]
         self._cleaned_data = cleaned_data.copy()
@@ -27,7 +28,7 @@ class DuplicateMap:
         self.csv_writer = CsvWriter()
 
 
-    def to_ref_and_archive(self):
+    def write_to_file(self):
         if self._duplicates_data.empty:
             return
 

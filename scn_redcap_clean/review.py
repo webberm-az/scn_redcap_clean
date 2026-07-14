@@ -3,7 +3,7 @@
 
 from . import config # global configs
 from .csv_writer import CsvWriter
-from .duplicates import Duplicates
+from .duplicate_accounts import DuplicateAccounts
 from .clinical import Clinical
 from .translation import Translation
 from .step import Step
@@ -40,7 +40,7 @@ class Review:
         (1 file for record keeping and 1 file for manual override editting)
         Duplicates are identified by dup_col w/ 'birthdate' as default. 
         '''
-        duplicates = Duplicates(df)
+        duplicates = DuplicateAccounts(df)
         df = duplicates.review_df()
         if df is None:
             return None

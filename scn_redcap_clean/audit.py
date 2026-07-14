@@ -2,6 +2,7 @@
 from pathlib import Path
 from . import config, paths
 from .changes import Changes
+from .duplicate_accounts import DuplicateAccounts
 from .csv_kit import CsvKit
 from .step import Step
 
@@ -49,30 +50,25 @@ class Audit:
 
 
 
-    def _insert_details(self): # assuming there's a better way to do this...
-        if self.step_enum is Step.translated:
-            # self._translated()
-            return
+    def _insert_details(self):
+        match self.step_enum:
+            case Step.translated:
+                # self._translated()
+                return
 
-        if self.step_enum is Step.duplicates:
-            self._duplicates()
-            return
+            case Step.duplicates:
+                self._duplicate_accounts()
+                return
 
-        if self.step_enum is Step.medications:
-            # self._medications()
-            return
+            case Step.medications:
+                # self._medications()
+                return
 
-        if self.step_enum is Step.genomics:
-            # self._genomics()
-            return
+            case Step.genomics:
+                # self._genomics()
+                return
 
-        # ??? instead
-        #method_name = f'_{self.step_enum.process_name}'
-        #step_method = getattr(self, method_name, None)
-        
-        #if step_method:
-            #step_method()
-            
+
 
     def _get_step_enum(self):
         filename = self.path_out.name
@@ -86,7 +82,7 @@ class Audit:
 
 
 
-    def _duplicates(self):
+    def _duplicate_accounts(self):
         if 'override' in str(self.path_out):
             return
 
@@ -96,8 +92,7 @@ class Audit:
 
 
     def _get_map(self):
-        # safer way to do this than an f''?
-        map_csvname = f'{self.step_enum.process_name}_submission_id_map'
+        map_csvname = DuplicateAccounts.map_csvname
         map_data = self.csvkit.path_to_df(map_csvname, paths.REF)
         
         return map_data, map_csvname

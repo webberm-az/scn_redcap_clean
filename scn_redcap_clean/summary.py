@@ -82,7 +82,7 @@ class Summary:
         if not is_id_change:
             return
 
-        self.record.append(f'\n*Added IDs:* {change.added_ids  }  \n*Deleted IDs:* {change.deleted_ids}')
+        self.record.append(f'\n    * *Added IDs:* {change.added_ids  }  \n    * *Deleted IDs:* {change.deleted_ids}')
 
 
 
@@ -153,7 +153,8 @@ class Summary:
         headers = [self._snake_to_title(key) for key in keys]
         
         self._table_row(headers)
-        self._table_row(['---'] * len(headers))
+        separators = ['---'] * (len(headers) - 1) + ['---:']
+        self._table_row(separators)
         
         for item in data_list:
             row_values = self._get_row_values(item, keys)    
@@ -290,5 +291,4 @@ class Summary:
 
     def _record_step_changes(self, original_data_path, revised_data_path):
         audit = Audit(original_data_path, revised_data_path)
-        audit._insert_details()
         self.all_changes.append(audit.changes)

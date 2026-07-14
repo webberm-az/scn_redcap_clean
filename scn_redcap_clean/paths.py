@@ -7,7 +7,6 @@ from .csv_kit import CsvKit
 
 from . import config, console
 
-
 ROOT = Path.cwd().resolve()
 
 PROJECT = ROOT / 'project'
@@ -16,32 +15,19 @@ REVIEW = PROJECT / 'review'
 STEPS = PROJECT / 'steps'
 OVERRIDES = PROJECT / 'overrides'
 
-
 HIDDEN = PROJECT / '.__internal__'
 RAW = HIDDEN / 'raw'
 ARCHIVE = HIDDEN / 'archive'
-NOTES = HIDDEN / 'notes'
-
-NOTES_OVERRIDE = NOTES / 'override_summaries'
-NOTES_JUSTIFY = NOTES / 'decision_logs'
-SCRATCHPAD = NOTES / 'scratchpad.md'
-TODO = NOTES / 'todo.md'
 
 csvkit = CsvKit()
 
 def init_directories():
     # Create main directories
-    folders = [
-        PROJECT, HIDDEN, STEPS, OVERRIDES, REVIEW, REF, 
-        RAW, ARCHIVE, NOTES, NOTES_OVERRIDE, NOTES_JUSTIFY]
+    folders = [PROJECT, HIDDEN, STEPS, OVERRIDES, REVIEW, REF, RAW, ARCHIVE]
     
     for dir_path in folders:
         dir_path.mkdir(parents = True, exist_ok = True)
     
-    SCRATCHPAD.touch(exist_ok = True)
-    TODO.touch(exist_ok = True)
-
-
 
 def setup_workspace():
     '''

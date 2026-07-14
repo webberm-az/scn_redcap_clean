@@ -47,7 +47,7 @@ class Medications(CleaningStep):
 
 
 
-    def input_override(self): # called in Override
+    def create_final_data(self): # called in Override
         ''' 
         If override_filename exists in overrides folder, maps medications/supplements terms to config.meds_dict and inputs into main csv
         '''

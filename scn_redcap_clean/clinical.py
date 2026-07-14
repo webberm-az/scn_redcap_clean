@@ -26,7 +26,7 @@ class Clinical(CleaningStep):
     
 
     
-    def input_override(self):
+    def create_final_data(self):
         ''' Runs overrides for Meds, passes the updated df to Genomics, and returns the final df. '''
         meds = Medications(self.df)
         self.df = self._safe_input(meds)
@@ -41,7 +41,7 @@ class Clinical(CleaningStep):
 
 
     def _safe_input(self, instance):
-        df = instance.input_override()
+        df = instance.create_final_data()
         if df is not None:
             return df
         

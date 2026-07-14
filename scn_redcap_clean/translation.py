@@ -55,7 +55,7 @@ class Translation(CleaningStep):
         return final_translated_df
 
 
-    def input_override(self): # called in step
+    def create_final_data(self): # called in step
         ''' 
         If override_filename exists in overrides folder inputs into main csv
         '''

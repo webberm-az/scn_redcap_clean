@@ -3,14 +3,14 @@ from enum import Enum
 from . import config
 from .clinical import Clinical
 from .genomics import Genomics
-from .duplicates import Duplicates
+from .duplicate_accounts import DuplicateAccounts
 from .meds import Medications
 from .translation import Translation
 
 class Step(Enum):
     ''' Handles all cleaning steps. '''
     translated = (Translation.process_name, Translation, config.step_name_translated)
-    duplicates = (Duplicates.process_name, Duplicates, config.step_name_duplicates)
+    duplicates = (DuplicateAccounts.process_name, DuplicateAccounts, config.step_name_duplicates)
     clinical = (Clinical.process_name, Clinical, config.step_name_clinical)
     medications = (Medications.process_name, Medications, None)
     genomics = (Genomics.process_name, Genomics, None)

@@ -41,7 +41,7 @@ class Genomics(CleaningStep):
 
 
 
-    def input_override(self):
+    def create_final_data(self):
         '''  Maps genomic variants to UniProt position map and inputs into main csv '''
         self.override_csv_path = self.csvkit.path( 
             f'{self.process_name}_manual_override', paths.OVERRIDES)

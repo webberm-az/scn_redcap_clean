@@ -58,7 +58,7 @@ class Overrides:
         self.csv_writer.archive_overrides(self.override_csv_name)
                 
         step_instance = self.step.class_name(data.copy())
-        data = step_instance.input_override()
+        data = step_instance.create_final_data()
 
         return data
 

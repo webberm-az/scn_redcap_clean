@@ -37,9 +37,7 @@ class CsvWriter:
     def main_and_archive(
             self, df, main_csvname, main_path, 
             archive_csvname = None, csvname_get_version = None):
-        '''
-        Create CSVs editable version to main_path and read-only to archive folder
-        '''
+        ''' Write csv to main_path and archive folder '''
         if archive_csvname is None:
             archive_csvname = main_csvname
 

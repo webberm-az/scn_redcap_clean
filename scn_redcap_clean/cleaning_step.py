@@ -6,5 +6,5 @@ class CleaningStep(ABC):
         self.df = df
 
     @abstractmethod
-    def input_override(self) -> pd.DataFrame:
+    def create_final_data(self) -> pd.DataFrame:
         pass
