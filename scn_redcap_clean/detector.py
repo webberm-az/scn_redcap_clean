@@ -33,7 +33,9 @@ class Detector:
         self.special_terms = self._format_special_terms(config.translation_dict)
         combined_text = self._combine_text(row, text_columns)
         
-        if not combined_text or combined_text.isdigit(): 
+        is_text = any(character.isalpha() for character in combined_text)
+
+        if not is_text: 
             return 'en'
 
         non_latin_script = self.script.detect_lang_character(combined_text)

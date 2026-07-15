@@ -93,7 +93,7 @@ class Merge:
 
 
     def get_shared_colname_not_duplicate(self, base_df, merging_df, csv_name):
-        remaining_shared_cols = utils.get_cols_if_in_df(
+        remaining_shared_cols = utils.get_column_headers_if_in_df(
             base_df, merging_df, self.id_col)
         
         if remaining_shared_cols:
@@ -163,7 +163,7 @@ class Merge:
 
     
     def _get_cols_to_drop(self, base_df, merging_df):
-        shared_colnames = utils.get_cols_if_in_df(base_df, merging_df, self.id_col)
+        shared_colnames = utils.get_column_headers_if_in_df(base_df, merging_df, self.id_col)
         self._from_shared_get_cols_to_drop(base_df, merging_df, shared_colnames)
 
 

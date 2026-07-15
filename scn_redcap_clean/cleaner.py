@@ -38,4 +38,4 @@ class Cleaner:
 
         df = self.data.assemble()
 
-        self.proceed.review_translations(df, self.data.language_cols)
+        self.proceed.review_translations(df, self.data.lang_col_headers)

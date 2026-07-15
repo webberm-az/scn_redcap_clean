@@ -38,7 +38,7 @@ class OverrideAppend:
         override_df = self._prep_override_df(df)
         df = df.set_index(self.id_col)
         temp_override = override_df.set_index(self.id_col)
-        shared_cols = utils.get_cols_if_in_df(df, override_df, self.id_col)
+        shared_cols = utils.get_column_headers_if_in_df(df, override_df, self.id_col)
         df.update(temp_override[shared_cols])
         df = df.reset_index()
         

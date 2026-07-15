@@ -49,13 +49,50 @@ def get_review_cvsname(process_name):
 
 #       df:
 
-def get_cols_if_in_df(
+def get_column_headers_if_in_df(
         df: pd.DataFrame, override_df: pd.DataFrame, id_col: Any) -> List[Any]:
     ''' Returns shared columns between df and override_df excluding id_col '''
     shared_cols = set(df.columns) & set(override_df.columns)
     clean_shared_cols = [col for col in shared_cols if col != id_col]
     
     return clean_shared_cols
+
+def get_valid_headers(data, headers):
+    valid_headers = [header for header in headers if header in data.columns]
+
+    return valid_headers
+
+def filter_alpha_columns(data: pd.DataFrame, headers: Iterable[Any]) -> List[Any]:
+    ''' Returns a list of columns that contain alpha/text data. '''
+    valid_headers = [header for header in headers if is_column_alpha_text(data, header)]
+
+    return valid_headers
+
+def is_column_alpha_text(df: pd.DataFrame, header: Any) -> bool:
+    ''' Returns True if the column exists and contains non-numeric text. '''
+    if header not in df.columns:
+        return False
+
+    series = df[header].dropna()
+    if not isinstance(series, pd.Series):
+        return False
+    
+    is_empty_column = series.empty or (series.astype(str).str.strip() == '').all()
+    if is_empty_column:
+        return False
+
+    is_alpha_text = not is_numeric_series(series)
+
+    return is_alpha_text
+
+def is_numeric_series(series: pd.Series) -> bool:
+    ''' Returns True if the series can be fully converted to numeric. '''
+    try:
+        pd.to_numeric(series, errors = 'raise')
+        return True
+
+    except (ValueError, TypeError):
+        return False
 
 def if_missing_drop_row(
         df: pd.DataFrame, filter_subset: Union[str, Iterable[str]]) -> pd.DataFrame:
