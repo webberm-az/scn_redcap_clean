@@ -11,7 +11,6 @@ class Age:
         self.end_date = 'end_date'
         self.include_age_groups = config.include_age_groups
 
-
     def insert(self, data, units = [Unit.days, Unit.months, Unit.years]):
         data = data.copy()
 
@@ -29,16 +28,12 @@ class Age:
                 
         return self.data
 
-
-
     def _insert_in_days(self, data, sub_date_col, suffix):
         data = self._prepare_dates(data, sub_date_col)
         days_col = self._get_column_name(Unit.days, suffix)
         data[days_col] = (data[self.end_date] - data[config.birthdate]).dt.days
         
         return data
-
-
 
     def _insert_in_months(self, data, sub_date_col, suffix):
         days_col = self._get_column_name(Unit.days, suffix)
@@ -50,8 +45,6 @@ class Age:
         
         return data
 
-
-
     def _insert_in_years(self, df, sub_date_col, suffix):
         months_col = self._get_column_name(Unit.months, suffix)
         if months_col not in df.columns:
@@ -62,15 +55,11 @@ class Age:
         
         return df
 
-
-
     def _cleaned_df(self, df, suffix):
         extra_columns_to_drop = self._get_columns_to_drop(suffix)
         df = df.drop(columns = extra_columns_to_drop, errors = 'ignore')
 
         return df
-
-
 
     def _insert_age_groups(self, df, suffix):
         age_group = AgeGroup(df)
@@ -78,8 +67,6 @@ class Age:
             self._add_age_group_col(df, unit, suffix, age_group)
 
         return age_group.df
-
-
 
     def _add_age_group_col(self, df, unit, suffix, age_group):
         age_column = self._get_column_name(unit, suffix)
@@ -89,26 +76,23 @@ class Age:
         
         return
 
-
-
     def _prepare_dates(self, df, sub_date_col):
         df = self._get_end_date(df, sub_date_col)
-        df[config.birthdate] = pd.to_datetime(df[config.birthdate]).copy()
-        df[sub_date_col] = pd.to_datetime(df[sub_date_col]).copy()
+        df[config.birthdate] = pd.to_datetime(
+            df[config.birthdate], format = 'mixed', errors = 'coerce').copy()
+        df[sub_date_col] = pd.to_datetime(
+            df[sub_date_col], format = 'mixed', errors = 'coerce').copy()
 
         return df
-
-
 
     def _get_column_name(self, unit, suffix):
         column_name = f'age_in_{unit.name}_{suffix}'
 
         return column_name
 
-
-
     def _get_end_date(self, df, sub_date_col):
-        df[self.end_date] = pd.to_datetime(df[sub_date_col]).copy()
+        df[self.end_date] = pd.to_datetime(
+            df[sub_date_col], format = 'mixed', errors = 'coerce').copy()
         if config.death_month in df.columns and config.death_year in df.columns:
             
             death_dates = self._cat_est_death_dates(df)
@@ -119,8 +103,6 @@ class Age:
             
         return df
 
-
-
     def _cat_est_death_dates(self, df):
         death_dates = pd.to_datetime(pd.DataFrame(
             {'year': df[config.death_year], 
@@ -129,8 +111,6 @@ class Age:
 
         return death_dates
             
-
-
     def _get_age_in_unit_list(self, df, sub_date_col, suffix):
         if Unit.years in self.unit_list:
                 df = self._insert_in_years(df, sub_date_col, suffix)
@@ -142,8 +122,6 @@ class Age:
             df = self._insert_in_days(df, sub_date_col, suffix)
 
         return df
-
-
     
     def _get_columns_to_drop(self, suffix):
         columns = [self.end_date]
@@ -152,8 +130,6 @@ class Age:
         
         return columns
 
-
-
     def _get_extra_unit_columns(self, suffix):
         columns = []
         for unit in Unit:
@@ -161,8 +137,6 @@ class Age:
             columns.extend(column_name_list)
             
         return columns
-
-
 
     def _get_extra_column(self, unit, suffix):
         if unit not in self.unit_list:
