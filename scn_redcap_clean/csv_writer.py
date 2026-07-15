@@ -12,7 +12,6 @@ class CsvWriter:
         self.csvkit = CsvKit()
         self.version = Version()
 
-    
     # for Overrides()
     def archive_overrides(self, filename, main_path = None):
         '''
@@ -30,8 +29,6 @@ class CsvWriter:
         self.archive_if_changed(filename, df) # version to archive folder
         
         return
-
-
 
     # for Overrides(), Data(), Step(), self
     def main_and_archive(
@@ -52,21 +49,19 @@ class CsvWriter:
 
         return self.path
 
-
     # for Review()
     def review_and_archive(self, df, step, csvname_get_version = None):
         '''
         Create CSVs editable version to main_path and read-only to archive folder
         '''
-        main_csv_name = f'{step}_manual_override'
-        archive_csv_name = f'{step}_for_review'
+        main_csv_name = utils.get_manual_cvsname(step)
+        archive_csv_name = utils.get_review_cvsname(step)
 
         self.main_and_archive(
             df, main_csv_name, paths.REVIEW, archive_csv_name, csvname_get_version)
         
         content = 'Additional explanations: \n'
         utils.write_txt_file(content, main_csv_name, paths.OVERRIDES)
-
 
     # for self
     def archive_if_changed(self, filename, df, version = None):
@@ -77,8 +72,6 @@ class CsvWriter:
         self._archive_if_new(filename, df, archive_file_path)
         self.last_archived_file = self.csvkit.read_only_path
         console.archive_file_saved_to(self.last_archived_file)
-
-        
         
     def _archive_if_new(self, csvname, df, path):
         if not path.exists():

@@ -15,7 +15,6 @@ from .version import Version
 
 class Translation(CleaningStep):
 
-    process_name = 'translation'
     
     def __init__(self, df):
         self.df = df
@@ -27,9 +26,15 @@ class Translation(CleaningStep):
         self.translator = Translator(self.packages)
         self.csvkit = CsvKit()
         self.detect = Detector(self.packages)
-        self.process_name = Translation.process_name
-        self.archive_csvname = f'{self.process_name}s_for_review'
+        self.archive_csvname = utils.get_review_cvsname(self.get_process_name())
         self.version = Version()
+
+
+    @classmethod
+    def get_process_name(cls):
+        process_name = 'translation'
+
+        return process_name
 
 
     def review_df(self, cols_to_translate):
@@ -60,7 +65,7 @@ class Translation(CleaningStep):
         If override_filename exists in overrides folder inputs into main csv
         '''
         df = self.df
-        df = OverrideAppend(self.process_name).append_override_df(df)
+        df = OverrideAppend(self.get_process_name()).append_override_df(df)
         
         return df
 

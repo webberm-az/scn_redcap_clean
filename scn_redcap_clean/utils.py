@@ -8,7 +8,6 @@ from . import console
 
 auto = {"id": "utils.auto"} # creates a parameter_input = utils.auto 
 
-
 def is_n_matches(pattern: Pattern[str], string: str, n: int) -> bool:
     ''' Returns True if at least n of pattern elements found in string '''
     count = 0
@@ -19,8 +18,6 @@ def is_n_matches(pattern: Pattern[str], string: str, n: int) -> bool:
             return True
 
     return False
-
-
 
 def get_max_file_index(existing_files, extract_int_func):
     '''
@@ -39,6 +36,15 @@ def get_max_file_index(existing_files, extract_int_func):
 
     return max_num, latest_file
 
+def get_manual_cvsname(process_name):
+    csvname = f'{process_name}_manual_override'
+
+    return csvname
+
+def get_review_cvsname(process_name):
+    csvname = f'{process_name}_for_review'
+
+    return csvname
 
 
 #       df:
@@ -51,8 +57,6 @@ def get_cols_if_in_df(
     
     return clean_shared_cols
 
-
-
 def if_missing_drop_row(
         df: pd.DataFrame, filter_subset: Union[str, Iterable[str]]) -> pd.DataFrame:
     ''' Removes rows where col is blank or missing '''
@@ -62,9 +66,6 @@ def if_missing_drop_row(
     df = df.dropna(subset = subset, how = 'all') # drop all NA
 
     return df
-    
-
-
 
 def add_column_if_dne(colname: Any, df: pd.DataFrame, input: Any = '') -> pd.DataFrame:
     if colname not in df.columns:
@@ -72,23 +73,17 @@ def add_column_if_dne(colname: Any, df: pd.DataFrame, input: Any = '') -> pd.Dat
     
     return df
 
-
-
 def match_rows_to_ref_id( # check ref_df ????
         df: pd.DataFrame, ref_df: pd.DataFrame, id_column: Any) -> pd.Series:
     df[id_column] = df[id_column].astype('float64')
         
     return cast(pd.Series, df[id_column])
 
-
-
 def is_df_identical(current_df, last_df):
     if last_df.astype(str).equals(current_df.astype(str)):
         return True
 
     return False
-
-
 
 def make_duplicate_orig_cols(df: pd.DataFrame, rep_cols: List[str]) -> pd.DataFrame:
     '''
@@ -99,8 +94,6 @@ def make_duplicate_orig_cols(df: pd.DataFrame, rep_cols: List[str]) -> pd.DataFr
 
     return df
 
-
-
 def format_id_column(id_column_set) -> pd.DataFrame:
     ''' 
     Formats IDs to strings, dropping .0 for integers but keeping true decimals 
@@ -110,7 +103,6 @@ def format_id_column(id_column_set) -> pd.DataFrame:
     id_column_set = id_column_set.apply(format_id)
     
     return id_column_set
-
 
 def format_id(value):
     if pd.isna(value) or value == '':
@@ -125,7 +117,6 @@ def format_id(value):
         return str(value)
 
 
-
 #       txt:
 
 def write_txt_file(content: str, filename: Union[str, Path], output_dir: Path) -> None:
@@ -135,14 +126,10 @@ def write_txt_file(content: str, filename: Union[str, Path], output_dir: Path) -
     file_path = get_txt_filepath(filename, output_dir)
     create_txt(content, filename, file_path)
 
-
-
 def create_txt(content, filename, file_path):
     # Path.write_text automatically opens, writes, and closes the file safely.
     file_path.write_text(content, encoding = 'utf-8')
     console.file_saved(filename, file_path)
-
-
 
 def get_txt_filepath(filename, output_dir):
     filename = ensure_txt_suffix(filename)
@@ -150,15 +137,11 @@ def get_txt_filepath(filename, output_dir):
 
     return file_path
 
-
-
 def ensure_txt_suffix(filename):
     ''' Adds '.txt' to name if needed '''
     filename = ensure_suffix(filename, '.txt')
     
     return filename
-
-
 
 def ensure_suffix(filename: Union[str, Path], suffix_str) -> Path:
         ''' Adds suffix_str to name if needed '''
@@ -170,8 +153,6 @@ def ensure_suffix(filename: Union[str, Path], suffix_str) -> Path:
 
         return filename
 
-
-
 def append_to_txt(content: str, filename: Union[str, Path], output_dir: Path) -> None:
     '''
     Appends text to a file without overwriting existing content.
@@ -181,8 +162,6 @@ def append_to_txt(content: str, filename: Union[str, Path], output_dir: Path) ->
     _append_txt(content, file_path)
     action = 'Text entry added'
     console.view_txt_file(action, file_path.name)
-
-
 
 def _append_txt(content, file_path):
     with open(file_path, mode='a', encoding='utf-8') as file:

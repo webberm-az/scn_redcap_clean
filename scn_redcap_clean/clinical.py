@@ -8,11 +8,14 @@ from .genomics import Genomics
 class Clinical(CleaningStep):
     ''' Combine Medication and Genomics Overrides into one step '''
     
-    process_name = 'clinical'
-
     def __init__(self, df):
         self.df = df.copy()
 
+    @classmethod
+    def get_process_name(cls):
+        process_name = 'clinical'
+
+        return process_name
 
     def review_dfs(self):
         ''' 
@@ -23,8 +26,6 @@ class Clinical(CleaningStep):
         genomics_df = Genomics(self.df).review_df()
 
         return meds_df, genomics_df
-    
-
     
     def create_final_data(self):
         ''' Runs overrides for Meds, passes the updated df to Genomics, and returns the final df. '''
@@ -38,8 +39,6 @@ class Clinical(CleaningStep):
 
         return self.df
 
-
-
     def _safe_input(self, instance):
         df = instance.create_final_data()
         if df is not None:
@@ -48,7 +47,6 @@ class Clinical(CleaningStep):
         return self.df
 
 
-    
     def _safe_get_age(self):
         if config.age_units is None:
             return self.df

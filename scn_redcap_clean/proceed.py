@@ -1,5 +1,5 @@
 # local imports
-from . import config, console
+from . import config, console, utils
 from .step import Step
 from .step_manager import StepManager
 from .overrides import Overrides
@@ -163,7 +163,7 @@ class Proceed:
     def _alert_if_no_override_csv(self, is_override_in_folder):
         if not is_override_in_folder:
             process_name = Step.translated.process_name
-            override_csv_name = f'{process_name}_manual_override'
+            override_csv_name = utils.get_manual_cvsname(process_name)
             console.missing_override(
                 override_csv_name, f'{process_name} input', f'without {process_name}s')
     
@@ -171,4 +171,4 @@ class Proceed:
 
     def _summary(self):
         summary = Summary()
-        summary.changes()
+        summary.to_file()

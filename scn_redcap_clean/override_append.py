@@ -8,7 +8,7 @@ class OverrideAppend:
 
         self.process_name = process_name
 
-        self.override_csv_name = f'{self.process_name}_manual_override'
+        self.override_csv_name = utils.get_manual_cvsname(self.process_name)
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
         self.override_csv_path = self.csvkit.path( # need

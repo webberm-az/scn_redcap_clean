@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from . import config, console, paths
+from . import config, console, paths, utils
 from .cleaning_step import CleaningStep
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
@@ -13,9 +13,8 @@ from .schemas import MedicationList
 
 class Medications(CleaningStep):
     ''' Standardizes and dummies medications and supplements using local AI Ollama. '''
-    
-    process_name = 'medications'
-    
+
+
     def __init__(self, df):
 
         self.df = df.copy()
@@ -24,10 +23,14 @@ class Medications(CleaningStep):
         self.csvkit = CsvKit()
         self.meds_dict_df = self.csvkit.path_to_df(
             config.meds_dict, paths.REF)
-        self.process_name = Medications.process_name
         self.class_prefix = 'class'
         self.temp_prefix = 'NEW_DUMMY'
 
+    @classmethod
+    def get_process_name(cls):
+        process_name = 'medications'
+
+        return process_name
 
 
     def review_df(self):
@@ -51,8 +54,8 @@ class Medications(CleaningStep):
         ''' 
         If override_filename exists in overrides folder, maps medications/supplements terms to config.meds_dict and inputs into main csv
         '''
-        self.override_csv_path = self.csvkit.path( 
-            f'{self.process_name}_manual_override', paths.OVERRIDES)
+        csvname = utils.get_manual_cvsname(self.get_process_name())
+        self.override_csv_path = self.csvkit.path(csvname, paths.OVERRIDES)
         df = self.try_input_mapped_long_df(self.df, self.meds_dict_df)
         
         return df
@@ -85,7 +88,7 @@ class Medications(CleaningStep):
             console.info_missing_file({self.override_csv_path}, 'overrides')
         
         if self.map_df is None:
-            console.print_missing_override_dict(self.process_name, 'config.meds_dict')
+            console.print_missing_override_dict(self.get_process_name(), 'config.meds_dict')
 
 
 
@@ -133,7 +136,7 @@ class Medications(CleaningStep):
 
     def _get_configs(self):
         extractor_configs = {
-            'name': self.process_name,
+            'name': self.get_process_name(),
             'cols': config.med_text_cols,
             'prompt': config.prompt_meds,
             'schema': MedicationList}

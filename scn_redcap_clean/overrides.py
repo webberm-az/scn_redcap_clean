@@ -1,4 +1,4 @@
-from . import paths
+from . import paths, utils
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .step_manager import StepManager
@@ -34,14 +34,14 @@ class Overrides:
 
 
     def exists(self, step_enum):
-        override_csv_name = f'{step_enum.process_name}_manual_override'
+        override_csv_name = utils.get_manual_cvsname(step_enum.process_name)
 
         return self.csvkit.exists(override_csv_name, paths.OVERRIDES)
 
 
     def get_df(self, step_enum):
         self.step = step_enum
-        override_csv_name = f'{self.step.process_name}_manual_override'
+        override_csv_name = utils.get_manual_cvsname(self.step.process_name)
         data = self.csvkit.path_to_df(override_csv_name, paths.OVERRIDES)
 
         return data
@@ -55,7 +55,7 @@ class Overrides:
 
     def _run_current_step(self, data):
         ''' Instantiates the specific class and runs the method. '''
-        self.csv_writer.archive_overrides(self.override_csv_name)
+        self.csv_writer.archive_overrides(self.override_csvname)
                 
         step_instance = self.step.class_name(data.copy())
         data = step_instance.create_final_data()
@@ -65,6 +65,6 @@ class Overrides:
 
 
     def _init_step_dependencies(self):
-        self.override_csv_name = f'{self.step.process_name}_manual_override'
+        self.override_csvname = utils.get_manual_cvsname(self.step.process_name)
         self.override_csv_path = self.csvkit.path(
-            self.override_csv_name, paths.OVERRIDES)
+            self.override_csvname, paths.OVERRIDES)

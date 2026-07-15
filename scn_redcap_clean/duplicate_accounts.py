@@ -9,8 +9,6 @@ from .duplicate_map import DuplicateMap
 
 class DuplicateAccounts(CleaningStep):
 
-    process_name = 'duplicate_accounts'
-    map_csvname = f'{process_name}_id_map'
 
     def __init__(self, data):
         self.data = data.copy()
@@ -18,8 +16,20 @@ class DuplicateAccounts(CleaningStep):
         self.dup_col = config.filter_columns
         self.id_col = config.merge_on_id_column
         self.flag_shared_col = 'flag_shared_birthdate'
-        self.process_name = DuplicateAccounts.process_name
         self.protected_ids = set()
+    
+    @classmethod
+    def get_process_name(cls):
+        process_name = 'duplicate_accounts'
+
+        return process_name
+
+
+    @classmethod
+    def get_map_csvname(cls):
+        map_csvname = f'{cls.get_process_name()}_id_map'
+
+        return map_csvname
 
 
     def review_df(self):
@@ -38,7 +48,7 @@ class DuplicateAccounts(CleaningStep):
         ''' 
         Removes duplicates in dup_col keeping submission with highest id_col value 
         '''
-        self._attempt_manual_override(f'{self.process_name}_manual_override')
+        self._attempt_manual_override()
 
         full_data = self.data.copy()
 
@@ -53,7 +63,7 @@ class DuplicateAccounts(CleaningStep):
 
     def _create_map(self, full_data):
         duplicate_map = DuplicateMap(full_data, self.data, self.protected_ids)
-        duplicate_map.map_csvname = self.map_csvname
+        duplicate_map.map_csvname = self.get_map_csvname()
         duplicate_map.write_to_file()
 
 
@@ -102,7 +112,8 @@ class DuplicateAccounts(CleaningStep):
 
 
 
-    def _attempt_manual_override(self, override_filename):
+    def _attempt_manual_override(self):
+        override_filename = utils.get_manual_cvsname(self.get_process_name())
         override_csv_path = self.csvkit.path(override_filename, paths.OVERRIDES)        
         if override_csv_path is not None:
             self.data = self.csvkit.append_override_rows(override_csv_path, self.data)

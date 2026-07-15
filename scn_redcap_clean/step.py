@@ -9,11 +9,11 @@ from .translation import Translation
 
 class Step(Enum):
     ''' Handles all cleaning steps. '''
-    translated = (Translation.process_name, Translation, config.step_name_translated)
-    duplicates = (DuplicateAccounts.process_name, DuplicateAccounts, config.step_name_duplicates)
-    clinical = (Clinical.process_name, Clinical, config.step_name_clinical)
-    medications = (Medications.process_name, Medications, None)
-    genomics = (Genomics.process_name, Genomics, None)
+    translated = (Translation.get_process_name(), Translation, config.step_name_translated)
+    duplicates = (DuplicateAccounts.get_process_name(), DuplicateAccounts, config.step_name_duplicates)
+    clinical = (Clinical.get_process_name(), Clinical, config.step_name_clinical)
+    medications = (Medications.get_process_name(), Medications, None)
+    genomics = (Genomics.get_process_name(), Genomics, None)
     
     
     def __init__(self, process_name, class_name, config_name):

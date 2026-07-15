@@ -7,13 +7,12 @@ from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
 from .schemas import GenomicList
 from .uniprot import UniProtQuery
-from . import bio, config, console, paths
+from . import bio, config, console, paths, utils
 
 
 class Genomics(CleaningStep):
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
     
-    process_name = 'genomics'
 
     def __init__(self, df):
 
@@ -25,7 +24,12 @@ class Genomics(CleaningStep):
             f'{config.gene_name}_position_map_uniprot', paths.REF)
         self.r_term = 'recommended_term'
         self.term = 'clean_term'
-        self.process_name = Genomics.process_name
+
+    @classmethod
+    def get_process_name(cls):
+        process_name = 'genomics'
+
+        return process_name
 
 
     def review_df(self):
@@ -43,8 +47,8 @@ class Genomics(CleaningStep):
 
     def create_final_data(self):
         '''  Maps genomic variants to UniProt position map and inputs into main csv '''
-        self.override_csv_path = self.csvkit.path( 
-            f'{self.process_name}_manual_override', paths.OVERRIDES)
+        override_filename = utils.get_manual_cvsname(self.get_process_name())
+        self.override_csv_path = self.csvkit.path(override_filename, paths.OVERRIDES)
         df = self.try_input_mapped_long_df(self.df, self.genomics_dict_df)
         
         return df
@@ -221,7 +225,7 @@ class Genomics(CleaningStep):
         return df
     def _get_configs(self):
         extractor_configs = {
-            'name': self.process_name,
+            'name': self.get_process_name(),
             'cols': config.genomic_cols,
             'prompt': config.prompt_genomics,
             'schema': GenomicList}
