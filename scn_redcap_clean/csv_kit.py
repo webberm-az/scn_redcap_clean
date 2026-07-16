@@ -1,11 +1,10 @@
 from pathlib import Path
-from typing import Optional, Union, List, cast
+from typing import Optional, Union, cast
 
 import pandas as pd # external import
 
 # local imports
 from . import config, console, utils
-
 
 class CsvKit:
 
@@ -13,15 +12,16 @@ class CsvKit:
         self.main_path = None
         self.read_only_path = None
 
-
     def robust_read(self, filepath: Union[str, Path]) -> pd.DataFrame:
         '''Reads a CSV file securely, handling mixed international encodings.'''
         # Encodings to try in order of likelihood for international Excel users
         encodings_to_try = ['utf-8-sig', 'cp1252', 'latin1', 'utf-16']
+        low_memory = config.low_memory_read_csv
         
         for encoding in encodings_to_try:
             try:
-                return pd.read_csv(filepath, encoding = encoding)
+                return pd.read_csv(
+                    filepath, encoding = encoding, low_memory = low_memory)
             except (UnicodeDecodeError, LookupError):
                 continue
         
@@ -29,15 +29,11 @@ class CsvKit:
         
         return df
 
-
-
     def ensure_suffix(self, csv_name: Union[str, Path]) -> Path:
         ''' Adds .csv to name if needed '''
         csv_name = utils.ensure_suffix(csv_name, '.csv')
 
         return csv_name
-
-
 
     def path_to_df(
         self, csv_name: Union[str, Path],  dir_path: Union[str, Path]
@@ -50,8 +46,6 @@ class CsvKit:
 
         return df
 
-
-
     def path(
         self, csv_name: Union[str, Path], dir_path: Union[str, Path]) -> Optional[Path]:
         
@@ -63,14 +57,10 @@ class CsvKit:
         
         return self.main_path
 
-
-
     def exists(self, csv_name: Union[str, Path], dir_path: Union[str, Path]) -> bool:
         potential_path = Path(dir_path) / self.ensure_suffix(csv_name)
         
         return potential_path.exists()
-
-
 
     def create_main(
             self, df, output_filename: Union[str, Path], dir_path: Union[str, Path]
@@ -84,14 +74,10 @@ class CsvKit:
         df.to_csv(self.main_path, index = False)
         console.file_saved_to(output_filename, self.main_path)
 
-
-
     def save_csv(self, df: pd.DataFrame, output_filepath: Union[str, Path]) -> None:
         ''' Create editable csv to main_path '''
         df.to_csv(output_filepath, index = False)
         console.action_to_path('File saved', output_filepath)
-
-
 
     def create_read_only(self, df: pd.DataFrame, path: Union[str, Path]) -> None:
         ''' Create read-only csv '''
@@ -101,20 +87,6 @@ class CsvKit:
             self.read_only_path.chmod(0o444)
         except PermissionError: 
             pass
-        
-
-
-    def get_df_dropna_subset(
-            self, raw_path: Union[str, Path], filename: Union[str, Path], 
-            filter_subset: List[str]) -> pd.DataFrame:
-        
-        clean_filename = self.ensure_suffix(filename)
-        df = self.robust_read(Path(raw_path) / clean_filename)
-        df = utils.if_missing_drop_row(df, filter_subset)
-
-        return df
-
-
 
     def instruct_missing_csv(
             self, filename: Union[str, Path], dir: Union[str, Path], role_name: str, 
@@ -124,19 +96,6 @@ class CsvKit:
         raw_path = Path(dir) / f'{clean_filename}'
         console.alert_missing_config_file(dir, role_name, set_config, str(raw_path))
 
-
-
-    def append_override_rows(
-            self, override_csv: Union[str, Path], df: pd.DataFrame) -> pd.DataFrame:
-        ''' Adds all rows in override_csv to df '''
-        override_df = self._get_matching_col_df(df, override_csv)
-        override_df = override_df.dropna(subset = [config.merge_on_id_column])
-        df = self._drop_duplicate_id(df, override_df)
-        df = pd.concat([df, override_df], ignore_index = True)
-        
-        return df
-
-
     def _get_matching_col_df(self, df, override_csv):
         ''' Reads override_csv and loops through cols to match data types '''
         override_df = self.robust_read(override_csv)
@@ -145,8 +104,6 @@ class CsvKit:
         
         return override_df
 
-
-
     def _ensure_col_match(self, col, df, override_df):
         ''' Only loops columns that exists in the base df '''
         if col in df.columns:
@@ -154,8 +111,6 @@ class CsvKit:
             return col_typed
 
         return override_df[col]
-
-
 
     def _try_col_match(self, col, df, override_df):
         try:
@@ -167,18 +122,6 @@ class CsvKit:
         except Exception as e:
             console.error(f'Could not match columns: {e}')
             return override_df[col]
-
-
-
-    def _drop_duplicate_id(self, base_df, override_df):
-        override_id = override_df[config.merge_on_id_column].unique().tolist()
-        is_duplicate_id = base_df[config.merge_on_id_column].isin(override_id)
-        
-        df = cast(pd.DataFrame, base_df[~is_duplicate_id])
-
-        return df
-
-
 
     def _try_read_csv(self):
         try:

@@ -35,10 +35,12 @@ config.med_text_cols = ['toy_meds', 'toy_supps']
 config.c_genomic = 'genomic_text1'
 config.p_genomic = 'genomic_p._text2'
 
+config.genomic_cols = [config.c_genomic, config.p_genomic]
+
 # all columns marked text in the data dictionary you don't want translated
-config.no_translate_cols = [
-      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column
-      ] + config.med_text_cols
+config.no_translate_cols = config.med_text_cols + config.genomic_cols + [
+      config.birthdate, config.merge_on_id_column,
+      ]
 
 config.age_units = [days, months, years]
 
@@ -86,7 +88,7 @@ cleaner = Cleaner()
 ```{python}
 #| label: clean
 
-config.translation_dict = { # !!! planning to track this in notes eventually for each version
+config.translation_dict = { # !!! planning to track this in cleaning_summary.md
             '布洛芬':'Ibuprofen',
             'SCN8A':'SCN8A',
            }
@@ -139,7 +141,4 @@ cleaner.proceed.use_existing_overrides = False
         to be continued...
           
 
-summary
-reporter
-
-add descriptive statistics
+summary (more details)

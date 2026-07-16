@@ -3,15 +3,12 @@ from .units import Unit
 
 '''     ________________________     Required     ______________________________     '''
 
-
 # Data Dictionary CSV
 data_dict = 'ToyDict.csv'
 csv_list = []
 
-
 # Module Specific
 modules = ['toy',] # as listed in the Data Dictionary 'Form Name' column
-
 
 raw_module_csv = 'Toy1' # must have all of columns of the module(s) you are filtering by
 
@@ -20,19 +17,14 @@ module_suffix_age = {
     'submission_date_2': 'mod2' # if more than 1 module is timestamped
 }
 
-
 c_genomic = 'genomic_text1'
 p_genomic = 'genomic_p._text2'
 
-
 med_text_cols = ['toy_meds', 'toy_supps']
-
 
 meds_dict = 'Toy_clinical_taxonomy.csv'
 
-
 age_dependent = ['toy_check1', 'toy_check2', 'toy_check3', 'toy_check4', 'toy_yesno']
-
 
 
 
@@ -77,12 +69,12 @@ age_groups = {
         (float('inf'), '65+')]
 }
 
-
 # for UniProt Ref Map
 gene_name = 'SCN8A'
 
 
 '''     ________________________     Defaults     ______________________________     '''
+low_memory_read_csv = False
 
 merge_on_id_column = 'participant_id'
 

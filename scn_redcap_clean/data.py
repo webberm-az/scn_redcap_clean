@@ -5,8 +5,6 @@ from .csv_kit import CsvKit
 from .data_dict import DataDict
 from .merge import Merge
 
-
-
 class Data:
 
     def __init__(self):

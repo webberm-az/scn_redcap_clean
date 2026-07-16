@@ -25,7 +25,6 @@ class AgeGroup:
 
         return self.df
 
-
     def _unpack_config_age_group_dict(self, unit):
         groups = config.age_groups.get(unit, [])
         
@@ -34,7 +33,6 @@ class AgeGroup:
         labels = [g[1] for g in groups]
 
         return bins, labels
-
 
     def add_age_group_column(self, age_column, bins, labels):
         output_column = f'{age_column}_groups'

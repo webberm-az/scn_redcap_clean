@@ -114,7 +114,6 @@ def view_txt_file(filename, output_dir):
     else:
         txt_content(filename, file_path)
 
-
 def txt_content(filename, file_path):
     print(f'\n   |  {filename}  |\n\n')
     print(file_path.read_text(encoding='utf-8'))
@@ -129,7 +128,6 @@ def translation_packages_summary(type, language_list, status=""):
     if_status = f" {status}" if status else ''
     message = f"{type} ArgosTranslate package(s){if_status} | Language(s): {language_list}"
     info(message)
-
 
 def alert_failed_translation_download(language_list, internet_available = True):
     message = f"Failed ArgosTranslate download(s) | Language(s): {language_list}"

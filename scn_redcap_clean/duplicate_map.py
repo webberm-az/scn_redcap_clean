@@ -4,7 +4,6 @@ import pandas as pd # external import
 from . import config, paths, utils
 from .csv_writer import CsvWriter
 
-
 class DuplicateMap:
 
     def __init__(self, full_data, cleaned_data, protected_ids):
@@ -27,7 +26,6 @@ class DuplicateMap:
         self.map_csvname = ''
         self.csv_writer = CsvWriter()
 
-
     def write_to_file(self):
         if self._duplicates_data.empty:
             return
@@ -38,16 +36,12 @@ class DuplicateMap:
 
         return
 
-
-
     def _map_ids(self):
         grouped_duplicates = self._duplicates_data.groupby(self.subset_columns)
         
         for subset_key, subset in grouped_duplicates:
             subset_ids = set(subset[self.id_col])
             self._map_subset(subset_key, subset_ids)
-
-
 
     def _map_subset(self, subset_key, subset_ids):
         deleted_ids = subset_ids - self._cleaned_ids
@@ -63,15 +57,11 @@ class DuplicateMap:
 
         self._map_data.append(record)
 
-
-
     def _format_duplicate_keys(self, duplicate_keys):
         if isinstance(duplicate_keys, tuple):
             return ' ,  '.join(map(str, duplicate_keys))
             
         return str(duplicate_keys)
-
-
 
     def _get_kept_ids(self, subset_ids, deleted_ids):
         ids = set(subset_ids) - set(deleted_ids)
@@ -79,16 +69,12 @@ class DuplicateMap:
 
         return ids
 
-
-
     def _is_protected(self, subset_ids):
         is_protected = any(subset_id in self._protected_ids for subset_id in subset_ids)
         if is_protected:
             return True
             
         return ''
-        
-
 
     def _join_ids(self, ids):
         formatted_ids = [utils.format_id(i) for i in ids]

@@ -9,11 +9,9 @@ from .schemas import GenomicList
 from .uniprot import UniProtQuery
 from . import bio, config, console, paths, utils
 
-
 class Genomics(CleaningStep):
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
     
-
     def __init__(self, df):
 
         self.df = df.copy()
@@ -31,7 +29,6 @@ class Genomics(CleaningStep):
 
         return process_name
 
-
     def review_df(self):
         ''' 
         Outputs csv files for genomic variants review 
@@ -43,8 +40,6 @@ class Genomics(CleaningStep):
 
         return df
 
-
-
     def create_final_data(self):
         '''  Maps genomic variants to UniProt position map and inputs into main csv '''
         override_filename = utils.get_manual_cvsname(self.get_process_name())
@@ -52,8 +47,6 @@ class Genomics(CleaningStep):
         df = self.try_input_mapped_long_df(self.df, self.genomics_dict_df)
         
         return df
-
-
 
     def try_input_mapped_long_df(self, df, map_df): # for Medications and Genomics
         ''' 
@@ -71,16 +64,12 @@ class Genomics(CleaningStep):
         
         return df
 
-
-
     def _alert_errors(self):
         if self.df is None:
             console.error("No step csvs found in 'steps' folder")
         
         if self.override_csv_path is None:
             console.info_missing_file({self.override_csv_path}, 'overrides')
-
-
 
     def _get_final_df(self, override_df):
         mapped_long_df = self.try_get_mapped_long_df(override_df)
@@ -90,8 +79,6 @@ class Genomics(CleaningStep):
         final_df = self.try_get_merged_final_df(self.df, mapped_long_df)
 
         return final_df
-
-
 
     def try_get_mapped_long_df(self, override_df):
         ''' Reads override csv, cleans prefixes, splits variants, and maps regions. '''
@@ -107,7 +94,6 @@ class Genomics(CleaningStep):
 
         return override_df
 
-    
     def _is_variant_type(self, override_df):
         clean_type_col = override_df['variant_type'].str.lower().str.strip()
         is_cdna = clean_type_col == 'cdna'
@@ -115,14 +101,11 @@ class Genomics(CleaningStep):
 
         return is_cdna, is_protein
 
-
     def _get_clean_cdna_col(self, o_df, is_cdna):
         if is_cdna.any():
             o_df.loc[is_cdna, config.cdna_variant] = o_df.loc[is_cdna, self.term]
 
         return o_df
-
-
 
     def try_get_merged_final_df(self, main_df, mapped_long_df):
         if mapped_long_df.empty:
@@ -134,8 +117,6 @@ class Genomics(CleaningStep):
 
         return final_df
 
-
-
     def _prep_override_df(self, o_df):
         o_df = o_df.dropna(subset = [self.r_term]).copy()
         remove_prefix = o_df[self.r_term].str.replace(r'^[cp]\.', '', regex = True)
@@ -145,8 +126,6 @@ class Genomics(CleaningStep):
             o_df[col] = pd.NA if col == config.protein_pos else None
 
         return o_df
-
-
 
     def _populate_protein_metrics(self, o_df, is_protein):
         is_protein_term_col = o_df.loc[is_protein, self.term]
@@ -161,15 +140,11 @@ class Genomics(CleaningStep):
 
         return o_df
 
-
-
     def _add_position_regions(self, df, is_protein):
         df.loc[is_protein, config.protein_region] = df.loc[is_protein].apply(
             self._get_position_region, axis = 1)
         
         return df
-
-
 
     def _get_position_region(self, row):
         pos = row[config.protein_pos]
@@ -185,8 +160,6 @@ class Genomics(CleaningStep):
             
         return 'Unknown'
 
-
-
     def _align_and_update_main_df(self, main_df, mapped_long_df):
         updates_wide = mapped_long_df.groupby(self.id_col).first()
 
@@ -199,16 +172,12 @@ class Genomics(CleaningStep):
                 
         return main_idxed.reset_index()
 
-
-
     def _update_col(self, col, shared_index, updates_wide, main_indexed):
         if col not in main_indexed.columns:
             main_indexed[col] = None
         main_indexed.loc[shared_index, col] = updates_wide.loc[shared_index, col]
         
         return main_indexed
-
-
 
     def _try_create_gene_position_refs(self):
         uniprot = UniProtQuery()

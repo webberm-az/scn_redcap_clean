@@ -31,8 +31,8 @@ class SummaryFormatter:
             self.summarized_step_names.append(formated_step_name)
 
     def _files_header(self, change):
-        subtitle = f'{change.previous_csv_name} &nbsp;&nbsp; ---> &nbsp;&nbsp; \
-            {change.current_csv_name}\n'
+        to_arrow = '&nbsp;&nbsp; ---> &nbsp;&nbsp;'
+        subtitle = f'{change.previous_csv_name}{to_arrow}{change.current_csv_name}\n'
         self._append_heading4(subtitle)
 
     def _body(self, change):

@@ -1,11 +1,11 @@
 participant_id,flag_shared_birthdate,birthdate,override_explanation,toy_check1,toy_check2,toy_check3,toy_check4,toy_yesno,toy_text1,toy_text2,toy_text3,toy_text4,toy_text5,genomic_text1,genomic_p._text2,toy_meds,toy_supps,submission_date,submission_date_2,child_death_m,child_death_y
-1805,,"2017-08-10	",,1,1,0,0,2,"yes, this happens often",?,she is very active,no/na,not lately,c.123G>C,N984K ? ,"Ondansetron 4mg, Levetiracetam 500mg","Vitamin D3, Melatonin","2024-08-10	","2025-08-10	",7,2024
-1815,,"2017-08-10	",,0,0,0,0,2,Mary does this all the time,we generally don't,she plays soccer and volleyball,,sometimes,123G>C p.(N984K),(N984K) SCN8A,ondansetrona e levetiracetam para crises,vitamina D e melatonina,"2024-08-18	","2025-08-18	",7,2024
+1805,,"2017-08-10	",,1,1,0,0,2,"[trans. from pt] yeah, this happens often",[trans. from pt] ? ?,[trans. from pt] she is very active,[trans. from pt] no/na,[trans. from pt] Not lately,c.123G>C,N984K ? ,"Ondansetron 4mg, Levetiracetam 500mg","Vitamin D3, Melatonin","2024-08-10	","2025-08-10	",7,2024
+1815,,"2017-08-10	",,0,0,0,0,2,[trans. from es] Mary does this all the time,[trans. from es] we generally don't,[trans. from es] she plays soccer and volleyball,,[trans. from es] sometimes,123G>C p.(N984K),(N984K) SCN8A,ondansetrona e levetiracetam para crises,vitamina D e melatonina,"2024-08-18	","2025-08-18	",7,2024
 ,,,,,,,,,,,,,,,,,,,,,
 1817,,"2017-11-11	",,1,1,0,0,,"[trans. from zh] Yes, often.",[trans. from zh] Sometimes.,[trans. from zh] It's full of energy.,,[trans. from zh] It rarely happens.,SCN8A,p.(G1451S),卡马西平片 200mg,"维生素D3, 褪黑素","2024-08-18	","2025-10-18	",,
-1824,shared,"2017-11-11	",,1,1,0,0,1,[trans. from zh] Always so / Always is.,,,[trans. from zh] Not applicable,[trans. from zh] We don't usually do that.,SCN8A,p.(G1451S),卡马西平片 200mg,"维生素D3, 褪黑素","2024-08-20	","2026-01-20	",,
+1824,shared,"2017-11-11	",,1,1,0,0,1,[trans. from es] Reg.,,,[trans. from es] ),[trans. from es] ),SCN8A,p.(G1451S),卡马西平片 200mg,"维生素D3, 褪黑素","2024-08-20	","2026-01-20	",,
 1828,,"2017-11-11	",,1,1,0,0,1,"Not often, but sometimes",,"he doesn't like to, but he will if we make him.",yes,he loves this,?,?,Acetazolamide 250mg,"Vitamin C, Coenzyme Q10","2024-10-20	","2026-11-20	",,
 ,,,,,,,,,,,,,,,,,,,,,
-1821,,"2020-08-15	",,0,0,0,0,,[trans. from es] That happens a lot.,[trans. from es] Not lately.,,,[trans. from es] Sometimes.,c.2345+1T>G,E1483K,"Diazepam, Cannabidiol","Omega 3, Vitamina C","2024-08-19	","2025-12-18	",,
-1825,,"2020-08-15	",,0,0,0,0,,[trans. from es] All the time.,[trans. from es] We usually don't.,,,[trans. from es] Once in a while.,c.2345+1T>G,E1483K,diazepam 5mg,Óleo de peixe (omega 3),"2024-08-21	","2026-08-25	",,
-1826,,"2020-08-15	",,0,0,0,0,1,[trans. from es] It often happens.,[trans. from es] Rarely.,,,,c2345+1T>G,pE1483K,"Diazepam, CBD oil",Omega-3,"2024-08-23	","2026-09-23	",,
+1826.999,,"2020-08-15	",Account submission with the most information; used  toy_yesno from the 1826 submission and rest from the 1821 original submission.,0,0,0,0,1,[trans. from es] That happens a lot.,[trans. from es] Not lately.,,,[trans. from es] Sometimes.,c.2345+1T>G,E1483K,"Diazepam, Cannabidiol","Omega 3, Vitamina C","2024-08-19	","2025-12-18	",,
+1825,,"2020-08-15	",,0,0,0,0,,Todo el tiempo.,Por lo general no lo hacemos.,,,De vez en cuando.,c.2345+1T>G,E1483K,diazepam 5mg,Óleo de peixe (omega 3),"2024-08-21	","2026-08-25	",,
+1826,,"2020-08-15	",,0,0,0,0,1,A menudo ocurre.,Rara vez.,,,,c2345+1T>G,pE1483K,"Diazepam, CBD oil",Omega-3,"2024-08-23	","2026-09-23	",,

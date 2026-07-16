@@ -2,7 +2,6 @@
 from . import config, paths, utils # global configs
 from .csv_kit import CsvKit
 
-
 class Merge:
 
     def __init__(self, language_cols, id_subset_csv):
@@ -10,7 +9,6 @@ class Merge:
         self.csvkit = CsvKit()
         self.language_cols = language_cols
         self.id_subset_csv = id_subset_csv
-
 
     def on_id(self):
         ''' Merges a list of CSVs on 'participant_id' '''
@@ -21,8 +19,6 @@ class Merge:
         merged_df = self._get_combined_df(id_subset_csv, merge_on_file_df)
                 
         return merged_df
-
-
 
     def _set_merge_on_file(self):
         ''' Sets merge_on_file to first file in list if merge_on_file = None '''
@@ -36,16 +32,12 @@ class Merge:
         
         return merge_on_file_clean
 
-
-
     def _get_merge_on_file_df(self):
         merge_on_file_clean = self.csvkit.ensure_suffix(self.id_subset_csv)
-        merge_on_file_df = self.csvkit.get_df_dropna_subset(
+        merge_on_file_df = self._get_df_dropna_subset(
             paths.RAW, merge_on_file_clean, [self.id_col])
 
         return merge_on_file_df
-
-
 
 
     def _get_combined_df(self, merge_on_file, merged_df):
@@ -57,8 +49,6 @@ class Merge:
             merged_df = self._safe_merge(csv_clean, merge_on_file, merged_df)
         
         return merged_df
-    
-
 
     def _safe_merge(self, csv_name, merge_on_file, merged_df):
         ''' Merges a list of CSVs on 'participant_id' '''
@@ -67,18 +57,21 @@ class Merge:
         
         return merged_df
 
-
-
     def _merge(self, csv_name, merged_df):
         ''' Merges df with csv on id_col and returns merged df '''
-        merging_df = self.csvkit.get_df_dropna_subset(
+        merging_df = self._get_df_dropna_subset(
             paths.RAW, csv_name, [self.id_col])
         merged_df = self.merge_dropping_shared_cols(merged_df, merging_df, csv_name)
 
         return merged_df
 
+    def _get_df_dropna_subset(self, raw_path, filename, filter_subset):
+        
+        clean_filename = self.csvkit.ensure_suffix(filename)
+        df = self.csvkit.robust_read(raw_path / clean_filename)
+        df = utils.if_missing_drop_row(df, filter_subset)
 
-
+        return df
 
     def merge_dropping_shared_cols(self, base_df, merging_df, csv_name):
         ''' 
@@ -90,8 +83,6 @@ class Merge:
 
         return base_df
 
-
-
     def get_shared_colname_not_duplicate(self, base_df, merging_df, csv_name):
         remaining_shared_cols = utils.get_column_headers_if_in_df(
             base_df, merging_df, self.id_col)
@@ -102,15 +93,10 @@ class Merge:
         
         return merging_df
         
-
-
     def get_rename_dict(self, remaining_shared_cols, csv_name):
         self.rename_dict = {}
         for col in remaining_shared_cols:
             self._get_new_col_name(col, csv_name)
-
-
-
 
     def _get_new_col_name(self, col, csv_name):
         new_col_name = self._suffix_col_name_with_csv_name(col, csv_name)
@@ -120,8 +106,6 @@ class Merge:
 
         return new_col_name
 
-
-
     def _suffix_col_name_with_csv_name(self, col, csv_name):
         csv_str = str(csv_name)
         clean_suffix = csv_str.replace('.csv', '').replace(' ', '_').replace('.', '_')
@@ -129,26 +113,18 @@ class Merge:
 
         return new_col_name
 
-
-
     def _add_to_rename_dict_and_alert(self, col, new_col_name):
         self.rename_dict[col] = new_col_name
         print(f"Matching Column names with different contents found for '{col}'.")
         print(f"Keeping 1st instance as '{col}' and matching instance as '{new_col_name}'.\n")
 
-
-
     def _if_active_text_col_add_new(self, col, new_col_name):
         if col in self.language_cols:
             self._if_not_in_active_append(new_col_name)
 
-
-
     def _if_not_in_active_append(self, new_col_name):
         if new_col_name not in self.language_cols:
             self.language_cols.append(new_col_name)  
-
-
 
     def _drop_duplicate_cols(self, base_df, merging_df):
         '''
@@ -160,13 +136,9 @@ class Merge:
 
         return merging_df
 
-
-    
     def _get_cols_to_drop(self, base_df, merging_df):
         shared_colnames = utils.get_column_headers_if_in_df(base_df, merging_df, self.id_col)
         self._from_shared_get_cols_to_drop(base_df, merging_df, shared_colnames)
-
-
 
     def _from_shared_get_cols_to_drop(self, base_df, merging_df, shared_colnames):
         base_aligned = base_df.set_index(self.id_col)
@@ -174,8 +146,6 @@ class Merge:
         common_ids = base_aligned.index.intersection(merging_aligned.index)
         self._get_col_to_drop(
             shared_colnames, base_aligned, merging_aligned, common_ids)
-
-
 
     def _get_col_to_drop(self, shared_colnames, base_aligned, merging_aligned, common_ids):
         for col in shared_colnames:
@@ -185,23 +155,17 @@ class Merge:
                 merging_aligned, common_ids, col)
             self._get_exact_duplicates(base_vals_as_str, merging_vals_as_str, col)
 
-
-
     def _get_base_vals_as_str(self, base_aligned, common_ids, col):
         base_vals = base_aligned.loc[common_ids, col]
         base_vals_as_str = base_vals.astype(str)
 
         return base_vals_as_str
 
-
-
     def _get_merging_vals_as_str(self, merging_aligned, common_ids, col):
         merging_vals = merging_aligned.loc[common_ids, col]
         merging_vals_as_str = merging_vals.astype(str)
 
         return merging_vals_as_str
-
-
 
     def _get_exact_duplicates(self, base_vals, merging_vals, col):
         # .equals() checks both shape and elements

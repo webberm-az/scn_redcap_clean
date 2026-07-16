@@ -8,7 +8,7 @@ version = '0.1.0'
 description = 'Data cleaning and preprocessing for Hammer Lab REDCap SCN genomics data'
 dependencies = [
     'pandas>=2.0.0',
-    'argostranslate',
+    'argostranslate>=1.11.0',
     'lingua-language-detector',
     'certifi>=2026.03.04',
     'ollama>=0.6.2',

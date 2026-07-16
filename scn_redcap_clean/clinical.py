@@ -4,7 +4,6 @@ from .cleaning_step import CleaningStep
 from .meds import Medications
 from .genomics import Genomics
 
-
 class Clinical(CleaningStep):
     ''' Combine Medication and Genomics Overrides into one step '''
     
@@ -45,7 +44,6 @@ class Clinical(CleaningStep):
             return df
         
         return self.df
-
 
     def _safe_get_age(self):
         if config.age_units is None:

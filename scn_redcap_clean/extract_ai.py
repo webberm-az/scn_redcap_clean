@@ -1,7 +1,6 @@
 from . import config
 from . import utils
 
-
 class ExtractorAI:
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
     
@@ -18,7 +17,6 @@ class ExtractorAI:
         self.id_col = config.merge_on_id_column
         self.base_long_cols = [self.id_col, 'from_column', 'raw_text']
 
-
     def get_for_review(self, df):
         ''' 
         Outputs csv files for genomic variants review 
@@ -31,8 +29,6 @@ class ExtractorAI:
 
         return final_df
 
-
-
     def _get_df(self, df):
         long_df = self._get_long_df(df)
         preped_df = self._prep_long_form_df(long_df)
@@ -41,8 +37,6 @@ class ExtractorAI:
 
         return final_df
 
-
-
     def _get_long_df(self, df):
         id_vars = [self.id_col]
         from_col_name = self.base_long_cols[1]
@@ -50,8 +44,6 @@ class ExtractorAI:
         long_df = df.melt(id_vars, self.columns, from_col_name, raw_extract_col)
         
         return long_df
-
-
 
     def _prep_long_form_df(self, long_df):
         
@@ -62,8 +54,6 @@ class ExtractorAI:
         long_df = long_df[active_rows_only]
         
         return long_df
-
-
 
     def _extract_df(self, df):
         
@@ -78,14 +68,11 @@ class ExtractorAI:
         
         return one_ai_term_per_row_df
 
-
     def _get_for_review_df(self, extraction_df):
         sorted_df = extraction_df.sort_values(by = self.ai_conf_col, ascending = True)
         sorted_df = utils.add_override_explanation_column(sorted_df, self.id_col)
         
         return sorted_df
-
-
 
     def _get_exploded_df(self, df):
         ''' Format ollama output for easy manual review '''
@@ -101,15 +88,11 @@ class ExtractorAI:
         
         return exploded_df
 
-
-
     def _get_schema_cols(self):
         list_field = self.schema.model_fields[self.local_ai.json_field_name]
         inner_model = list_field.annotation.__args__[0]
     
         self.schema_cols = list(inner_model.model_fields.keys())
-
-
 
     def _get_exploded_col(self, col, exploded_df):
         exploded_col = exploded_df[self.ollama_results_col].apply(

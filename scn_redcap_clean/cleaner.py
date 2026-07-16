@@ -7,7 +7,6 @@ from . import paths
 from .data import Data
 from .proceed import Proceed
 
-
 class Cleaner:
     '''
     Runs data cleaning steps. Each step outputs a main step csv to the 'steps' folder. Review csvs for the next step are output to the 'review' folder.
@@ -21,7 +20,6 @@ class Cleaner:
         self.data = Data()
         self.proceed = Proceed()
         self.proceed.use_existing_overrides = self.use_existing_overrides
-
 
     def clean(self):
         ''' 

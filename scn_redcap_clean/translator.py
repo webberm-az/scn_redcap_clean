@@ -2,10 +2,10 @@ import re
 
 # external imports
 import argostranslate.translate
+import logging
 
 # local imports
 from . import config # global configs
-
 
 class Translator:
     ''' Translates non-English text to English using argostranslate and langdetect packages '''
@@ -16,14 +16,12 @@ class Translator:
             \s* # match zero or more spaces on the right side
         ''', re.VERBOSE)
 
-
     def __init__(self, packages):
         # e.g. special_terms = {'布洛芬':'Ibuprofen',}  inputs for special terms
 
         self.special_terms = self._format_special_terms(config.translation_dict)
         self.packages = packages
-
-
+        logging.getLogger("stanza").setLevel(logging.ERROR)
 
     def to_english(self, text, lang):
         ''' Returns translated, cleaned text '''
@@ -40,8 +38,6 @@ class Translator:
         
         return translated_and_cleaned
 
-
-
     def _replace_special_terms(self, text):
         ''' Swaps 1st terms with  2nd term anywhere inside the string '''
         if not self.special_terms:
@@ -52,15 +48,11 @@ class Translator:
         
         return text
 
-
-
     def _get_translated(self, orig_term, translated_term, text):
         if str(orig_term).lower() in str(text).lower():
             text = text.replace(orig_term, translated_term)
         
         return text
-
-
 
     def _translate_and_clean(self, text, lang):
         translated = argostranslate.translate.translate(text, lang, 'en')
@@ -68,16 +60,12 @@ class Translator:
 
         return translated_and_cleaned
 
-
-
     def _format_special_terms(self, special_terms):
         if not special_terms:
             return {}
         formatted_terms = self._lower_key_term(special_terms)
 
         return formatted_terms
-
-
 
     def _lower_key_term(self, special_terms):
         special_terms = {

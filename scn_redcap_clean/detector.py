@@ -10,7 +10,6 @@ from .script import Script
 
 os.environ['ARGOS_DEVICE_TYPE'] = 'cpu'
 
-
 class Detector:
     ''' 
     Translates non-English text to English using argostranslate and langdetect packages 
@@ -24,9 +23,6 @@ class Detector:
         # finds 3 (default) characters in a non-latin script before classifying 
         self.script = Script()
         self.packages = packages
-
-
-
 
     def detect_language(self, row, text_columns):
         ''' Detect language by all input columns for each row '''
@@ -46,16 +42,12 @@ class Detector:
         
         return lang
 
-
-
     def _format_special_terms(self, special_terms):
         if not special_terms:
             return {}
         formatted_terms = self._lower_key_term(special_terms)
 
         return formatted_terms
-
-
 
     def _lower_key_term(self, special_terms):
         special_terms = {
@@ -64,16 +56,12 @@ class Detector:
 
         return special_terms
 
-
-
     def _combine_text(self, row, text_columns):
         # clean and filter valid text elements from row
         text_segments = self._clean_cols(row, text_columns)
         combined_text = ' '.join(text_segments)
 
         return combined_text
-
-
 
     def _clean_cols(self, row, text_columns):
         ''' Isolates, cleans, and filters valid text elements from row and text_columns '''
@@ -86,8 +74,6 @@ class Detector:
 
         return text_segments
 
-
-    
     def _clean_cells(self, cell_val):
         ''' Cleans each cell value (strips whitespace and converts to string) '''
         cleaned_str = ''
@@ -95,8 +81,6 @@ class Detector:
             cleaned_str = str(cell_val).strip()      
               
         return cleaned_str
-    
-
 
     def _if_clean_append(self, cleaned_str, text_segments):
         ''' Appends cleaned string to text_segments if not empty '''
@@ -104,8 +88,6 @@ class Detector:
             text_segments.append(cleaned_str)
 
         return text_segments
-
-
 
     def _get_detected_lang(self, combined_text):
         ''' Returns language code for translation '''
@@ -118,8 +100,6 @@ class Detector:
         
         except Exception: 
             return 'en'
-        
-
 
     def _get_lang_prediction_defaults(self, predictions):
         top_prediction = predictions[0]
@@ -134,8 +114,6 @@ class Detector:
         
         return lang
 
-
-    
     def _is_probably_english(self, top_prediction):
         is_prob_english = (
             top_prediction.language == Language.ENGLISH and top_prediction.prob > 0.8)

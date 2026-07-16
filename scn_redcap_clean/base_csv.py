@@ -7,7 +7,6 @@ from . import config, paths # global configs
 from .csv_kit import CsvKit
 from .data_dict import DataDict
 
-
 class BaseCSV:
 
     def __init__(self):
@@ -18,14 +17,11 @@ class BaseCSV:
         if self.dict_df is not None and self.data_df is not None:
             self.data_dict = DataDict(self.data_df, self.dict_df)
 
-
     def create(self):
         base_df = self.filter_id_by_modules()
 
         if isinstance(base_df, DataFrame):
             self._save_and_report(base_df)
-            
-
 
     def filter_id_by_modules(self):
         if self._is_data_missing():
@@ -41,8 +37,6 @@ class BaseCSV:
 
         return base_df
 
-
-
     def get_rows_at_least_one_reponse(self, checkbox_cols, other_cols):
         is_row_all_zero_checkbox = self._are_all_checkboxes_zero(checkbox_cols)
         is_row_all_na_other = self._are_all_text_fields_na(other_cols)
@@ -54,8 +48,6 @@ class BaseCSV:
         
         return rows_at_least_one_reponse
 
-
-
     def _is_data_missing(self):
         if self.dict_df is not None and self.data_df is not None:
             return False
@@ -63,8 +55,6 @@ class BaseCSV:
         self._alert_missing_files()
             
         return True
-
-
 
     def _alert_missing_files(self):
         if self.dict_df is None:
@@ -74,8 +64,6 @@ class BaseCSV:
         if self.data_df is None:
             self.csvkit.instruct_missing_csv(
                 config.raw_module_csv, 'raw', 'Raw Module Data', 'config.raw_module_csv')
-
-
 
     def _are_all_checkboxes_zero(self, columns):
         data_df = cast(DataFrame, self.data_df)
@@ -87,8 +75,6 @@ class BaseCSV:
         
         return entire_row_zero
 
-
-
     def _are_all_text_fields_na(self, columns):
         data_df = cast(DataFrame, self.data_df)
         if not columns: # no other columns in module
@@ -99,13 +85,9 @@ class BaseCSV:
         
         return entire_row_na
 
-
-
     def _save_and_report(self, df: pd.DataFrame):
         self.csvkit.create_main(df, '__base__', paths.RAW)
         print(f'Raw base file response count: {len(df)}\n')
-
-
 
     def _get_checkbox_all_zero(self, columns):
         data_df = cast(DataFrame, self.data_df)
@@ -114,8 +96,6 @@ class BaseCSV:
         entire_row_zero = (is_zero_or_na_col).all(axis=1)
 
         return entire_row_zero
-
-
 
     def _get_other_all_na(self, columns):
         data_df = cast(DataFrame, self.data_df)

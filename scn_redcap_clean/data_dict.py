@@ -5,14 +5,12 @@ from pandas import DataFrame
 
 from . import config # global configs
 
-
 class DataDict:
 
     def __init__(self, data_df: pd.DataFrame, dict_df: pd.DataFrame):
         self.data_df = data_df
         self.dict_df = dict_df
  
-
     def get_columns_by_type(
         self, 
         type: str, 
@@ -28,8 +26,6 @@ class DataDict:
         
         return col_match
 
-
-
     def get_columns(
         self, type: str, modules: List[str]) -> Dict[str, List[str]]:
         '''Splits relevant data dictionary columns into safe, verified groups.'''
@@ -42,8 +38,6 @@ class DataDict:
         field_dict = {type: module_type_list, 'other': module_other_list}
         
         return field_dict
-
-
 
     def get_module_dict_df(self, modules: List[str]) -> pd.DataFrame:
         module_col_list = self.dict_df[config.module_column].isin(modules)

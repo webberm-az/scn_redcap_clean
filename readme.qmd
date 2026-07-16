@@ -79,9 +79,9 @@ config.p_genomic = 'genomic_p._text2'
 config.genomic_cols = [config.c_genomic , config.p_genomic ]
 
 # all columns marked text in the data dictionary you don't want translated
-config.no_translate_cols = [
-      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column
-      ] + config.med_text_cols
+config.no_translate_cols = config.med_text_cols + config.genomic_cols + [
+      config.birthdate, config.merge_on_id_column,
+      ]
 
 # alternatively you can manually set language_text_columns you want translated (see extras)
 
