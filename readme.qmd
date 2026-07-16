@@ -35,12 +35,18 @@ pip install -e .
 pip install jupyter
 
 
+` ` ` ` ` `  {for hipaa data: run in terminal to ensure hipaa data is never pushed to git}
+
+git remote set-url --push origin no_push_allowed
+
+
 # Required Imports, Config and Download
 
 For additional config settings you can also look in config.py
 
 (If you change anything in this chunk, or any config.py variables you must rerun all the
 chunks below)
+
 
 **Raw data & the data dictionary must be in the config.original_data folder before running**
 Raw data (config.csv_list) & data dictionary (config.data_dict) config.raw_data_dirs
