@@ -52,9 +52,9 @@ class Translation(CleaningStep):
             return 
 
         self.packages.print_language_download_summary() 
-        final_translated_df = self._get_translations_for_review_df()
+        final_data = self._get_translations_for_review_df()
 
-        return final_translated_df
+        return final_data
 
     def create_final_data(self): # called in step
         ''' 
@@ -87,11 +87,11 @@ class Translation(CleaningStep):
         return False
 
     def _get_translations_for_review_df(self):
-        translated_df = cast(
+        data = cast(
             pd.DataFrame, self._get_translated_rows_only_df())
-        utils.add_column_if_dne('override_explanation', translated_df)
+        data = utils.add_override_explanation_column(data, self.id_col)
 
-        return translated_df
+        return data
 
 
 

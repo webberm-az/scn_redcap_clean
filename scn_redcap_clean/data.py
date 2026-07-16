@@ -1,5 +1,3 @@
-import pandas as pd
-
 # local imports
 from . import config, console, paths, utils # global configs
 from .csv_writer import CsvWriter 

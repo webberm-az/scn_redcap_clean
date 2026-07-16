@@ -69,21 +69,27 @@ class DuplicateAccounts(CleaningStep):
 
 
     def _format_review_df(self, sorted_df):
-        utils.add_column_if_dne('override_explanation', sorted_df)
         utils.add_column_if_dne(self.flag_shared_col, sorted_df)
 
-        dup_cols_first_df = self._put_dup_cols_first(sorted_df)
+        dup_cols_first_df = utils.put_front_columns_first(
+            sorted_df, self.id_col, self.flag_shared_col, self.dup_col)
         final_df_with_spacing = self._add_duplicate_row_pad(dup_cols_first_df)
 
         return final_df_with_spacing
 
 
-    def _put_dup_cols_first(self, df):
+    def _redorder_columns(self, data):
         dup_cols = [self.dup_col] if isinstance(self.dup_col, str) else self.dup_col
-        remaining_cols = [column for column in df.columns if column not in dup_cols]
-        dup_cols_first_df = df[dup_cols + remaining_cols]
+  
+        front_columns = [self.id_col, self.flag_shared_col] + dup_cols + [utils.get_explanation_header()]
         
-        return dup_cols_first_df
+        valid_front_headers = utils.get_valid_headers(data, front_columns)
+        
+        remaining_headers = [col for col in data.columns if col not in valid_front_headers]
+        
+        data = data[valid_front_headers + remaining_headers]
+        
+        return data
 
 
 
@@ -212,7 +218,7 @@ class DuplicateAccounts(CleaningStep):
 
 
     def _drop_override_note_cols(self, df):
-        drop_cols = ['override_explanation', self.flag_shared_col]
+        drop_cols = [utils.get_explanation_header(), self.flag_shared_col]
         self.data = df.drop(columns = drop_cols, errors = 'ignore')
 
         return self.data

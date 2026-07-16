@@ -214,8 +214,6 @@ class Genomics(CleaningStep):
         uniprot = UniProtQuery()
         uniprot.create_gene_position_refs()
 
-
-
     def _get_genomics_for_review(self):
         local_ai = LocalAI(schema = GenomicList, field_name = 'variants')
         extractor_configs = self._get_configs()
@@ -223,6 +221,7 @@ class Genomics(CleaningStep):
         df = extractor.get_for_review(self.df)
 
         return df
+
     def _get_configs(self):
         extractor_configs = {
             'name': self.get_process_name(),

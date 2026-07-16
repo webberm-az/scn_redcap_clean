@@ -81,7 +81,7 @@ class ExtractorAI:
 
     def _get_for_review_df(self, extraction_df):
         sorted_df = extraction_df.sort_values(by = self.ai_conf_col, ascending = True)
-        utils.add_column_if_dne('override_explanation', sorted_df)
+        sorted_df = utils.add_override_explanation_column(sorted_df, self.id_col)
         
         return sorted_df
 

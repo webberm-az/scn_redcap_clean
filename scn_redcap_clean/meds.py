@@ -129,8 +129,12 @@ class Medications(CleaningStep):
         extractor_configs = self._get_configs()
         extractor = ExtractorAI(local_ai, extractor_configs)
         df = extractor.get_for_review(self.df)
-        df = self._get_add_to_ref_col(df)
-
+        add_to_ref_header = 'add_to_ref'
+        df = self._get_add_to_ref_col(df, add_to_ref_header)
+        if df is None:
+            return 
+            
+        df = utils.put_front_columns_first(df, self.id_col, add_to_ref_header)
         return df
 
 
@@ -145,12 +149,12 @@ class Medications(CleaningStep):
 
 
 
-    def _get_add_to_ref_col(self, meds_df):
+    def _get_add_to_ref_col(self, meds_df, add_to_ref_header):
         if meds_df is None:
             return None
         
         is_missing = RefMap(self.meds_dict_df).is_missing(meds_df['recommended_term'])
-        meds_df['add_to_ref'] = np.where(is_missing, 'MISSING IN REF', '')
+        meds_df[add_to_ref_header] = np.where(is_missing, 'MISSING IN REF', '')
 
         return meds_df
 

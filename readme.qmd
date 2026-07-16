@@ -14,13 +14,13 @@ execute:
 
 ` ` ` run in terminal
 
-python3 -m venv venv
+python3 -m venv .venv
 
 Code chunks must be run in order. If you make changes to inputs in an earlier code chunk rerun all (and review manual overrides as needed) chunks below in order.
 
 ` ` ` ` ` `  run in terminal if venv not activated in new session
 
-source venv/bin/activate
+source .venv/bin/activate
 
 ## Install Required Packages
 
@@ -58,7 +58,7 @@ Update all config. before running
 from scn_redcap_clean import Cleaner, config, days, months, years # local import
 
 # Original Data Folder(s) (files can be in subfolders of these folders too)
-original_data_folder = ['cleaning_dump']
+config.original_data_folder = ['files_toy']
 
 # Data Dictionary
 config.data_dict = 'ToyDict.csv'
@@ -80,19 +80,18 @@ config.genomic_cols = [config.c_genomic , config.p_genomic ]
 
 # all columns marked text in the data dictionary you don't want translated
 config.no_translate_cols = [
-      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column]
+      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column
+      ] + config.med_text_cols
 
 # alternatively you can manually set language_text_columns you want translated (see extras)
 
-config.original_data_folder = ['files_toy']
+config.age_units = [days, months, years]
 
-age_units = [days, months, years]
-
-include_age_groups = True 
+config.include_age_groups = True 
 
 # ignore 'age_groups' if include_age_groups = False
 # age group bins (always starts at 0)
-age_groups = { # adjust with  (max. age in days/months/years, 'label for ages included in interval')
+config.age_groups = { # adjust with  (max. age in days/months/years, 'label for ages included in interval')
     days: [
         (7, '0-7 days'),
         (28, '8-28 days'),
@@ -125,6 +124,7 @@ age_groups = { # adjust with  (max. age in days/months/years, 'label for ages in
         (float('inf'), '65+')]
 }
 
+config.meds_dict = 'Toy_clinical_taxonomy.csv'
 
 # auto creates project folders next to your .qmd file
 cleaner = Cleaner()

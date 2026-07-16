@@ -46,8 +46,46 @@ def get_review_cvsname(process_name):
 
     return csvname
 
+def get_explanation_header():
+    return 'override_explanation'
+
+
 
 #       df:
+
+def add_override_explanation_column(data, id_col):
+    add_column_if_dne(get_explanation_header(), data)
+    front_columns = [id_col, get_explanation_header()]
+    data = _columns_to_front(data, front_columns)
+    
+    return data
+
+def put_front_columns_first(
+    data: pd.DataFrame, id_header: Any, flag_header: Any = None, 
+    other_important: Any = None) -> pd.DataFrame:
+    ''' 
+    Reorders data columns: ID -> Issue Flag -> Other Important -> Override Explanation
+    '''
+    add_column_if_dne(get_explanation_header(), data)
+    flag_headers = [] if flag_header is None else [flag_header]
+
+    other_important_headers = [] if other_important is None else ([other_important] 
+        if isinstance(other_important, str) else list(other_important))
+    
+    front_columns = [
+        id_header] + flag_headers + other_important_headers + [get_explanation_header()]
+    
+    data = _columns_to_front(data, front_columns)
+    
+    return data
+
+def _columns_to_front(data, front_columns):
+    valid_front_headers = get_valid_headers(data, front_columns)
+    remaining_headers = get_remaining_data_headers(data, valid_front_headers)
+    
+    data = cast(pd.DataFrame, data[valid_front_headers + remaining_headers])
+
+    return data
 
 def get_column_headers_if_in_df(
         df: pd.DataFrame, override_df: pd.DataFrame, id_col: Any) -> List[Any]:
@@ -56,6 +94,12 @@ def get_column_headers_if_in_df(
     clean_shared_cols = [col for col in shared_cols if col != id_col]
     
     return clean_shared_cols
+
+def get_remaining_data_headers(data, filter_headers):
+    valid_headers = [
+        header for header in data.columns if header not in filter_headers]
+
+    return valid_headers
 
 def get_valid_headers(data, headers):
     valid_headers = [header for header in headers if header in data.columns]

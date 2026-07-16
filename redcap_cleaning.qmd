@@ -17,7 +17,7 @@ Raw data (config.csv_list) & data dictionary (config.data_dict) config.raw_data_
 from scn_redcap_clean import Cleaner, config, days, months, years # local import
 
 # Original Data Folder(s) (files can be in subfolders of these folders too)
-original_data_folder = ['cleaning_dump']
+config.original_data_folder = ['files_toy']
 
 # Data Dictionary
 config.data_dict = 'ToyDict.csv'
@@ -37,13 +37,14 @@ config.p_genomic = 'genomic_p._text2'
 
 # all columns marked text in the data dictionary you don't want translated
 config.no_translate_cols = [
-      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column]
+      config.c_genomic, config.p_genomic, config.birthdate, config.merge_on_id_column
+      ] + config.med_text_cols
 
-age_units = [days, months, years]
+config.age_units = [days, months, years]
 
-include_age_groups = True
+config.include_age_groups = True
 # age group bins (always starts at 0)
-age_groups = {
+config.age_groups = {
     days: [
         (7, '0-7 days'),
         (28, '8-28 days'),
@@ -76,6 +77,8 @@ age_groups = {
         (float('inf'), '65+')]
 }
 
+config.meds_dict = 'Toy_clinical_taxonomy.csv'
+
 cleaner = Cleaner()
 ```
 
@@ -88,7 +91,6 @@ config.translation_dict = { # !!! planning to track this in notes eventually for
             'SCN8A':'SCN8A',
            }
 
-cleaner.proceed.use_existing_overrides = True
 cleaner.clean()
 ```
 
@@ -104,7 +106,6 @@ Add comments to the duplicates_manual_overrides.txt as needed.
 *For manual overrides Participant_id should be written as {last Participant_id per bday}.999*
 ```{python}
 #| label: proceed from duplicates override
-config.run_clinical = True
 cleaner.proceed.duplicates()
 
 ```
