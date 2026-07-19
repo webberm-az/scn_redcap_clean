@@ -150,6 +150,10 @@ genomics_split_cols = protein_split_cols + [cdna_variant]
 all_generated_genomics_cols = genomics_split_cols + [
     protein_aa_orig_3, protein_aa_repl_3, protein_variant_1, protein_variant_3]
 
+
+
+ai_extraction_timeout = 30  #in seconds per cell
+
 # AI Prompts
 prompt_genomics = (
     'You are an expert biocurator processing messy clinical records to extract gene ' 'mutations. Identify and extract two distinct types of variants:\n'

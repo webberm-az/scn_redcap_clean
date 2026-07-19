@@ -1,5 +1,8 @@
-from . import config
-from . import utils
+from . import config, console, utils
+
+class ConsecutiveFailuresError(Exception):
+    ''' Raised to interrupt Pandas .apply() '''
+    pass
 
 class ExtractorAI:
     ''' Extracts raw genomic and protein variants using local AI Ollama. '''
@@ -17,7 +20,7 @@ class ExtractorAI:
         self.id_col = config.merge_on_id_column
         self.base_long_cols = [self.id_col, 'from_column', 'raw_text']
 
-    def get_for_review(self, df):
+    def get_for_review(self, data):
         ''' 
         Outputs csv files for genomic variants review 
         (1 file for record keeping and 1 file for manual override editting)
@@ -25,48 +28,86 @@ class ExtractorAI:
         '''
         self.local_ai.ensure_local_ai()
 
-        final_df = self._get_df(df)
+        final_data = self._get_df(data)
 
-        return final_df
+        return final_data
 
-    def _get_df(self, df):
-        long_df = self._get_long_df(df)
-        preped_df = self._prep_long_form_df(long_df)
-        extraction_df = self._extract_df(preped_df)
-        final_df = self._get_for_review_df(extraction_df)
+    def _get_df(self, data):
+        long_data = self._get_long_df(data)
+        preped_data = self._prep_long_form_df(long_data)
+        extraction_data = self._extract_df(preped_data)
+        if extraction_data is None:
+            return None
+            
+        final_data = self._get_for_review_df(extraction_data)
 
-        return final_df
+        return final_data
 
-    def _get_long_df(self, df):
+    def _get_long_df(self, data):
         id_vars = [self.id_col]
         from_col_name = self.base_long_cols[1]
         raw_extract_col = self.base_long_cols[2]
-        long_df = df.melt(id_vars, self.columns, from_col_name, raw_extract_col)
+        long_df = data.melt(id_vars, self.columns, from_col_name, raw_extract_col)
         
         return long_df
 
-    def _prep_long_form_df(self, long_df):
+    def _prep_long_form_df(self, data):
         
-        long_df['raw_text'] = long_df['raw_text'].astype(str).str.strip()
-        is_not_empty = long_df['raw_text'] != ''
-        is_not_nan = long_df['raw_text'].str.lower() != 'nan'
+        data['raw_text'] = data['raw_text'].astype(str).str.strip()
+        is_not_empty = data['raw_text'] != ''
+        is_not_nan = data['raw_text'].str.lower() != 'nan'
         active_rows_only = is_not_empty & is_not_nan
-        long_df = long_df[active_rows_only]
+        data = data[active_rows_only]
         
-        return long_df
+        return data
 
-    def _extract_df(self, df):
+    def _extract_df(self, data):
+        ollama_results = self._try_ollama_extraction(data)
+        if ollama_results is None:
+            return
+            
+        data[self.ollama_results_col], data[self.ai_conf_col] = zip(*ollama_results)
         
-        print(f"Extracting {self.process_name} text using local '{self.local_ai.model}' and calculating confidence scores...")
-        
-        ollama_results = df['raw_text'].apply(
-            lambda text: self.local_ai.extract_term(self.prompt, text))
-        
-        df[self.ollama_results_col], df[self.ai_conf_col] = zip(*ollama_results)
-        
-        one_ai_term_per_row_df = self._get_exploded_df(df)
+        one_ai_term_per_row_df = self._get_exploded_df(data)
         
         return one_ai_term_per_row_df
+
+    def _try_ollama_extraction(self, data):
+        self._init_extraction_tracking()
+        try:
+            ollama_results = data['raw_text'].apply(self._safe_extract)
+            return ollama_results
+            
+        except ConsecutiveFailuresError:
+            console.alert(
+                f"Aborted: AI timed out {self.max_consecutive_fails} times in a row.")
+            return None
+
+    def _init_extraction_tracking(self):
+        print(f"Extracting {self.process_name} text using local '{self.local_ai.model}' and calculating confidence scores...")
+        self.consecutive_fails = 0
+        self.max_consecutive_fails = 3
+
+
+    def _safe_extract(self, text):
+        extracted_terms, confidence_score, is_timeout = self.local_ai.extract_term(
+            self.prompt, text)
+        
+        is_abort = self._is_abort(is_timeout)
+        if is_abort:
+            raise ConsecutiveFailuresError() # Breaks .apply() loop
+            
+        return extracted_terms, confidence_score
+
+    def _is_abort(self, is_timeout):
+        if not is_timeout:
+            self.consecutive_fails = 0
+            return False
+        
+        else:
+            self.consecutive_fails += 1
+            is_abort = self.consecutive_fails >= self.max_consecutive_fails
+            return is_abort
 
     def _get_for_review_df(self, extraction_df):
         sorted_df = extraction_df.sort_values(by = self.ai_conf_col, ascending = True)
