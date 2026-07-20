@@ -77,7 +77,7 @@ config.csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
 # csv must have all columns of the module(s) you are filtering by (extra modules/cols are fine)
 config.raw_module_csv = 'Toy1'
 
-config.med_text_cols = ['toy_meds', 'toy_supps']
+config.med_text_cols = ['toy_meds', 'toy_supps', 'past_meds']
 
 config.c_genomic = 'genomic_text1'
 config.p_genomic = 'genomic_p._text2'
@@ -362,6 +362,8 @@ If it's a new medication or supplement, insert a new row with the 'functional_cl
 **Once manual edits are complete move 'medications_manual_override' to overrides folder.**
 The meds_dict.csv **in the 'ref' folder.** should be updated based on the 'add_to_ref' 
 column in 'medications_manual_override.csv' **before running this step.**
+'from_column' name's will be classified as medications if 'med' is part of the 
+'from_column' name. Edit as needed in 'medications_manual_override.csv' 
 
 
 ### if clean() or proceed()  outputs a medications_for_review and/or genomics_for_review

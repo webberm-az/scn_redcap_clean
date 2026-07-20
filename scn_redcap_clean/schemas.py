@@ -1,13 +1,16 @@
 import pydantic
 from typing import Optional
 
+def recommended_term_str(): # for Medications and Genomics classes
+    return 'recommended_term'
+
+
 class Medication(pydantic.BaseModel):
     original_term: str = pydantic.Field(
         description = 'The exact text segment extracted from the original text, in its original language.')
-    
+    # recommended_term_str() must change if this term is changed
     recommended_term: str = pydantic.Field(
         description = 'The direct English translation of the original_term. Do not add chemical precision.')
-
 
 
 class MedicationList(pydantic.BaseModel):
@@ -16,12 +19,12 @@ class MedicationList(pydantic.BaseModel):
         description = 'List of extracted medications or supplements.')
 
 
-
 class Genomic(pydantic.BaseModel):
     variant_type: Optional[str] = pydantic.Field(
         None, 
         description = "Must be exactly one of: 'cDNA' (for c. variants) or 'protein' (for p. variants).")
 
+    # recommended_term_str() must change if this term is changed
     recommended_term: Optional[str] = pydantic.Field(
         None, 
         description = 'The variant standardized into basic HGVS-like syntax. '
@@ -32,7 +35,6 @@ class Genomic(pydantic.BaseModel):
         "- 'c 2345+1T>G' -> 'c.2345+1T>G'\n" 
         "- 'dup 123' -> 'c.123dup'\n"
         "- 'c123_124delAG' -> 'c.123_124delAG'")
-
 
 
 class GenomicList(pydantic.BaseModel):

@@ -30,7 +30,7 @@ config.csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
 # csv must have all columns of the module(s) you are filtering by (extra modules/cols are fine)
 config.raw_module_csv = 'Toy1'
 
-config.med_text_cols = ['toy_meds', 'toy_supps']
+config.med_text_cols = ['toy_meds', 'toy_supps', 'past_meds']
 
 config.c_genomic = 'genomic_text1'
 config.p_genomic = 'genomic_p._text2'

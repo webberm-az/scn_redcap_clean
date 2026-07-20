@@ -128,6 +128,14 @@ translation_dict = {
 
 
 
+#  __Medications_________________________
+# column headers from meds_dict
+main_header = 'Generic Name' 
+function_header = 'functional_class'
+from_col = 'from_column'
+
+
+
 #  __Genomics_________________________
 
 genomic_cols = [c_genomic, p_genomic]

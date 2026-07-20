@@ -1,30 +1,25 @@
 import numpy as np
-import pandas as pd
 
-from . import config, console, paths, utils
+from . import config, console, paths, schemas, utils
 from .cleaning_step import CleaningStep
 from .csv_writer import CsvWriter
 from .csv_kit import CsvKit
 from .extract_ai import ExtractorAI
 from .local_ai import LocalAI
+from .med_dummies import MedDummies
+from .meds_map import MedsMap
 from .ref_map import RefMap
-from .schemas import MedicationList
-
 
 class Medications(CleaningStep):
     ''' Standardizes and dummies medications and supplements using local AI Ollama. '''
 
-
-    def __init__(self, df):
-
-        self.df = df.copy()
-        self.archiver = CsvWriter()
+    def __init__(self, data):
+        self.data = data.copy()
+        self.csv_writer = CsvWriter()
         self.id_col = config.merge_on_id_column
         self.csvkit = CsvKit()
-        self.meds_dict_df = self.csvkit.path_to_df(
+        self.meds_ref_data = self.csvkit.path_to_df(
             config.meds_dict, paths.REF)
-        self.class_prefix = 'class'
-        self.temp_prefix = 'NEW_DUMMY'
 
     @classmethod
     def get_process_name(cls):
@@ -32,23 +27,20 @@ class Medications(CleaningStep):
 
         return process_name
 
-
     def review_df(self):
         ''' 
         Outputs csv files for medications review 
         (1 file for record keeping and 1 file for manual override editting)
         Medications and supplements are standardized using local AI Ollama
         '''
-        if self.meds_dict_df is None:
+        if self.meds_ref_data is None:
             console.alert_missing_config_file(
                 'ref', 'Medication and Supplements Map', 'config.meds_dict')
             return None
             
-        df = self._get_meds_for_review()
+        data = self._get_meds_for_review()
 
-        return df
-
-
+        return data
 
     def create_final_data(self): # called in Override
         ''' 
@@ -56,228 +48,74 @@ class Medications(CleaningStep):
         '''
         csvname = utils.get_manual_cvsname(self.get_process_name())
         self.override_csv_path = self.csvkit.path(csvname, paths.OVERRIDES)
-        df = self.try_input_mapped_long_df(self.df, self.meds_dict_df)
+        data = self._input_override_data()
         
-        return df
-
-
-
-    def try_input_mapped_long_df(self, df, map_df): # for Medications and Genomics
-        ''' 
-        If override_csv_name exists in overrides folder:
-        Maps terms using map_df and inputs into main csv
-        '''
-        self.df = df
-        self.map_df = map_df
-        if self.df is None or self.override_csv_path is None or self.map_df is None:
-            self._alert_errors()
-            return None
-
-        override_df = self.csvkit.robust_read(self.override_csv_path) 
-        df = self._get_final_df(override_df)
-        
-        return df
-
-
-
-    def _alert_errors(self):
-        if self.df is None:
-            console.error("No step csvs found in 'steps' folder")
-        
-        if self.override_csv_path is None:
-            console.info_missing_file({self.override_csv_path}, 'overrides')
-        
-        if self.map_df is None:
-            console.print_missing_override_dict(self.get_process_name(), 'config.meds_dict')
-
-
-
-    def _get_final_df(self, override_df):
-        mapped_long_df = self.try_get_mapped_long_df(override_df)
-        if mapped_long_df.empty:
-            return self.df
-
-        final_df = self.try_get_merged_final_df(self.df, mapped_long_df)
-
-        return final_df
-
-
-
-    def try_get_mapped_long_df(self, override_df): # called in OverrideManager        
-        self.name = 'Name'
-        override_df[self.name] = self._get_main_name(override_df['recommended_term'])
-
-        if self.meds_dict_df is not None:
-            mapped_df = self._get_mapped_df(override_df)
-            return mapped_df
-            
-        return override_df
-
-
-
-    def try_get_merged_final_df(self, df, mapped_long_df): # called in OverridePivot
-        binary_df = self._get_binary_df(mapped_long_df)
-        full_df = self._merge_full_df(df, binary_df)
-        full_df = self._clean_full_df(full_df)
-
-        return full_df
-
-
+        return data
 
     def _get_meds_for_review(self):
-        local_ai = LocalAI(schema = MedicationList, field_name = 'substances')
+        local_ai = LocalAI(schema = schemas.MedicationList, field_name = 'substances')
         extractor_configs = self._get_configs()
         extractor = ExtractorAI(local_ai, extractor_configs)
-        df = extractor.get_for_review(self.df)
+        data = extractor.get_for_review(self.data)
         add_to_ref_header = 'add_to_ref'
-        df = self._get_add_to_ref_col(df, add_to_ref_header)
-        if df is None:
+        data = self._get_add_to_ref_col(data, add_to_ref_header)
+        if data is None:
             return 
             
-        df = utils.put_front_columns_first(df, self.id_col, add_to_ref_header)
-        return df
-
+        data = utils.put_front_columns_first(data, self.id_col, add_to_ref_header)
+        return data
 
     def _get_configs(self):
         extractor_configs = {
             'name': self.get_process_name(),
             'cols': config.med_text_cols,
             'prompt': config.prompt_meds,
-            'schema': MedicationList}
+            'schema': schemas.MedicationList}
 
         return extractor_configs
 
-
-
-    def _get_add_to_ref_col(self, meds_df, add_to_ref_header):
-        if meds_df is None:
+    def _get_add_to_ref_col(self, meds_data, add_to_ref_header):
+        if meds_data is None:
             return None
+        ref_map = RefMap(self.meds_ref_data)
+        recommended_term = schemas.recommended_term_str()
+        is_missing = ref_map.is_missing(meds_data[recommended_term])
+        meds_data[add_to_ref_header] = np.where(is_missing, 'MISSING IN REF', '')
+
+        return meds_data
+
+    def _input_override_data(self):
+        ''' 
+        If override_csv_name exists in overrides folder:
+        Maps terms using map_data and inputs into main csv
+        '''
+        if self.data is None or self.override_csv_path is None or \
+            self.meds_ref_data is None:
+            self._alert_errors()
+            return None
+
+        self.override_data = self.csvkit.robust_read(self.override_csv_path) 
+        data = self._get_final_data()
         
-        is_missing = RefMap(self.meds_dict_df).is_missing(meds_df['recommended_term'])
-        meds_df[add_to_ref_header] = np.where(is_missing, 'MISSING IN REF', '')
+        return data
 
-        return meds_df
-
-
-
-    def _get_main_name(self, term_column):
-        if isinstance(term_column, pd.Series):
-            main_names_column = RefMap(self.meds_dict_df).get_main_names(term_column)
-
-            return main_names_column
-
-
-
-    def _get_mapped_df(self, o_df):
-        o_df[self.name] = o_df[self.name].astype(str).str.lower().str.strip()    
-        mapped_df = self._merge_override_with_map(o_df)
-        mapped_df = self._fillna_classes(mapped_df, o_df)
-
-        return mapped_df
-
-
-
-    def _merge_override_with_map(self, o_df):
-        self.main = 'Generic Name'
-        m_dict = self._get_clean_meds_dict_df()
-        merged_df = pd.merge(
-            o_df, m_dict, left_on = self.name, right_on = self.main, how = "left")
+    def _alert_errors(self):
+        if self.data is None:
+            console.error("No step csvs found in 'steps' folder")
         
-        return merged_df
-
-
-
-    def _fillna_classes(self, mapped_df, o_df):
-        mapped_df[self.main] = mapped_df[self.main].fillna(o_df[self.name])
+        if self.override_csv_path is None:
+            console.info_missing_file({self.override_csv_path}, 'overrides')
         
-        na_classes = self._get_na_class(mapped_df)
-        classes_df = mapped_df[self.function].fillna(na_classes)
-        mapped_df[self.function] = classes_df.str.lower().str.replace(' ', '_')
-        
-        return mapped_df
+        if self.meds_ref_data is None:
+            console.print_missing_override_dict(
+                self.get_process_name(), 'config.meds_dict')
 
+    def _get_final_data(self):
+        meds_map = MedsMap(self.meds_ref_data, self.override_data)
+        mapped_long_data = meds_map.get_long_data()
+        if mapped_long_data.empty:
+            return self.data
+        med_dummies = MedDummies(self.data, mapped_long_data)
+        final_data = med_dummies.merged_data()
 
-
-    def _get_clean_meds_dict_df(self):
-        self.function = 'functional_class'
-        if self.meds_dict_df is None:
-            return pd.DataFrame(columns = [self.main, self.function])
-
-        m_dict = self.meds_dict_df.copy()
-        m_dict[self.main] = m_dict[self.main].astype(str).str.lower().str.strip()
-        m_dict[self.function] = m_dict[self.function].astype(str).str.strip()
-        
-        return m_dict
-
-
-
-    def _get_na_class(self, mapped_df):
-        self.from_col = 'from_column'
-        is_med = mapped_df[self.from_col].str.contains('med', case = False, na = False)
-        na_classes = np.where(is_med, 'na_medication', 'supplement')
-        na_classes_series = pd.Series(na_classes, index = mapped_df.index)
-
-        return na_classes_series
-
-
-
-    def _get_binary_df(self, long_df):
-        class_binary = self._get_class_dummies_df(long_df)
-        med_binary = self._get_med_dummies_df(long_df)    
-        binary_df = self._get_merged_dummies_df(class_binary, med_binary)
-
-        return binary_df
-
-
-
-    def _merge_full_df(self, main_df, binary_df):
-        full_df = pd.merge(main_df, binary_df, on = self.id_col, how = "left")
-        
-        new_binary_cols = self._get_all_new_binary_cols(binary_df)
-        full_df[new_binary_cols] = full_df[new_binary_cols].fillna(0).astype(int)
-
-        return full_df
-
-
-
-    def _clean_full_df(self, full_df):
-        full_df.columns = [
-            col.replace(f'{self.temp_prefix}_', '').replace(' ', '_') 
-            for col in full_df.columns]
-        
-        return full_df
-
-
-
-    def _get_all_new_binary_cols(self, binary_df):
-        new_binary_cols = [
-            col for col in binary_df.columns 
-            if col.startswith((f'{self.class_prefix}_', f'{self.temp_prefix}_'))]
-        
-        return new_binary_cols
-
-
-
-    def _get_class_dummies_df(self, df):
-        class_dummies = pd.get_dummies(df[self.function], prefix = self.class_prefix)
-        class_dummies[self.id_col] = df[self.id_col].values
-        class_matrix = class_dummies.groupby(self.id_col).max()
-        
-        return class_matrix
-
-
-
-    def _get_med_dummies_df(self, df):
-        med_dumms = pd.crosstab(index = df[self.id_col], columns = df[self.main])
-        med_dumms.columns = [f"{self.temp_prefix}_{col}" for col in med_dumms.columns]
-        med_dummies_df = (med_dumms > 0).astype(int)
-
-        return med_dummies_df
-
-
-
-    def _get_merged_dummies_df(self, d1, d2):
-        binary_df = pd.merge(
-            d1, d2, left_index = True, right_index = True, how = 'outer').reset_index()
-
-        return binary_df
+        return final_data
