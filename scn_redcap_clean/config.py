@@ -1,5 +1,6 @@
 from . import utils
 from .units import Unit
+from .model_ai import Model_AI
 
 '''     ________________________     Required     ______________________________     '''
 
@@ -161,6 +162,8 @@ all_generated_genomics_cols = genomics_split_cols + [
 
 
 ai_extraction_timeout = 30  #in seconds per cell
+
+ram = Model_AI.lightweight
 
 # AI Prompts
 prompt_genomics = (

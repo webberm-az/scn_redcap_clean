@@ -5,16 +5,22 @@ import sys
 
 from .processor_json import ProcessorJSON
 from . import console, config
+from .model_ai import Model_AI
+
 
 local_url = 'http://127.0.0.1:11434/api/chat'
 
 
 class LocalAI:
-    ''' Standardizes medications and supplements using local AI Ollama. '''
+    ''' 
+    Standardizes medications and supplements using local AI Ollama. 
+    llama3:latest is best with mac 16gb+ memory config.Ram = Model_AI.standard
+    llama3.2 is best with mac 8gb+ memory config.Ram = Model_AI.lightweight
+    '''
     
-    def __init__(self, schema, field_name, model = 'llama3:latest', url = local_url):
+    def __init__(self, schema, field_name, model = None, url = local_url):
 
-        self.model = model
+        self._init_model(model)
         self.url = url
         self.response_schema = schema.model_json_schema()
         self.json_field_name = field_name
@@ -35,6 +41,19 @@ class LocalAI:
             ollama_request)
         
         return extracted_list, confidence_score, is_timeout
+
+    def _init_model(self, model):
+        if model is not None:
+            self.model = model
+            return
+
+        ram_config = getattr(config, 'ram', Model_AI.lightweight)
+
+        match ram_config:
+            case Model_AI.standard:
+                self.model = 'llama3:latest'
+            case _:
+                self.model = 'llama3.2'
 
     def _alert_not_downloaded(self):
         m = 'Ollama not found. Download and install from:\n https://ollama.com/download'
@@ -63,15 +82,12 @@ class LocalAI:
             args, stdout = None, stderr = stderr, creationflags = creationflags)
 
     def _ensure_local_ai_model(self):
-        print(f"Ensuring local model '{self.model}'...")
+        print(f"Ensuring local model '{self.model}' is available. This may take a few minutes if downloading...")
         
-        process = subprocess.Popen(
-            ['ollama', 'pull', self.model], stdout =  None, stderr = subprocess.PIPE)
-        
-        try:
-            process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            print(f" Downloading '{self.model}' via Ollama...\n")
+        subprocess.run(['ollama', 'pull', self.model], stdout = subprocess.PIPE, 
+            stderr = subprocess.PIPE, text = True, check = True) 
+
+        print(f"Model '{self.model}' is ready.\n")
 
     def _get_ai_system_instruction(self, prompt):
         system_instruction = (
