@@ -14,7 +14,8 @@ Raw data (config.csv_list) & data dictionary (config.data_dict) config.raw_data_
 
 ```{python}
 #| label: Imports and Config
-from scn_redcap_clean import Cleaner, config, days, months, years # local import
+from scn_redcap_clean import Cleaner, config, days, months, years, Model_AI # local import
+config.ram = Model_AI.lightweight
 
 # Original Data Folder(s) (files can be in subfolders of these folders too)
 config.original_data_folder = ['files_toy']
@@ -29,6 +30,11 @@ config.csv_list = ['Toy1', 'Toy2.csv']  # raw data csvs for merge
 
 # csv must have all columns of the module(s) you are filtering by (extra modules/cols are fine)
 config.raw_module_csv = 'Toy1'
+
+config.module_suffix_age = {
+    'submission_date' : 'toy',
+    'submission_date_2': 'mod2' # if more than 1 module is timestamped
+}
 
 config.med_text_cols = ['toy_meds', 'toy_supps', 'past_meds']
 
@@ -66,17 +72,17 @@ config.age_groups = {
         (72, '3-5 years'),
         (float('inf'), '5+ years')],
     years: [
-        (1, '< 1'),
-        (3, '1-2'),
-        (5, '3-4'),
-        (12, '5-11'),
-        (18, '12-17'),
-        (25, '18-24'),
-        (35, '25-34'),
-        (45, '35-44'),
-        (55, '45-54'),
-        (65, '55-64'),
-        (float('inf'), '65+')]
+        (1, '< 1 year'),
+        (3, '1-2 years'),
+        (5, '3-4 years'),
+        (12, '5-11 years'),
+        (18, '12-17 years'),
+        (25, '18-24 years'),
+        (35, '25-34 years'),
+        (45, '35-44 years'),
+        (55, '45-54 years'),
+        (65, '55-64 years'),
+        (float('inf'), '65+ years')]
 }
 
 config.meds_dict = 'Toy_clinical_taxonomy.csv'

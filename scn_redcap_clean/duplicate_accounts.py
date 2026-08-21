@@ -111,16 +111,52 @@ class DuplicateAccounts(CleaningStep):
 
     def _append_override_rows(self, override_csv, df):
         ''' Adds all rows in override_csv to df '''
-        override_df = self.csvkit._get_matching_col_df(df, override_csv)
+        override_df = self._get_matching_col_df(df, override_csv)
         override_df = override_df.dropna(subset = [config.merge_on_id_column])
         df = self._drop_duplicate_id(df, override_df)
         df = pd.concat([df, override_df], ignore_index = True)
         
         return df
 
+
+    def _get_matching_col_df(self, df, override_csv):
+        ''' Reads override_csv and loops through cols to match data types '''
+        override_df = self.csvkit.robust_read(override_csv)
+        for col in override_df.columns:
+            override_df[col] = self._ensure_col_match(col, df, override_df)
+        
+        return override_df
+
+    def _ensure_col_match(self, col, df, override_df):
+        ''' Only loops columns that exists in the base df '''
+        if col in df.columns:
+            col_typed = self._try_col_match(col, df, override_df)
+            return col_typed
+
+        return override_df[col]
+
+    def _try_col_match(self, col, df, override_df):
+        try:
+            if col == self.id_col: 
+                return override_df[col].astype('float64')
+            
+            target_type = df[col].dtype
+            
+            if pd.api.types.is_integer_dtype(target_type):
+                override_df[col] = override_df[col].astype('Int64')
+            else:
+                override_df[col] = override_df[col].astype(target_type)
+
+            return override_df[col]
+        
+        except Exception as e:
+            console.error(f'Could not match columns: {e}')
+            return override_df[col]
+
     def _drop_duplicate_id(self, base_df, override_df):
-        override_id = override_df[config.merge_on_id_column].unique().tolist()
-        is_duplicate_id = base_df[config.merge_on_id_column].isin(override_id)
+        override_id = override_df[self.id_col].unique().tolist()
+        
+        is_duplicate_id = base_df[self.id_col].isin(override_id)
         
         df = base_df[~is_duplicate_id]
 
@@ -163,7 +199,9 @@ class DuplicateAccounts(CleaningStep):
         '''
 
         df_sorted = self.data.sort_values(by = self.id_col, ascending = True)
-        is_duplicate = df_sorted.duplicated(subset = self.dup_col, keep = 'last')
+        date_match = pd.to_datetime(
+            df_sorted[self.dup_col], errors = 'coerce', format = 'mixed')
+        is_duplicate = date_match.duplicated(keep = 'last') & date_match.notna()
         is_protected = df_sorted[self.id_col].isin(list(self.protected_ids))
         drop_mask = is_duplicate & ~is_protected
 

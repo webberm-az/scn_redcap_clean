@@ -96,33 +96,6 @@ class CsvKit:
         raw_path = Path(dir) / f'{clean_filename}'
         console.alert_missing_config_file(dir, role_name, set_config, str(raw_path))
 
-    def _get_matching_col_df(self, df, override_csv):
-        ''' Reads override_csv and loops through cols to match data types '''
-        override_df = self.robust_read(override_csv)
-        for col in override_df.columns:
-            override_df[col] = self._ensure_col_match(col, df, override_df)
-        
-        return override_df
-
-    def _ensure_col_match(self, col, df, override_df):
-        ''' Only loops columns that exists in the base df '''
-        if col in df.columns:
-            col_typed = self._try_col_match(col, df, override_df)
-            return col_typed
-
-        return override_df[col]
-
-    def _try_col_match(self, col, df, override_df):
-        try:
-            if col == config.merge_on_id_column: 
-                return override_df[col].astype('float64')
-            override_df[col] = override_df[col].astype(df[col].dtype)
-            return override_df[col]
-        
-        except Exception as e:
-            console.error(f'Could not match columns: {e}')
-            return override_df[col]
-
     def _try_read_csv(self):
         try:
             if self.main_path is None:
